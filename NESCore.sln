@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NESCore", "NESCore\NESCore.csproj", "{F9FCCF70-36DD-472E-8E26-4AA4E93FE63B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NESTest", "NESTest\NESTest.csproj", "{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{F9FCCF70-36DD-472E-8E26-4AA4E93FE63B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9FCCF70-36DD-472E-8E26-4AA4E93FE63B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9FCCF70-36DD-472E-8E26-4AA4E93FE63B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
