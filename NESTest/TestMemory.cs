@@ -35,5 +35,11 @@ namespace Tests
             Assert.AreNotEqual(0x6923, nes.Ram.Word(0x00));
             Assert.AreEqual(0x2369, nes.Ram.Word(0x00));
         }
+
+        [Test]
+        public void TestStack()
+        {
+            Assert.Pass();
+        }
     }
 }

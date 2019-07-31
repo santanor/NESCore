@@ -21,8 +21,11 @@ namespace NESCore
 
         private byte[] bank;
 
-        public RAM(int size)
+        private CPU cpu;
+
+        public RAM(int size, CPU cpu)
         {
+            this.cpu = cpu;
             bank = new byte[size];
         }
 
@@ -61,8 +64,42 @@ namespace NESCore
 
         public void WriteWord(short addr, short value)
         {
+            var bytes = value.ToBytes();
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                bank[addr + i] = bytes[i];
+            }
+        }
 
+        public void PushByte(byte value)
+        {
 
+        }
+
+        public void PushWord(short value)
+        {
+
+        }
+
+        public byte PeekByte()
+        {
+            return 0x00;
+
+        }
+
+        public short PeekWord()
+        {
+            return 0x0000;
+        }
+
+        public byte PopByte()
+        {
+            return 0x00;
+        }
+
+        public short PopWord()
+        {
+            return 0x0000;
         }
 
         /// <summary>

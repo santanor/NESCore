@@ -1,3 +1,4 @@
+using System.IO;
 using NESCore;
 using NUnit.Framework;
 
@@ -34,6 +35,11 @@ namespace Tests
             Assert.AreEqual(val, word);
             Assert.AreNotEqual(word, 0x6923);
 
+            var streamContent = new byte[] {0x23, 0x69, 0x42, 0x32};
+            var stream = new MemoryStream(streamContent);
+            Assert.AreEqual(stream.Nextbytes(1)[0], 0x23);
+            Assert.AreEqual(stream.Nextbytes(2)[1], 0x42);
+            Assert.AreEqual(stream.Nextbytes(10).Length, 1);
         }
 
     }

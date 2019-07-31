@@ -12,8 +12,11 @@ namespace NESCore
         /// <returns></returns>
         public static byte[] Nextbytes(this Stream stream, int amount)
         {
-            var result = new byte[amount];
-            for (var i = 0; i < amount; i++)
+            // Create the smallest array possible, which is either the entered amount
+            // Or the remaining elements in the stream
+            var arrayLength = Math.Min(amount, (stream.Length - stream.Position));
+            var result = new byte[arrayLength];
+            for (var i = 0; i < arrayLength; i++)
             {
                 result[i] = (byte)stream.ReadByte();
             }
