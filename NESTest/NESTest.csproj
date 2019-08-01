@@ -16,4 +16,11 @@
       <ProjectReference Include="..\NESCore\NESCore.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="TestData\nestest.nes" />
+      <Content Include="TestData\nestest.nes">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

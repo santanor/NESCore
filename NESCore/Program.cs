@@ -2,9 +2,9 @@
 
 namespace NESCore
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             ROM.FromFile(@"C:\dev\NESCore\NESCore\rom\nestest.nes");
         }

@@ -1,3 +1,5 @@
+using System;
+
 namespace NESCore
 {
     public class CPU
@@ -5,27 +7,27 @@ namespace NESCore
         /// <summary>
         /// Accumulator, deal with carry, overflow and so on...
         /// </summary>
-        private byte A;
+        public byte A;
 
         /// <summary>
         /// General purpose register
         /// </summary>
-        private byte X;
+        public byte X;
 
         /// <summary>
         /// General purpose register
         /// </summary>
-        private byte Y;
+        public byte Y;
 
         /// <summary>
         /// The opcode of this cycle
         /// </summary>
-        private byte currentOpcode;
+        public byte currentOpcode;
 
         /// <summary>
         /// Counter of elapsed cycles (Hz) this current second.
         /// </summary>
-        private int cyclesThisSec;
+        public int cyclesThisSec;
 
         /// <summary>
         /// Flags of the status register:
@@ -39,21 +41,43 @@ namespace NESCore
         ///   * Z = zero flag (1 when all bits of a result are 0)
         /// C = carry flag (1 on unsigned overflow)
         /// </summary>
-        private byte P;
+        public byte P;
 
         /// <summary>
         /// Program Counter
         /// </summary>
-        private short PC;
+        public short PC;
 
         /// <summary>
         /// Stack Pointer, from 0x100 to 0x1FF address
         /// </summary>
-        private byte SP;
+        public byte SP;
 
         /// <summary>
         /// Speed of the CPU in Hz. Used to slow down the emulation to match the NES's clock speed
         /// </summary>
-        private int speed;
+        public int speed;
+
+        public RAM Ram;
+
+        public CPU()
+        {
+            Ram = new RAM(RAM.RAM_SIZE, this);
+        }
+
+        public void PowerUp()
+        {
+            X = 0x00;
+            A = 0x00;
+            Y = 0x00;
+            P = 0x34;
+            SP = 0xFD;
+            Ram.WriteByte(0x4017, 0x00);
+
+            for (short i = 0x4000; i <= 0x4013; i++)
+            {
+                Ram.WriteByte(i, 0x00);
+            }
+        }
     }
 }

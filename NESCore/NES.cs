@@ -8,7 +8,8 @@ namespace NESCore
         public NES()
         {
             Cpu = new CPU();
-            Ram = new RAM(RAM.RAM_SIZE, Cpu);
+            Ram = Cpu.Ram;
+            Cpu.PowerUp();
         }
 
     }

@@ -73,33 +73,30 @@ namespace NESCore
 
         public void PushByte(byte value)
         {
-
+            var bankPointer = (short)(cpu.SP + 0x100);
+            WriteByte(bankPointer, value);
+            cpu.SP -= 1;
         }
 
         public void PushWord(short value)
         {
-
-        }
-
-        public byte PeekByte()
-        {
-            return 0x00;
-
-        }
-
-        public short PeekWord()
-        {
-            return 0x0000;
+            var bankPointer = (short)(cpu.SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
+            WriteWord(bankPointer, value);
+            cpu.SP -= 2;
         }
 
         public byte PopByte()
         {
-            return 0x00;
+            var value = Byte((short)(cpu.SP + 1 + 0x100));
+            cpu.SP += 1;
+            return value;
         }
 
         public short PopWord()
         {
-            return 0x0000;
+            var value = Word((short)(cpu.SP + 1 + 0x100));
+            cpu.SP += 2;
+            return value;
         }
 
         /// <summary>

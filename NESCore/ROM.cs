@@ -16,22 +16,22 @@ namespace NESCore
         /// Header
         /// Bytes 0-3 of the ROM
         /// </summary>
-        private byte[] nesTitle = new byte[3];
+        public byte[] nesTitle;
 
         /// <summary>
         /// for iNES format it should always be 0xA1 (26)
         /// </summary>
-        private byte fileFormat;
+        public byte fileFormat;
 
         /// <summary>
         /// Byte4. Number of 16384 byte program ROM pages. Byte4
         /// </summary>
-        private uint numPRGPages;
+        public uint numPRGPages;
 
         /// <summary>
         /// Byte5. Number of 8192 byte character ROM pages (0 indicates CHR RAM).
         /// </summary>
-        private uint numCHRPages;
+        public uint numCHRPages;
 
         /// <summary>
         /// byte 6
@@ -42,7 +42,7 @@ namespace NESCore
         /// B: SRAM at 6000-7FFFh battery backed.  0= no, 1 = yes
         /// M: Mirroring.  0 = horizontal, 1 = vertical.
         /// </summary>
-        private byte flags6;
+        public byte flags6;
 
         /// <summary>
         /// byte 7
@@ -52,33 +52,33 @@ namespace NESCore
         /// V: Vs. Unisystem.  When set, this is a Vs. game
         /// x: these bits are not used in iNES.
         /// </summary>
-        private byte flags7;
+        public byte flags7;
 
         /// <summary>
         /// bytes 8-15.
         /// These bytes are not used, and should be 00h.
         /// </summary>
-        private byte[] endOfHeader = new byte[8];
+        public byte[] endOfHeader;
 
         /// <summary>
         /// Index of the mapper to be used
         /// </summary>
-        private int mapper;
+        public int mapper;
 
         /// <summary>
         /// Actual ROM program
         /// </summary>
-        private byte[] prgROM;
+        public byte[] prgROM;
 
         /// <summary>
         /// trainer data (if anything)
         /// </summary>
-        private byte[] trainer;
+        public byte[] trainer;
 
         /// <summary>
         /// Character ROM
         /// </summary>
-        private byte[] chrROM;
+        public byte[] chrROM;
 
         /// <summary>
         /// Reads a .nes ROM file, loads its contents into a ROM object for it to be used in the emulator
@@ -95,7 +95,7 @@ namespace NESCore
 
             var reader = File.OpenRead(path);
 
-            rom.nesTitle = reader.Nextbytes(3);
+            rom.nesTitle = reader.Nextbytes(4);
             rom.numPRGPages = (byte)reader.ReadByte();
             rom.numCHRPages = (byte)reader.ReadByte();
             rom.flags6 = (byte)reader.ReadByte();

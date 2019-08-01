@@ -39,7 +39,25 @@ namespace Tests
         [Test]
         public void TestStack()
         {
-            Assert.Pass();
+            nes.Ram.PushByte(0x23);
+            Assert.AreEqual(nes.Ram.PopByte(), 0x23);
+            Assert.AreEqual(nes.Ram.PopByte(), 0x00);
+
+            //Checking that the stack writes to the correct address in the memory map
+            nes.Ram.PushByte(0x23);
+            Assert.AreEqual(nes.Ram.Byte(0x01FD), 0x23);
+            nes.Ram.PopByte();// clean it up
+
+
+            nes.Ram.PushWord(0x2369);
+            Assert.AreEqual(nes.Ram.PopWord(), 0x2369);
+
+            nes.Ram.PushWord(0x2369);
+            nes.Ram.PushByte(0x42);
+            Assert.AreEqual(nes.Ram.PopWord(), 0x6942);
+            Assert.AreEqual(nes.Ram.PopByte(), 0x23);
+
+            Assert.AreEqual(nes.Ram.PopWord(), 0x0000);
         }
     }
 }
