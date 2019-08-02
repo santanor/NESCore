@@ -74,7 +74,7 @@ namespace NESCore
             SP = 0xFD;
             Ram.WriteByte(0x4017, 0x00);
 
-            for (short i = 0x4000; i <= 0x4013; i++)
+            for (ushort i = 0x4000; i <= 0x4013; i++)
             {
                 Ram.WriteByte(i, 0x00);
             }

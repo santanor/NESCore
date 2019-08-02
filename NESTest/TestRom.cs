@@ -20,11 +20,16 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
-            var (success, romResult) = ROM.FromFile("./TestData/nestest.nes");
+            var (success, romResult) = GetTestROM();
             Assert.True(success);
             Assert.IsNotNull(romResult);
 
             rom = romResult;
+        }
+
+        public static (bool, ROM) GetTestROM()
+        {
+            return ROM.FromFile("./TestData/nestest.nes");
         }
 
         [Test]
