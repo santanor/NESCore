@@ -32,9 +32,17 @@ namespace NESCore
             return result;
         }
 
-        public static short ToWord(this byte[] value)
+        public static byte[] ToBytes(this ushort value)
         {
-            return (short)(value.Length switch
+            var result = new byte[2];
+            result[0] = (byte)(value & 0x00FF);
+            result[1] = (byte)((value & 0xFF00) >> 8);
+            return result;
+        }
+
+        public static ushort ToWord(this byte[] value)
+        {
+            return (ushort)(value.Length switch
             {
                 0 => 0,
                 1 => value[0],

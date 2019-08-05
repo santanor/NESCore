@@ -43,7 +43,7 @@ namespace NESCore
         /// Reads two bytes from the starting position and returns it as a memory address.
         /// It will do the calculation for you, that's how nice this bad boy is
         /// </summary>
-        public short Word(ushort address)
+        public ushort Word(ushort address)
         {
             var result = new byte[2];
             result[0] = Byte(address);
@@ -62,7 +62,13 @@ namespace NESCore
             bank[addr] = value;
         }
 
-        public void WriteWord(ushort addr, short value)
+        /// <summary>
+        /// Writes a word to the specified memory location, the word
+        /// is internally converted and flipped to be inserted into the memory bank
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <param name="value"></param>
+        public void WriteWord(ushort addr, ushort value)
         {
             var bytes = value.ToBytes();
             for (var i = 0; i < bytes.Length; i++)
@@ -71,6 +77,11 @@ namespace NESCore
             }
         }
 
+
+        /// <summary>
+        /// Push a byte on top of the stack
+        /// </summary>
+        /// <param name="value"></param>
         public void PushByte(byte value)
         {
             var bankPointer = (ushort)(cpu.SP + 0x100);
@@ -78,13 +89,22 @@ namespace NESCore
             cpu.SP -= 1;
         }
 
-        public void PushWord(short value)
+        /// <summary>
+        /// Push a word on top of the stack, internally the word is flipped to reflect
+        /// the correct endian-ess
+        /// </summary>
+        /// <param name="value"></param>
+        public void PushWord(ushort value)
         {
             var bankPointer = (ushort)(cpu.SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
             WriteWord(bankPointer, value);
             cpu.SP -= 2;
         }
 
+        /// <summary>
+        /// Pulls the top-most byte from the stack
+        /// </summary>
+        /// <returns></returns>
         public byte PopByte()
         {
             var value = Byte((ushort)(cpu.SP + 1 + 0x100));
@@ -92,7 +112,12 @@ namespace NESCore
             return value;
         }
 
-        public short PopWord()
+        /// <summary>
+        /// Pops the 2 top-most bytes from the stack and returns them as a word
+        /// </summary>
+        /// <returns></returns>
+
+        public ushort PopWord()
         {
             var value = Word((ushort)(cpu.SP + 1 + 0x100));
             cpu.SP += 2;
@@ -105,6 +130,86 @@ namespace NESCore
         public void Zero()
         {
             Array.Fill<byte>(bank, 0);
+        }
+
+        /// <summary>
+        /// Mockup method, simply returns what its given. It's here for consistency
+        /// </summary>
+        public ushort Absolute(ushort addr)
+        {
+            return addr;
+        }
+
+        /// <summary>
+        /// Absolute X
+        /// Returns whatever is entered as a parameter plus register X
+        /// </summary>
+        public ushort AbsoluteX(ushort addr)
+        {
+            return (ushort)(addr + cpu.X);
+        }
+
+        /// <summary>
+        /// Absolute Y
+        /// Returns whatever is entered as a parameter plus register Y
+        /// </summary>
+        public ushort AbsoluteY(ushort addr)
+        {
+            return (ushort)(addr + cpu.Y);
+        }
+
+        /// <summary>
+        /// Zero Page X
+        /// Gets the content of the parameter, adds X to it and that points
+        /// to an address in the zero page where the parameter can be found
+        /// </summary>
+        public ushort ZPageX(byte addr)
+        {
+            return (ushort)((addr + cpu.X) & 0x00FF);
+        }
+
+        /// <summary>
+        /// Zero Page Y
+        /// Gets the content of the parameter, adds X to it and that points
+        /// to an address in the zero page where the parameter can be found
+        /// </summary>
+        public ushort ZPageY(byte addr)
+        {
+            return (ushort)((addr + cpu.Y) & 0x00FF);
+        }
+
+        public ushort IndirectX(byte addr)
+        {
+            addr = (byte)ZPageX(addr);
+            if (addr == 0xFF)
+            {
+                var result = new byte[2];
+                result[0] = Byte(addr);
+                result[1] = 0x00;
+
+                return result.ToWord();
+            }
+
+            return Word(addr);
+        }
+
+        public ushort IndirectY(byte addr)
+        {
+            ushort result;
+            if (addr == 0xFF)
+            {
+                var tempBytes = new byte[2];
+                tempBytes[0] = Byte(addr);
+                tempBytes[1] = 0xFF;
+
+                result = tempBytes.ToWord();
+            }
+            else
+            {
+                result = Word(addr);
+            }
+
+            return (ushort)(result + cpu.Y);
         }
     }
 }

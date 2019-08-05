@@ -11,7 +11,6 @@ namespace Tests
         public void Setup()
         {
             nes = new NES();
-
         }
 
         [Test]
@@ -58,6 +57,68 @@ namespace Tests
             Assert.AreEqual(nes.Ram.PopByte(), 0x23);
 
             Assert.AreEqual(nes.Ram.PopWord(), 0x0000);
+        }
+
+        [Test]
+        public void TestIndirectAddressing()
+        {
+            ushort addr = 0x00;
+
+            nes.Ram.WriteWord(0x70, 0xAC30);
+            nes.Cpu.X = 0x64;
+            addr = nes.Ram.IndirectX(0xC);
+            Assert.AreEqual( 0xAC30, addr);
+
+            nes.Ram.Zero();
+            nes.Ram.WriteWord(0x7E, 0x2074);
+            nes.Cpu.X = 100;
+            addr = nes.Ram.IndirectX(0x1A);
+            Assert.AreEqual(0x2074, addr);
+
+            nes.Ram.Zero();
+            nes.Ram.WriteWord(0x86, 0x4028);
+            nes.Cpu.Y = 0x10;
+            addr = nes.Ram.IndirectY(0x86);
+            Assert.AreEqual(0x4038, addr);
+        }
+
+        [Test]
+        public void TestZeroPageAddressing()
+        {
+            ushort addr = 0;
+
+            // zpagex_addr test
+            nes.Cpu.X = 0x60;
+            addr = nes.Ram.ZPageX(0xC0);
+            Assert.AreEqual(0x0020 ,addr);
+
+            // zpagey_addr test
+            nes.Cpu.Y = 0x10;
+            addr = nes.Ram.ZPageY(0xFB);
+            Assert.AreEqual(0x000B, addr);
+        }
+
+        [Test]
+        public void TestAbsoluteAddressing()
+        {
+            //First test. Absolute. I know, silly but necessary
+            ushort param = 0x6969;
+            var addr = nes.Ram.Absolute(param);
+            Assert.AreEqual(addr, param);
+
+            //Second test. Absolute X
+            nes.Ram.Zero();
+            param = 0x6959;
+            nes.Cpu.X = 0x10;
+            addr = nes.Ram.AbsoluteX(param);
+            Assert.AreEqual(addr, 0x6969);
+
+            //Third test. Absolute Y
+            nes.Ram.Zero();
+            param = 0x6949;
+            nes.Cpu.Y = 0x20;
+            addr = nes.Ram.AbsoluteY(param);
+            Assert.AreEqual(addr, 0x6969);
         }
     }
 }
