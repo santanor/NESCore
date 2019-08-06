@@ -1,4 +1,5 @@
 using System;
+using Serilog;
 
 namespace NESCore
 {
@@ -46,7 +47,7 @@ namespace NESCore
         /// <summary>
         /// Program Counter
         /// </summary>
-        public short PC;
+        public ushort PC;
 
         /// <summary>
         /// Stack Pointer, from 0x100 to 0x1FF address
@@ -77,6 +78,25 @@ namespace NESCore
             for (ushort i = 0x4000; i <= 0x4013; i++)
             {
                 Ram.WriteByte(i, 0x00);
+            }
+        }
+
+        public void Run()
+        {
+            while (true)
+            {
+                Cycle();
+            }
+        }
+
+        public void Cycle()
+        {
+            var opcode = Ram.Byte(PC);
+            switch (opcode)
+            {
+                default:
+                    Log.Error($"Unkown OPcode: {opcode:X)}");
+                    break;
             }
         }
     }
