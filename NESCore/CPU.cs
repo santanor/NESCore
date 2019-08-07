@@ -92,12 +92,102 @@ namespace NESCore
         public void Cycle()
         {
             var opcode = Ram.Byte(PC);
-            switch (opcode)
+
+            var pageCrossed = opcode switch
             {
-                default:
-                    Log.Error($"Unkown OPcode: {opcode:X)}");
-                    break;
+                0x00 => Invalid(opcode),         // Breakpoint
+                0x01 => OraIndirectX(),
+                0x02 => Invalid(opcode),
+                0x03 => Invalid(opcode),
+                0x04 => Invalid(opcode),
+                0x05 => OraZPage(),
+                0x06 => Invalid(opcode),
+                0x07 => Invalid(opcode),
+                0x08 => Invalid(opcode),
+                0x09 => OraImmediate(),
+                0x0A => Invalid(opcode),
+                0x0B => Invalid(opcode),
+                0x0C => Invalid(opcode),
+                0x0D => OraAbsolute(),
+                0x0E => Invalid(opcode),
+                0x0F => Invalid(opcode),
+                0x10 => Invalid(opcode),
+                0x11 => OraIndirectY(),
+                0x12 => Invalid(opcode),
+                0x13 => Invalid(opcode),
+                0x14 => Invalid(opcode),
+                0x15 => OraZPageX(),
+                0x16 => Invalid(opcode),
+                0x17 => Invalid(opcode),
+                0x18 => Invalid(opcode),
+                0x19 => OraAbsoluteY(),
+                0x1A => Invalid(opcode),
+                0x1B => Invalid(opcode),
+                0x1C => Invalid(opcode),
+                0x1D => OraAbsoluteX(),
+                0x1E => Invalid(opcode),
+                0x1F => Invalid(opcode),
+                _ => Invalid(opcode)
+            };
+
+            if (pageCrossed)
+            {
+                cyclesThisSec++;
             }
+        }
+
+        /// <summary>
+        /// Invalid Opcode, logs the error to file
+        /// </summary>
+        private bool Invalid(byte opcode)
+        {
+            Log.Error($"Unkown OPcode: {opcode:X}");
+            return true;
+        }
+
+        bool OraIndirectX()
+        {
+            return true;
+        }
+
+        bool OraIndirectY()
+        {
+            return true;
+        }
+
+        bool OraAbsoluteX()
+        {
+            return true;
+        }
+
+        bool OraAbsoluteY()
+        {
+            return true;
+        }
+
+        bool OraAbsolute()
+        {
+            return true;
+        }
+
+        bool OraZPageX()
+        {
+            return true;
+        }
+
+        bool OraZPageY()
+        {
+            return true;
+        }
+
+        bool OraZPage()
+        {
+            return true;
+        }
+
+        bool OraImmediate()
+        {
+            return true;
         }
     }
 }
