@@ -15,5 +15,30 @@ namespace NESCore
             return (bitSet & 1) == 1;
         }
 
+        public static void Set(ref byte b, int bitPos)
+        {
+            b |= (byte)(1 << bitPos);
+        }
+
+        public static void Clear(ref byte b, int bitPos)
+        {
+            b &= (byte)(~(1 << bitPos));
+        }
+
+        /// <summary>
+        /// Sets the bit specific position in the byte to 1|0 acording to the specified value
+        /// </summary>
+        public static void Val(ref byte b, Flags position, bool value)
+        {
+            if (value)
+            {
+                Set(ref b, (int)position);
+            }
+            else
+            {
+                Clear(ref b, (int)position);
+            }
+        }
+
     }
 }

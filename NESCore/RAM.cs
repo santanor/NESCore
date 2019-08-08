@@ -39,6 +39,11 @@ namespace NESCore
             return bank[address];
         }
 
+        public byte Byte(int address)
+        {
+            return Byte((ushort)address);
+        }
+
         /// <summary>
         /// Reads two bytes from the starting position and returns it as a memory address.
         /// It will do the calculation for you, that's how nice this bad boy is
@@ -50,6 +55,11 @@ namespace NESCore
             result[1] = Byte((ushort)(address + 1));
 
             return result.ToWord();
+        }
+
+        public ushort Word(int address)
+        {
+            return Word((ushort)address);
         }
 
         /// <summary>
@@ -211,5 +221,14 @@ namespace NESCore
 
             return (ushort)(result + cpu.Y);
         }
+
+        public byte ZPageXParam() => Byte(ZPageX(Byte(cpu.PC + 1)));
+        public byte ZPageYParam() => Byte(ZPageY(Byte(cpu.PC + 1)));
+        public byte ZPageParam() => Byte(Byte(cpu.PC + 1) & 0x00FF);
+        public byte AbsoluteParam() => Byte(Absolute(Word(cpu.PC + 1)));
+        public byte AbsoluteXParam() => Byte(AbsoluteX(Word(cpu.PC + 1)));
+        public byte AbsoluteYParam() => Byte(AbsoluteY(Word(cpu.PC + 1)));
+        public byte IndirectXParam() => Byte(IndirectX(Byte(cpu.PC + 1)));
+        public byte IndirectYParam() => Byte(IndirectY(Byte(cpu.PC + 1)));
     }
 }

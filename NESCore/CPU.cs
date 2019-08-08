@@ -3,6 +3,8 @@ using Serilog;
 
 namespace NESCore
 {
+    public enum Flags {Negative, Overflow, Unused, Break, Decimal, IRQ, Zero, Carry};
+    
     public class CPU
     {
         /// <summary>
@@ -39,7 +41,7 @@ namespace NESCore
         /// B = break flag (1 when interrupt was caused by a BRK)
         /// D = decimal flag (1 when CPU in BCD mode)
         /// I = IRQ flag (when 1, no interrupts will occur (exceptions are IRQs forced by BRK and NMIs))
-        ///   * Z = zero flag (1 when all bits of a result are 0)
+        /// Z = zero flag (1 when all bits of a result are 0)
         /// C = carry flag (1 on unsigned overflow)
         /// </summary>
         public byte P;
@@ -95,7 +97,7 @@ namespace NESCore
 
             var pageCrossed = opcode switch
             {
-                0x00 => Invalid(opcode),         // Breakpoint
+                0x00 => Invalid(opcode),
                 0x01 => OraIndirectX(),
                 0x02 => Invalid(opcode),
                 0x03 => Invalid(opcode),
@@ -145,49 +147,23 @@ namespace NESCore
             return true;
         }
 
-        bool OraIndirectX()
+        #region Ora
+
+        bool Ora(byte param, int cycles, int pcIncrease, bool checkPageCrossed = false)
         {
             return true;
         }
 
-        bool OraIndirectY()
-        {
-            return true;
-        }
+        bool OraIndirectX() => Ora(Ram.IndirectXParam(), 0,0);
+        bool OraIndirectY() => Ora(Ram.IndirectYParam(), 0, 0, true);
+        bool OraAbsoluteX() => Ora(Ram.AbsoluteXParam(), 0, 0, true);
+        bool OraAbsoluteY() => Ora(Ram.AbsoluteYParam(), 0, 0, true);
+        bool OraAbsolute() => Ora(Ram.AbsoluteParam(), 0, 0);
+        bool OraZPageX() => Ora(Ram.ZPageXParam(), 0, 0);
+        bool OraZPage() => Ora(Ram.ZPageParam(), 0, 0);
+        bool OraImmediate() => Ora(Ram.Byte(PC + 1), 0, 0);
 
-        bool OraAbsoluteX()
-        {
-            return true;
-        }
-
-        bool OraAbsoluteY()
-        {
-            return true;
-        }
-
-        bool OraAbsolute()
-        {
-            return true;
-        }
-
-        bool OraZPageX()
-        {
-            return true;
-        }
-
-        bool OraZPageY()
-        {
-            return true;
-        }
-
-        bool OraZPage()
-        {
-            return true;
-        }
-
-        bool OraImmediate()
-        {
-            return true;
-        }
+        #endregion
     }
+
 }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Serilog;
 
 namespace NESCore
 {
@@ -49,6 +50,5 @@ namespace NESCore
                 _ => (value[1] << 8) + value[0]
             });
         }
-
     }
 }
