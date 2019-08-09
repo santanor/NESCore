@@ -1,10 +1,11 @@
 using System;
+using System.Text;
 using Serilog;
 
 namespace NESCore
 {
     public enum Flags {Negative, Overflow, Unused, Break, Decimal, IRQ, Zero, Carry};
-    
+
     public class CPU
     {
         /// <summary>
@@ -147,23 +148,54 @@ namespace NESCore
             return true;
         }
 
-        #region Ora
+        #region ORA. Logical OR on the acumulator, set the zero and negative flags
 
-        bool Ora(byte param, int cycles, int pcIncrease, bool checkPageCrossed = false)
+
+        bool Ora(byte param, int cycles, int pcIncrease)
         {
+            LogInstruction(pcIncrease - 1, $"ORA #${param:X}");
+            A = (byte)(A | param);
+
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+
+            cyclesThisSec += cycles;
+            PC += (ushort)pcIncrease;
+
             return true;
         }
 
-        bool OraIndirectX() => Ora(Ram.IndirectXParam(), 0,0);
-        bool OraIndirectY() => Ora(Ram.IndirectYParam(), 0, 0, true);
-        bool OraAbsoluteX() => Ora(Ram.AbsoluteXParam(), 0, 0, true);
-        bool OraAbsoluteY() => Ora(Ram.AbsoluteYParam(), 0, 0, true);
-        bool OraAbsolute() => Ora(Ram.AbsoluteParam(), 0, 0);
-        bool OraZPageX() => Ora(Ram.ZPageXParam(), 0, 0);
-        bool OraZPage() => Ora(Ram.ZPageParam(), 0, 0);
-        bool OraImmediate() => Ora(Ram.Byte(PC + 1), 0, 0);
+        bool OraImmediate() => Ora(Ram.Byte(PC + 1), 2, 2);
+        bool OraZPage() => Ora(Ram.ZPageParam(), 2, 2);
+        bool OraZPageX() => Ora(Ram.ZPageXParam(), 4, 2);
+        bool OraAbsolute() => Ora(Ram.AbsoluteParam(), 4, 3);
+        bool OraAbsoluteX() => Ora(Ram.AbsoluteXParam(true), 4, 3);
+        bool OraAbsoluteY() => Ora(Ram.AbsoluteYParam(true), 4, 3);
+        bool OraIndirectX() => Ora(Ram.IndirectXParam(), 6,2);
+        bool OraIndirectY() => Ora(Ram.IndirectYParam(true), 5, 2);
+
+
 
         #endregion
+
+
+
+        private void LogInstruction(int numParams, string mnemonic)
+        {
+            var sb = new StringBuilder();
+            sb.Append($"{PC:X} {currentOpcode:X} ", PC, currentOpcode);
+
+            for (var i = 1; i <= numParams; i++) {
+                sb.Append($"{Ram.Byte(PC + i):X} ");
+            }
+
+            sb.Append('\t');
+            sb.Append(mnemonic);
+            sb.Append("\t\t\t");
+            sb.Append($"A:{A:X} X:{X:X} Y:{Y:X} P:{P:X} SP:{SP:X} CYC:{cyclesThisSec}");
+
+            Log.Debug(sb.ToString());
+        }
     }
 
 }

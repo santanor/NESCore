@@ -226,9 +226,58 @@ namespace NESCore
         public byte ZPageYParam() => Byte(ZPageY(Byte(cpu.PC + 1)));
         public byte ZPageParam() => Byte(Byte(cpu.PC + 1) & 0x00FF);
         public byte AbsoluteParam() => Byte(Absolute(Word(cpu.PC + 1)));
-        public byte AbsoluteXParam() => Byte(AbsoluteX(Word(cpu.PC + 1)));
-        public byte AbsoluteYParam() => Byte(AbsoluteY(Word(cpu.PC + 1)));
+
+        public byte AbsoluteXParam(bool checkPageCrossed = false)
+        {
+            var parameter = Word(cpu.PC + 1);
+            var absX = AbsoluteX(parameter);
+            var result = Byte(absX);
+
+            if (checkPageCrossed)
+            {
+                CheckPageCrossed(parameter, absX);
+            }
+
+            return result;
+        }
+
+        public byte AbsoluteYParam(bool checkPageCrossed = false)
+        {
+            var parameter = Word(cpu.PC + 1);
+            var absY = AbsoluteY(parameter);
+            var result = Byte(absY);
+
+            if (checkPageCrossed)
+            {
+                CheckPageCrossed(parameter, absY);
+            }
+
+            return result;
+        }
+
         public byte IndirectXParam() => Byte(IndirectX(Byte(cpu.PC + 1)));
-        public byte IndirectYParam() => Byte(IndirectY(Byte(cpu.PC + 1)));
+
+        public byte IndirectYParam(bool checkPageCrossed = false)
+        {
+            var parameter = Byte(cpu.PC + 1);
+            var indY = IndirectY(parameter);
+            var result = Byte(indY);
+
+            if (checkPageCrossed)
+            {
+                CheckPageCrossed(parameter, indY);
+            }
+
+            return result;
+        }
+
+
+        private void CheckPageCrossed(ushort addr1, ushort addr2)
+        {
+            if ((addr1 & 0xFF00) != (addr2 & 0xFF00))
+            {
+                cpu.cyclesThisSec++;
+            }
+        }
     }
 }

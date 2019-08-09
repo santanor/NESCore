@@ -17,7 +17,7 @@ namespace NESCore
 
             Log.Logger = new LoggerConfiguration()
                         .WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                        .WriteTo.File("Logs/logfile.log", rollingInterval: RollingInterval.Minute)
+                        .WriteTo.File("Logs/logfile.log",outputTemplate:"[{Level:u3}] {Message:lj}{NewLine}{Exception}")
                .CreateLogger();
         }
 
