@@ -168,6 +168,11 @@ namespace NESCore
             return (ushort)(addr + cpu.Y);
         }
 
+        public ushort ZPage(ushort addr)
+        {
+            return (ushort)(addr & 0x00FF);
+        }
+
         /// <summary>
         /// Zero Page X
         /// Gets the content of the parameter, adds X to it and that points

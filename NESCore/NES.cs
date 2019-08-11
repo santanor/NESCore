@@ -8,6 +8,7 @@ namespace NESCore
     {
         public RAM Ram;
         public CPU Cpu;
+        public bool running = true;
 
         public NES()
         {
