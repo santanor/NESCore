@@ -21,11 +21,10 @@ namespace NESCore
 
         private byte[] bank;
 
-        private CPU cpu;
+        public CPU Cpu;
 
-        public RAM(int size, CPU cpu)
+        public RAM(int size)
         {
-            this.cpu = cpu;
             bank = new byte[size];
         }
 
@@ -94,9 +93,9 @@ namespace NESCore
         /// <param name="value"></param>
         public void PushByte(byte value)
         {
-            var bankPointer = (ushort)(cpu.SP + 0x100);
+            var bankPointer = (ushort)(Cpu.SP + 0x100);
             WriteByte(bankPointer, value);
-            cpu.SP -= 1;
+            Cpu.SP -= 1;
         }
 
         /// <summary>
@@ -106,9 +105,9 @@ namespace NESCore
         /// <param name="value"></param>
         public void PushWord(ushort value)
         {
-            var bankPointer = (ushort)(cpu.SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
+            var bankPointer = (ushort)(Cpu.SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
             WriteWord(bankPointer, value);
-            cpu.SP -= 2;
+            Cpu.SP -= 2;
         }
 
         /// <summary>
@@ -117,8 +116,8 @@ namespace NESCore
         /// <returns></returns>
         public byte PopByte()
         {
-            var value = Byte((ushort)(cpu.SP + 1 + 0x100));
-            cpu.SP += 1;
+            var value = Byte((ushort)(Cpu.SP + 1 + 0x100));
+            Cpu.SP += 1;
             return value;
         }
 
@@ -129,8 +128,8 @@ namespace NESCore
 
         public ushort PopWord()
         {
-            var value = Word((ushort)(cpu.SP + 1 + 0x100));
-            cpu.SP += 2;
+            var value = Word((ushort)(Cpu.SP + 1 + 0x100));
+            Cpu.SP += 2;
             return value;
         }
 
@@ -156,7 +155,7 @@ namespace NESCore
         /// </summary>
         public ushort AbsoluteX(ushort addr)
         {
-            return (ushort)(addr + cpu.X);
+            return (ushort)(addr + Cpu.X);
         }
 
         /// <summary>
@@ -165,7 +164,7 @@ namespace NESCore
         /// </summary>
         public ushort AbsoluteY(ushort addr)
         {
-            return (ushort)(addr + cpu.Y);
+            return (ushort)(addr + Cpu.Y);
         }
 
         public ushort ZPage(ushort addr)
@@ -180,7 +179,7 @@ namespace NESCore
         /// </summary>
         public ushort ZPageX(byte addr)
         {
-            return (ushort)((addr + cpu.X) & 0x00FF);
+            return (ushort)((addr + Cpu.X) & 0x00FF);
         }
 
         /// <summary>
@@ -190,7 +189,7 @@ namespace NESCore
         /// </summary>
         public ushort ZPageY(byte addr)
         {
-            return (ushort)((addr + cpu.Y) & 0x00FF);
+            return (ushort)((addr + Cpu.Y) & 0x00FF);
         }
 
         public ushort IndirectX(byte addr)
@@ -224,17 +223,17 @@ namespace NESCore
                 result = Word(addr);
             }
 
-            return (ushort)(result + cpu.Y);
+            return (ushort)(result + Cpu.Y);
         }
 
-        public byte ZPageXParam() => Byte(ZPageX(Byte(cpu.PC + 1)));
-        public byte ZPageYParam() => Byte(ZPageY(Byte(cpu.PC + 1)));
-        public byte ZPageParam() => Byte(Byte(cpu.PC + 1) & 0x00FF);
-        public byte AbsoluteParam() => Byte(Absolute(Word(cpu.PC + 1)));
+        public byte ZPageXParam() => Byte(ZPageX(Byte(Cpu.PC + 1)));
+        public byte ZPageYParam() => Byte(ZPageY(Byte(Cpu.PC + 1)));
+        public byte ZPageParam() => Byte(Byte(Cpu.PC + 1) & 0x00FF);
+        public byte AbsoluteParam() => Byte(Absolute(Word(Cpu.PC + 1)));
 
         public byte AbsoluteXParam(bool checkPageCrossed = false)
         {
-            var parameter = Word(cpu.PC + 1);
+            var parameter = Word(Cpu.PC + 1);
             var absX = AbsoluteX(parameter);
             var result = Byte(absX);
 
@@ -248,7 +247,7 @@ namespace NESCore
 
         public byte AbsoluteYParam(bool checkPageCrossed = false)
         {
-            var parameter = Word(cpu.PC + 1);
+            var parameter = Word(Cpu.PC + 1);
             var absY = AbsoluteY(parameter);
             var result = Byte(absY);
 
@@ -260,11 +259,11 @@ namespace NESCore
             return result;
         }
 
-        public byte IndirectXParam() => Byte(IndirectX(Byte(cpu.PC + 1)));
+        public byte IndirectXParam() => Byte(IndirectX(Byte(Cpu.PC + 1)));
 
         public byte IndirectYParam(bool checkPageCrossed = false)
         {
-            var parameter = Byte(cpu.PC + 1);
+            var parameter = Byte(Cpu.PC + 1);
             var indY = IndirectY(parameter);
             var result = Byte(indY);
 
@@ -281,7 +280,7 @@ namespace NESCore
         {
             if ((addr1 & 0xFF00) != (addr2 & 0xFF00))
             {
-                cpu.cyclesThisSec++;
+                Cpu.cyclesThisSec++;
             }
         }
     }

@@ -6,14 +6,18 @@ namespace NESCore
 {
     public class NES
     {
-        public RAM Ram;
-        public CPU Cpu;
-        public bool running = true;
+        public readonly RAM Ram;
+        public readonly CPU Cpu;
+        public bool Running = true;
 
         public NES()
         {
-            Cpu = new CPU();
-            Ram = Cpu.Ram;
+            Ram = new RAM(RAM.RAM_SIZE);
+            Cpu = new CPU
+            {
+                Ram = Ram
+            };
+            Ram.Cpu = Cpu;
             Cpu.PowerUp();
 
             Log.Logger = new LoggerConfiguration()

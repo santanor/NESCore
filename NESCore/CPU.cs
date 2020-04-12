@@ -60,16 +60,13 @@ namespace NESCore
         /// <summary>
         /// Speed of the CPU in Hz. Used to slow down the emulation to match the NES's clock speed
         /// </summary>
-        public int speed;
+        public int Speed;
 
         public RAM Ram;
-        public NES Nes;
 
-        public CPU(NES nes)
-        {
-            Ram = new RAM(RAM.RAM_SIZE, this);
-            Nes = nes;
-        }
+        private bool running;
+
+        private Action[] opcodes;
 
         public void PowerUp()
         {
@@ -84,298 +81,310 @@ namespace NESCore
             {
                 Ram.WriteByte(i, 0x00);
             }
+
+            running = true;
+            
+            CreateOpcodeArray();
+        }
+
+        private void CreateOpcodeArray()
+        {
+            opcodes = new Action[]
+            {
+                Break, //0x00
+                OraIndirectX, //0x01
+                Halt, //0x02
+                Invalid, //0x03
+                Invalid, //0x04
+                OraZPage, //0x05
+                AslZPage, //0x06
+                Invalid, //0x07
+                Invalid, //0x08
+                OraImmediate, //0x09
+                AslAccumulator, //0x0A
+                Invalid, //0x0B
+                Invalid, //0x0C
+                OraAbsolute, //0x0D
+                AslAbsolute, //0x0E
+                Invalid, //0x0F
+                Invalid, //0x10
+                OraIndirectY, //0x11
+                Halt, //0x12
+                Invalid, //0x13
+                Invalid, //0x14
+                OraZPageX, //0x15
+                AslZPageX, //0x16
+                Invalid, //0x17
+                Invalid, //0x18
+                OraAbsoluteY, //0x19
+                Invalid, //0x1A
+                Invalid, //0x1B
+                Invalid, //0x1C
+                OraAbsoluteX, //0x1D
+                AslAbsoluteX, //0x1E
+                Invalid, //0x20
+                AndIndirectX, //0x21
+                Halt, //0x22
+                Invalid, //0x23
+                Invalid, //0x24
+                AndZPage, //0x25
+                Invalid, //0x26
+                Invalid, //0x27
+                Invalid, //0x28
+                AndImmediate, //0x29
+                Invalid, //0x2A
+                Invalid, //0x2C
+                AndAbsolute, //0x2D
+                Invalid, //0x2E
+                Invalid, //0x2F
+                Invalid, //0x30
+                AndIndirectY, //0x31
+                Halt, //0x32
+                Invalid, //0x33
+                Invalid, //0x34
+                AndZPageX, //0x35
+                Invalid, //0x36
+                Invalid, //0x37
+                Invalid, //0x38
+                AndAbsoluteY, //0x39
+                Invalid, //0x3A
+                Invalid, //0x3B
+                Invalid, //0x3C
+                AndAbsoluteX, //0x3D
+                Invalid, //0x3E
+                Invalid, //0x3F
+                Invalid, //0x40
+                Invalid, //0x41
+                Halt, //0x42
+                Invalid, //0x43
+                Invalid, //0x44
+                Invalid, //0x45
+                Invalid, //0x46
+                Invalid, //0x47
+                Invalid, //0x48
+                Invalid, //0x49
+                Invalid, //0x4A
+                Invalid, //0x4B
+                Invalid, //0x4C
+                Invalid, //0x4D
+                Invalid, //0x4E
+                Invalid, //0x4F
+                Invalid, //0x50
+                Invalid, //0x51
+                Halt, //0x52
+                Invalid, //0x53
+                Invalid, //0x54
+                Invalid, //0x55
+                Invalid, //0x56
+                Invalid, //0x57
+                Invalid, //0x58
+                Invalid, //0x59
+                Invalid, //0x5A
+                Invalid, //0x5B
+                Invalid, //0x5C
+                Invalid, //0x5D
+                Invalid, //0x5E
+                Invalid, //0x5F
+                Invalid, //0x60
+                AdcIndirectX, //0x61
+                Halt, //0x62
+                Invalid, //0x63
+                Invalid, //0x64
+                AdcZPage, //0x65
+                Invalid, //0x66
+                Invalid, //0x67
+                Invalid, //0x68
+                AdcImmediate, //0x69
+                Invalid, //0x6A
+                Invalid, //0x6B
+                Invalid, //0x6C
+                AdcAbsolute, //0x6D
+                Invalid, //0x6E
+                Invalid, //0x6F
+                Invalid, //0x70
+                AdcIndirectY, //0x71
+                Halt, //0x72
+                Invalid, //0x73
+                Invalid, //0x74
+                AdcZPageX, //0x75
+                Invalid, //0x76
+                Invalid, //0x77
+                Invalid, //0x78
+                AdcAbsoluteY, //0x79
+                Invalid, //0x7A
+                Invalid, //0x7B
+                Invalid, //0x7C
+                AdcAbsoluteX, //0x7D
+                Invalid, //0x7E
+                Invalid, //0x7F
+                Invalid, //0x80
+                Invalid, //0x81
+                Invalid, //0x82
+                Invalid, //0x83
+                Invalid, //0x84
+                Invalid, //0x85
+                Invalid, //0x86
+                Invalid, //0x87
+                Invalid, //0x88
+                Invalid, //0x89
+                Invalid, //0x8A
+                Invalid, //0x8B
+                Invalid, //0x8C
+                Invalid, //0x8D
+                Invalid, //0x8E
+                Invalid, //0x8F
+                Invalid, //0x90
+                Invalid, //0x91
+                Halt, //0x92
+                Invalid, //0x93
+                Invalid, //0x94
+                Invalid, //0x95
+                Invalid, //0x96
+                Invalid, //0x97
+                Invalid, //0x98
+                Invalid, //0x99
+                Invalid, //0x9A
+                Invalid, //0x9B
+                Invalid, //0x9C
+                Invalid, //0x9D
+                Invalid, //0x9E
+                Invalid, //0x9F
+                Invalid, //0xA0
+                Invalid, //0xA1
+                Invalid, //0xA2
+                Invalid, //0xA3
+                Invalid, //0xA4
+                Invalid, //0xA5
+                Invalid, //0xA6
+                Invalid, //0xA7
+                Invalid, //0xA8
+                Invalid, //0xA9
+                Invalid, //0xAA
+                Invalid, //0xAB
+                Invalid, //0xAC
+                Invalid, //0xAD
+                Invalid, //0xAE
+                Invalid, //0xAF
+                Invalid, //0xB0
+                Invalid, //0xB1
+                Halt, //0xB2
+                Invalid, //0xB3
+                Invalid, //0xB4
+                Invalid, //0xB5
+                Invalid, //0xB6
+                Invalid, //0xB7
+                Invalid, //0xB8
+                Invalid, //0xB9
+                Invalid, //0xBA
+                Invalid, //0xBB
+                Invalid, //0xBC
+                Invalid, //0xBD
+                Invalid, //0xBE
+                Invalid, //0xBF
+                Invalid, //0xC0
+                Invalid, //0xC1
+                Invalid, //0xC2
+                Invalid, //0xC3
+                Invalid, //0xC4
+                Invalid, //0xC5
+                Invalid, //0xC6
+                Invalid, //0xC7
+                Invalid, //0xC8
+                Invalid, //0xC9
+                Invalid, //0xCA
+                Invalid, //0xCB
+                Invalid, //0xCC
+                Invalid, //0xCD
+                Invalid, //0xCE
+                Invalid, //0xCF
+                Invalid, //0xD0
+                Invalid, //0xD1
+                Halt, //0xD2
+                Invalid, //0xD3
+                Invalid, //0xD4
+                Invalid, //0xD5
+                Invalid, //0xD6
+                Invalid, //0xD7
+                Invalid, //0xD8
+                Invalid, //0xD9
+                Invalid, //0xDA
+                Invalid, //0xDB
+                Invalid, //0xDC
+                Invalid, //0xDD
+                Invalid, //0xDE
+                Invalid, //0xDF
+                Invalid, //0xE0
+                Invalid, //0xE1
+                Invalid, //0xE2
+                Invalid, //0xE3
+                Invalid, //0xE4
+                Invalid, //0xE5
+                Invalid, //0xE6
+                Invalid, //0xE7
+                Invalid, //0xE8
+                Invalid, //0xE9
+                Invalid, //0xEA
+                Invalid, //0xEB
+                Invalid, //0xEC
+                Invalid, //0xED
+                Invalid, //0xEE
+                Invalid, //0xEF
+                Invalid, //0xF0
+                Invalid, //0xF1
+                Halt, //0xF2
+                Invalid, //0xF3
+                Invalid, //0xF4
+                Invalid, //0xF5
+                Invalid, //0xF6
+                Invalid, //0xF7
+                Invalid, //0xF8
+                Invalid, //0xF9
+                Invalid, //0xFA
+                Invalid, //0xFB
+                Invalid, //0xFC
+                Invalid, //0xFD
+                Invalid, //0xFE
+                Invalid, //0xFF
+            };
+
         }
 
         public void Run()
         {
-            while (Nes.running)
+            while (running)
             {
                 Cycle();
             }
         }
 
+        public void Stop() => running = false;
+
         public void Cycle()
         {
-            var opcode = Ram.Byte(PC);
-
-            var pageCrossed = opcode switch
-            {
-                0x00 => Invalid(opcode),
-                0x01 => OraIndirectX(),
-                0x02 => Halt(),
-                0x03 => Invalid(opcode),
-                0x04 => Invalid(opcode),
-                0x05 => OraZPage(),
-                0x06 => Invalid(opcode),
-                0x07 => Invalid(opcode),
-                0x08 => Invalid(opcode),
-                0x09 => OraImmediate(),
-                0x0A => Invalid(opcode),
-                0x0B => Invalid(opcode),
-                0x0C => Invalid(opcode),
-                0x0D => OraAbsolute(),
-                0x0E => Invalid(opcode),
-                0x0F => Invalid(opcode),
-                0x10 => Invalid(opcode),
-                0x11 => OraIndirectY(),
-                0x12 => Halt(),
-                0x13 => Invalid(opcode),
-                0x14 => Invalid(opcode),
-                0x15 => OraZPageX(),
-                0x16 => Invalid(opcode),
-                0x17 => Invalid(opcode),
-                0x18 => Invalid(opcode),
-                0x19 => OraAbsoluteY(),
-                0x1A => Invalid(opcode),
-                0x1B => Invalid(opcode),
-                0x1C => Invalid(opcode),
-                0x1D => OraAbsoluteX(),
-                0x1E => Invalid(opcode),
-                0x20 => Invalid(opcode),
-                0x21 => Invalid(opcode),
-                0x22 => Halt(),
-                0x23 => Invalid(opcode),
-                0x24 => Invalid(opcode),
-                0x25 => Invalid(opcode),
-                0x26 => Invalid(opcode),
-                0x27 => Invalid(opcode),
-                0x28 => Invalid(opcode),
-                0x29 => Invalid(opcode),
-                0x2A => Invalid(opcode),
-                0x2C => Invalid(opcode),
-                0x2D => Invalid(opcode),
-                0x2E => Invalid(opcode),
-                0x2F => Invalid(opcode),
-                0x30 => Invalid(opcode),
-                0x31 => Invalid(opcode),
-                0x32 => Halt(),
-                0x33 => Invalid(opcode),
-                0x34 => Invalid(opcode),
-                0x35 => Invalid(opcode),
-                0x36 => Invalid(opcode),
-                0x37 => Invalid(opcode),
-                0x38 => Invalid(opcode),
-                0x39 => Invalid(opcode),
-                0x3A => Invalid(opcode),
-                0x3B => Invalid(opcode),
-                0x3C => Invalid(opcode),
-                0x3D => Invalid(opcode),
-                0x3E => Invalid(opcode),
-                0x3F => Invalid(opcode),
-                0x40 => Invalid(opcode),
-                0x41 => Invalid(opcode),
-                0x42 => Halt(),
-                0x43 => Invalid(opcode),
-                0x44 => Invalid(opcode),
-                0x45 => Invalid(opcode),
-                0x46 => Invalid(opcode),
-                0x47 => Invalid(opcode),
-                0x48 => Invalid(opcode),
-                0x49 => Invalid(opcode),
-                0x4A => Invalid(opcode),
-                0x4B => Invalid(opcode),
-                0x4C => Invalid(opcode),
-                0x4D => Invalid(opcode),
-                0x4E => Invalid(opcode),
-                0x4F => Invalid(opcode),
-                0x50 => Invalid(opcode),
-                0x51 => Invalid(opcode),
-                0x52 => Halt(),
-                0x53 => Invalid(opcode),
-                0x54 => Invalid(opcode),
-                0x55 => Invalid(opcode),
-                0x56 => Invalid(opcode),
-                0x57 => Invalid(opcode),
-                0x58 => Invalid(opcode),
-                0x59 => Invalid(opcode),
-                0x5A => Invalid(opcode),
-                0x5B => Invalid(opcode),
-                0x5C => Invalid(opcode),
-                0x5D => Invalid(opcode),
-                0x5E => Invalid(opcode),
-                0x5F => Invalid(opcode),
-                0x60 => Invalid(opcode),
-                0x61 => Invalid(opcode),
-                0x62 => Halt(),
-                0x63 => Invalid(opcode),
-                0x64 => Invalid(opcode),
-                0x65 => Invalid(opcode),
-                0x66 => Invalid(opcode),
-                0x67 => Invalid(opcode),
-                0x68 => Invalid(opcode),
-                0x69 => Invalid(opcode),
-                0x6A => Invalid(opcode),
-                0x6B => Invalid(opcode),
-                0x6C => Invalid(opcode),
-                0x6D => Invalid(opcode),
-                0x6E => Invalid(opcode),
-                0x6F => Invalid(opcode),
-                0x70 => Invalid(opcode),
-                0x71 => Invalid(opcode),
-                0x72 => Halt(),
-                0x73 => Invalid(opcode),
-                0x74 => Invalid(opcode),
-                0x75 => Invalid(opcode),
-                0x76 => Invalid(opcode),
-                0x77 => Invalid(opcode),
-                0x78 => Invalid(opcode),
-                0x79 => Invalid(opcode),
-                0x7A => Invalid(opcode),
-                0x7B => Invalid(opcode),
-                0x7C => Invalid(opcode),
-                0x7D => Invalid(opcode),
-                0x7E => Invalid(opcode),
-                0x7F => Invalid(opcode),
-                0x80 => Invalid(opcode),
-                0x81 => Invalid(opcode),
-                0x82 => Invalid(opcode),
-                0x83 => Invalid(opcode),
-                0x84 => Invalid(opcode),
-                0x85 => Invalid(opcode),
-                0x86 => Invalid(opcode),
-                0x87 => Invalid(opcode),
-                0x88 => Invalid(opcode),
-                0x89 => Invalid(opcode),
-                0x8A => Invalid(opcode),
-                0x8B => Invalid(opcode),
-                0x8C => Invalid(opcode),
-                0x8D => Invalid(opcode),
-                0x8E => Invalid(opcode),
-                0x8F => Invalid(opcode),
-                0x90 => Invalid(opcode),
-                0x91 => Invalid(opcode),
-                0x92 => Halt(),
-                0x93 => Invalid(opcode),
-                0x94 => Invalid(opcode),
-                0x95 => Invalid(opcode),
-                0x96 => Invalid(opcode),
-                0x97 => Invalid(opcode),
-                0x98 => Invalid(opcode),
-                0x99 => Invalid(opcode),
-                0x9A => Invalid(opcode),
-                0x9B => Invalid(opcode),
-                0x9C => Invalid(opcode),
-                0x9D => Invalid(opcode),
-                0x9E => Invalid(opcode),
-                0x9F => Invalid(opcode),
-                0xA0 => Invalid(opcode),
-                0xA1 => Invalid(opcode),
-                0xA2 => Invalid(opcode),
-                0xA3 => Invalid(opcode),
-                0xA4 => Invalid(opcode),
-                0xA5 => Invalid(opcode),
-                0xA6 => Invalid(opcode),
-                0xA7 => Invalid(opcode),
-                0xA8 => Invalid(opcode),
-                0xA9 => Invalid(opcode),
-                0xAA => Invalid(opcode),
-                0xAB => Invalid(opcode),
-                0xAC => Invalid(opcode),
-                0xAD => Invalid(opcode),
-                0xAE => Invalid(opcode),
-                0xAF => Invalid(opcode),
-                0xB0 => Invalid(opcode),
-                0xB1 => Invalid(opcode),
-                0xB2 => Halt(),
-                0xB3 => Invalid(opcode),
-                0xB4 => Invalid(opcode),
-                0xB5 => Invalid(opcode),
-                0xB6 => Invalid(opcode),
-                0xB7 => Invalid(opcode),
-                0xB8 => Invalid(opcode),
-                0xB9 => Invalid(opcode),
-                0xBA => Invalid(opcode),
-                0xBB => Invalid(opcode),
-                0xBC => Invalid(opcode),
-                0xBD => Invalid(opcode),
-                0xBE => Invalid(opcode),
-                0xBF => Invalid(opcode),
-                0xC0 => Invalid(opcode),
-                0xC1 => Invalid(opcode),
-                0xC2 => Invalid(opcode),
-                0xC3 => Invalid(opcode),
-                0xC4 => Invalid(opcode),
-                0xC5 => Invalid(opcode),
-                0xC6 => Invalid(opcode),
-                0xC7 => Invalid(opcode),
-                0xC8 => Invalid(opcode),
-                0xC9 => Invalid(opcode),
-                0xCA => Invalid(opcode),
-                0xCB => Invalid(opcode),
-                0xCC => Invalid(opcode),
-                0xCD => Invalid(opcode),
-                0xCE => Invalid(opcode),
-                0xCF => Invalid(opcode),
-                0xD0 => Invalid(opcode),
-                0xD1 => Invalid(opcode),
-                0xD2 => Halt(),
-                0xD3 => Invalid(opcode),
-                0xD4 => Invalid(opcode),
-                0xD5 => Invalid(opcode),
-                0xD6 => Invalid(opcode),
-                0xD7 => Invalid(opcode),
-                0xD8 => Invalid(opcode),
-                0xD9 => Invalid(opcode),
-                0xDA => Invalid(opcode),
-                0xDB => Invalid(opcode),
-                0xDC => Invalid(opcode),
-                0xDD => Invalid(opcode),
-                0xDE => Invalid(opcode),
-                0xDF => Invalid(opcode),
-                0xE0 => Invalid(opcode),
-                0xE1 => Invalid(opcode),
-                0xE2 => Invalid(opcode),
-                0xE3 => Invalid(opcode),
-                0xE4 => Invalid(opcode),
-                0xE5 => Invalid(opcode),
-                0xE6 => Invalid(opcode),
-                0xE7 => Invalid(opcode),
-                0xE8 => Invalid(opcode),
-                0xE9 => Invalid(opcode),
-                0xEA => Invalid(opcode),
-                0xEB => Invalid(opcode),
-                0xEC => Invalid(opcode),
-                0xED => Invalid(opcode),
-                0xEE => Invalid(opcode),
-                0xEF => Invalid(opcode),
-                0xF0 => Invalid(opcode),
-                0xF1 => Invalid(opcode),
-                0xF2 => Halt(),
-                0xF3 => Invalid(opcode),
-                0xF4 => Invalid(opcode),
-                0xF5 => Invalid(opcode),
-                0xF6 => Invalid(opcode),
-                0xF7 => Invalid(opcode),
-                0xF8 => Invalid(opcode),
-                0xF9 => Invalid(opcode),
-                0xFA => Invalid(opcode),
-                0xFB => Invalid(opcode),
-                0xFC => Invalid(opcode),
-                0xFD => Invalid(opcode),
-                0xFE => Invalid(opcode),
-                0xFF => Invalid(opcode),
-                _ => Invalid(opcode)
-            };
-
-            if (pageCrossed)
-            {
-                cyclesThisSec++;
-            }
+            opcodes[Ram.Byte(PC)].Invoke();
         }
 
         /// <summary>
         /// Invalid Opcode, logs the error to file
         /// </summary>
-        private bool Invalid(byte opcode)
+        private void Invalid()
         {
-            Log.Error($"Unkown OPcode: {opcode:X}");
-            return true;
+            Log.Error($"Unkown OPcode: {Ram.Byte(PC):X}");
+        }
+
+        private void Break()
+        {
+            LogInstruction(0, $"BRK");
+            Bit.Set(ref P, Flags.Break);
+            Bit.Set(ref P, Flags.IRQ);
+            cyclesThisSec += 7;
+            PC++;
         }
 
         #region ORA. Logical OR on the acumulator, set the zero and negative flags
 
 
-        bool Ora(byte param, int cycles, int pcIncrease)
+        void Ora(byte param, int cycles, int pcIncrease)
         {
             LogInstruction(pcIncrease - 1, $"ORA #${param:X}");
             A = (byte)(A | param);
@@ -385,18 +394,16 @@ namespace NESCore
 
             cyclesThisSec += cycles;
             PC += (ushort)pcIncrease;
-
-            return true;
         }
 
-        bool OraImmediate() => Ora(Ram.Byte(PC + 1), 2, 2);
-        bool OraZPage() => Ora(Ram.ZPageParam(), 2, 2);
-        bool OraZPageX() => Ora(Ram.ZPageXParam(), 4, 2);
-        bool OraAbsolute() => Ora(Ram.AbsoluteParam(), 4, 3);
-        bool OraAbsoluteX() => Ora(Ram.AbsoluteXParam(true), 4, 3);
-        bool OraAbsoluteY() => Ora(Ram.AbsoluteYParam(true), 4, 3);
-        bool OraIndirectX() => Ora(Ram.IndirectXParam(), 6,2);
-        bool OraIndirectY() => Ora(Ram.IndirectYParam(true), 5, 2);
+        void OraImmediate() => Ora(Ram.Byte(PC + 1), 2, 2);
+        void OraZPage() => Ora(Ram.ZPageParam(), 2, 2);
+        void OraZPageX() => Ora(Ram.ZPageXParam(), 4, 2);
+        void OraAbsolute() => Ora(Ram.AbsoluteParam(), 4, 3);
+        void OraAbsoluteX() => Ora(Ram.AbsoluteXParam(true), 4, 3);
+        void OraAbsoluteY() => Ora(Ram.AbsoluteYParam(true), 4, 3);
+        void OraIndirectX() => Ora(Ram.IndirectXParam(), 6,2);
+        void OraIndirectY() => Ora(Ram.IndirectYParam(true), 5, 2);
 
 
 
@@ -404,69 +411,117 @@ namespace NESCore
 
         #region ASL Arithmetic Shift Left. shifts all bits left one position. 0 is shifted into bit 0 and the original bit 7 is shifted into the Carry.
 
-        private bool Asl(ref byte param, int cycles, int pcIncrease)
+        private void Asl(ref byte param, int cycles, int pcIncrease)
         {
             LogInstruction(pcIncrease -1, $"ASL #${param:X}");
 
             var shifted = param << 1;
-            return true;
         }
 
-        private bool AslAccumulator() => Asl(ref A, 2, 1);
-        private bool AslZPage()
+        private void AslAccumulator() => Asl(ref A, 2, 1);
+        private void AslZPage()
         {
             var addr = Ram.ZPage(Ram.Byte(PC + 1));
             var param = Ram.ZPageParam();
             Asl(ref param, 5, 2);
 
             Ram.WriteByte(addr, param);
-            return true;
         }
 
-        private bool AslZPageX()
+        private void AslZPageX()
         {
             var addr = Ram.ZPageX(Ram.Byte(PC + 1));
             var param = Ram.ZPageXParam();
             Asl(ref param, 6, 2);
             Ram.WriteByte(addr, param);
-
-            return true;
         }
 
-        private bool AslAbsolute()
+        private void AslAbsolute()
         {
             var addr = Ram.Absolute(Ram.Word(PC + 1));
             var param = Ram.AbsoluteParam();
             Asl(ref param, 6, 3);
             Ram.WriteByte(addr, param);
-
-            return true;
         }
 
-        private bool AslAbsoluteX()
+        private void AslAbsoluteX()
         {
             var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
             var param = Ram.AbsoluteXParam();
             Asl(ref param, 7, 3);
             Ram.WriteByte(addr, param);
-
-            return true;
         }
 
         #endregion
 
         #region Halt. Kills the machine, bam, pum ded, gone gurl....
 
-        bool Halt()
+        void Halt()
         {
             LogInstruction(0, "KILL");
-            Nes.running = false;
-            return true;
+            Stop();
         }
 
         #endregion
 
+        #region ADC Add with Carry
 
+        private void Adc(byte value, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"ADC #${value:X}");
+            var carry = Bit.Test(P, Flags.Carry) ? 1 : 0;
+            var result = A + carry + value;
+            carry = (byte) ((result & 0x100) >> 8);
+
+            Bit.Val(ref P, Flags.Carry, carry > 0);
+
+            // If operands same source sign but different result sign
+            var isOverflown = ((A ^ result) & (value ^ result) & 0x80);
+            A = (byte) result;
+
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Overflow, isOverflown > 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        private void AdcImmediate() => Adc(Ram.Byte(PC + 1), 2, 2);
+        private void AdcZPage() => Adc(Ram.ZPageParam(), 3, 2);
+        private void AdcZPageX() => Adc(Ram.ZPageXParam(), 4, 2);
+        private void AdcAbsolute() => Adc(Ram.AbsoluteParam(), 4, 3);
+        private void AdcAbsoluteX() => Adc(Ram.AbsoluteXParam(true), 4, 3);
+        private void AdcAbsoluteY() => Adc(Ram.AbsoluteYParam(true), 4, 3);
+        private void AdcIndirectX() => Adc(Ram.IndirectXParam(), 6, 2);
+        private void AdcIndirectY() => Adc(Ram.IndirectYParam(true), 5, 2);
+        
+        #endregion
+
+        #region AND Bitwise AND with accumulator
+
+        private void And(byte value, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"ADC #${value:X}");
+            A &= value;
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+
+            cyclesThisSec += cycles;
+            PC += pcIncrease;
+        }
+
+        private void AndImmediate() => And(Ram.Byte(PC + 1), 2, 2);
+        private void AndZPage() => And(Ram.ZPageParam(), 3, 2);
+        private void AndZPageX() => And(Ram.ZPageXParam(), 4, 2);
+        private void AndAbsolute() => And(Ram.AbsoluteParam(), 4, 3);
+        private void AndAbsoluteX() => And(Ram.AbsoluteXParam(true), 4, 3);
+        private void AndAbsoluteY() => And(Ram.AbsoluteYParam(true), 4, 3);
+        private void AndIndirectX() => And(Ram.IndirectXParam(), 6, 2);
+        private void AndIndirectY() => And(Ram.IndirectYParam(true), 5, 2);
+        
+        #endregion
+        
         private void LogInstruction(int numParams, string mnemonic)
         {
             var sb = new StringBuilder();
