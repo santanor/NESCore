@@ -115,7 +115,7 @@ namespace NESCore
                 OraZPageX, //0x15
                 AslZPageX, //0x16
                 Invalid, //0x17
-                Invalid, //0x18
+                Clc, //0x18
                 OraAbsoluteY, //0x19
                 Invalid, //0x1A
                 Invalid, //0x1B
@@ -145,7 +145,7 @@ namespace NESCore
                 AndZPageX, //0x35
                 Invalid, //0x36
                 Invalid, //0x37
-                Invalid, //0x38
+                Sec, //0x38
                 AndAbsoluteY, //0x39
                 Invalid, //0x3A
                 Invalid, //0x3B
@@ -154,35 +154,35 @@ namespace NESCore
                 Invalid, //0x3E
                 Invalid, //0x3F
                 Invalid, //0x40
-                Invalid, //0x41
+                EorIndirectX, //0x41
                 Halt, //0x42
                 Invalid, //0x43
                 Invalid, //0x44
-                Invalid, //0x45
+                EorZPage, //0x45
                 Invalid, //0x46
                 Invalid, //0x47
                 Invalid, //0x48
-                Invalid, //0x49
+                EorImmediate, //0x49
                 Invalid, //0x4A
                 Invalid, //0x4B
                 Invalid, //0x4C
-                Invalid, //0x4D
+                EorAbsolute, //0x4D
                 Invalid, //0x4E
                 Invalid, //0x4F
                 Bvc, //0x50
-                Invalid, //0x51
+                EorIndirectY, //0x51
                 Halt, //0x52
                 Invalid, //0x53
                 Invalid, //0x54
-                Invalid, //0x55
+                EorZPageX, //0x55
                 Invalid, //0x56
                 Invalid, //0x57
-                Invalid, //0x58
-                Invalid, //0x59
+                Cli, //0x58
+                EorAbsoluteY, //0x59
                 Invalid, //0x5A
                 Invalid, //0x5B
                 Invalid, //0x5C
-                Invalid, //0x5D
+                EorAbsoluteX, //0x5D
                 Invalid, //0x5E
                 Invalid, //0x5F
                 Invalid, //0x60
@@ -209,7 +209,7 @@ namespace NESCore
                 AdcZPageX, //0x75
                 Invalid, //0x76
                 Invalid, //0x77
-                Invalid, //0x78
+                Sei, //0x78
                 AdcAbsoluteY, //0x79
                 Invalid, //0x7A
                 Invalid, //0x7B
@@ -273,7 +273,7 @@ namespace NESCore
                 Invalid, //0xB5
                 Invalid, //0xB6
                 Invalid, //0xB7
-                Invalid, //0xB8
+                Clv, //0xB8
                 Invalid, //0xB9
                 Invalid, //0xBA
                 Invalid, //0xBB
@@ -305,7 +305,7 @@ namespace NESCore
                 CmpZPageX, //0xD5
                 DecZPageX, //0xD6
                 Invalid, //0xD7
-                Invalid, //0xD8
+                Cld, //0xD8
                 CmpAbsoluteY, //0xD9
                 Invalid, //0xDA
                 Invalid, //0xDB
@@ -337,7 +337,7 @@ namespace NESCore
                 Invalid, //0xF5
                 IncZPageX, //0xF6
                 Invalid, //0xF7
-                Invalid, //0xF8
+                Sed, //0xF8
                 Invalid, //0xF9
                 Invalid, //0xFA
                 Invalid, //0xFB
@@ -629,6 +629,51 @@ namespace NESCore
         void IncAbsolute() => DeltaMemory(Ram.Absolute(Ram.Byte(PC + 1)), 1, 6, 3, "INC");
         void IncAbsoluteX() => DeltaMemory(Ram.AbsoluteX(Ram.Byte(PC + 1)), 1, 7, 3, "INC");
         
+        #endregion
+        
+        #region EOR bitwise exclusive OR
+
+        void Eor(byte value, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"EOR ${value:X}");
+
+            A ^= value;
+
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+            Bit.Val(ref P, Flags.Zero, A == 0);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void EorImmediate() => Eor(Ram.Byte(PC + 1), 2, 2);
+        void EorZPage() => Eor(Ram.ZPageParam(), 3, 2);
+        void EorZPageX() => Eor(Ram.ZPageXParam(), 4, 2);
+        void EorAbsolute() => Eor(Ram.AbsoluteParam(), 4, 3);
+        void EorAbsoluteX() => Eor(Ram.AbsoluteXParam(true), 4, 3);
+        void EorAbsoluteY() => Eor(Ram.AbsoluteYParam(true), 4, 3);
+        void EorIndirectX() => Eor(Ram.IndirectXParam(), 6, 2);
+        void EorIndirectY() => Eor(Ram.IndirectYParam(true), 5, 2);
+        
+        #endregion
+        
+        #region Flag Processor status instructions
+
+        void SetFlagValue(Flags flag, bool isSet, string mnemonic)
+        {
+            LogInstruction(0, mnemonic);
+            Bit.Val(ref P, flag, isSet);
+            cyclesThisSec += 2; //Constant. Always
+            PC++; //Constant. Always
+        }
+
+        void Clc() => SetFlagValue(Flags.Carry, false, "CLC");
+        void Sec() => SetFlagValue(Flags.Carry, true, "SEC");
+        void Cli() => SetFlagValue(Flags.IRQ, false, "CLI");
+        void Sei() => SetFlagValue(Flags.IRQ, true, "SEI");
+        void Clv() => SetFlagValue(Flags.Overflow, false, "CLV");
+        void Cld() => SetFlagValue(Flags.Decimal, false, "CLD");
+        void Sed() => SetFlagValue(Flags.Decimal, true, "SED");
         #endregion
         
         private void LogInstruction(int numParams, string mnemonic)
