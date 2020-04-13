@@ -1,11 +1,12 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Xml.Xsl;
 using Serilog;
 
 namespace NESCore
 {
-    public enum Flags {Negative, Overflow, Unused, Break, Decimal, IRQ, Zero, Carry};
+    public enum Flags {Carry, Zero, IRQ, Decimal, Break, Unused, Overflow, Negative};
 
     public class CPU
     {
@@ -95,34 +96,35 @@ namespace NESCore
                 Break, //0x00
                 OraIndirectX, //0x01
                 Halt, //0x02
-                Invalid, //0x03
+                AsoIndirectX, //0x03
                 Nop, //0x04
                 OraZPage, //0x05
                 AslZPage, //0x06
-                Invalid, //0x07
-                Invalid, //0x08
+                AsoZPage, //0x07
+                Php, //0x08
                 OraImmediate, //0x09
                 AslAccumulator, //0x0A
                 Invalid, //0x0B
                 Nop, //0x0C
                 OraAbsolute, //0x0D
                 AslAbsolute, //0x0E
-                Invalid, //0x0F
+                AsoAbsolute, //0x0F
                 Bpl, //0x10
                 OraIndirectY, //0x11
                 Halt, //0x12
-                Invalid, //0x13
+                AsoIndirectY, //0x13
                 Nop, //0x14
                 OraZPageX, //0x15
                 AslZPageX, //0x16
-                Invalid, //0x17
+                AsoZPageX, //0x17
                 Clc, //0x18
                 OraAbsoluteY, //0x19
                 Nop, //0x1A
-                Invalid, //0x1B
+                AsoAbsoluteY, //0x1B
                 Nop, //0x1C
                 OraAbsoluteX, //0x1D
                 AslAbsoluteX, //0x1E
+                AsoAbsoluteX, //0x1F
                 Jsr, //0x20
                 AndIndirectX, //0x21
                 Halt, //0x22
@@ -131,7 +133,7 @@ namespace NESCore
                 AndZPage, //0x25
                 RolZPage, //0x26
                 Invalid, //0x27
-                Invalid, //0x28
+                Plp, //0x28
                 AndImmediate, //0x29
                 RolAccumulator, //0x2A
                 BitAbsolute, //0x2C
@@ -162,7 +164,7 @@ namespace NESCore
                 EorZPage, //0x45
                 LsrZPage, //0x46
                 Invalid, //0x47
-                Invalid, //0x48
+                Pha, //0x48
                 EorImmediate, //0x49
                 LsrAccumulator, //0x4A
                 Invalid, //0x4B
@@ -194,7 +196,7 @@ namespace NESCore
                 AdcZPage, //0x65
                 RorZPage, //0x66
                 Invalid, //0x67
-                Invalid, //0x68
+                Pla, //0x68
                 AdcImmediate, //0x69
                 RorAccumulator, //0x6A
                 Invalid, //0x6B
@@ -219,35 +221,35 @@ namespace NESCore
                 RorAbsoluteX, //0x7E
                 Invalid, //0x7F
                 Nop, //0x80
-                Invalid, //0x81
+                StaIndirectX, //0x81
                 Nop, //0x82
                 Invalid, //0x83
-                Invalid, //0x84
-                Invalid, //0x85
-                Invalid, //0x86
+                StyZPage, //0x84
+                StaZPage, //0x85
+                StxZPage, //0x86
                 Invalid, //0x87
                 Dey, //0x88
                 Nop, //0x89
                 Txa, //0x8A
                 Invalid, //0x8B
-                Invalid, //0x8C
-                Invalid, //0x8D
-                Invalid, //0x8E
+                StyAbsolute, //0x8C
+                StaAbsolute, //0x8D
+                StxAbsolute, //0x8E
                 Invalid, //0x8F
                 Bcc, //0x90
-                Invalid, //0x91
+                StaIndirectY, //0x91
                 Halt, //0x92
                 Invalid, //0x93
-                Invalid, //0x94
-                Invalid, //0x95
-                Invalid, //0x96
+                StyZPageX, //0x94
+                StaZPageX, //0x95
+                StxZPageY, //0x96
                 Invalid, //0x97
                 Tya, //0x98
-                Invalid, //0x99
-                Invalid, //0x9A
+                StaAbsoluteY, //0x99
+                Txs, //0x9A
                 Invalid, //0x9B
                 Invalid, //0x9C
-                Invalid, //0x9D
+                StaAbsoluteX, //0x9D
                 Invalid, //0x9E
                 Invalid, //0x9F
                 LdyImmediate, //0xA0
@@ -276,7 +278,7 @@ namespace NESCore
                 Invalid, //0xB7
                 Clv, //0xB8
                 LdaAbsoluteY, //0xB9
-                Invalid, //0xBA
+                Tsx, //0xBA
                 Invalid, //0xBB
                 LdyAbsoluteX, //0xBC
                 LdaAbsoluteX, //0xBD
@@ -391,7 +393,7 @@ namespace NESCore
             A = (byte)(A | param);
 
             Bit.Val(ref P, Flags.Zero, A == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
 
             cyclesThisSec += cycles;
             PC += (ushort)pcIncrease;
@@ -491,7 +493,7 @@ namespace NESCore
 
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Overflow, isOverflown > 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
         }
 
         private void AdcImmediate() => Adc(Ram.Byte(PC + 1), 2, 2);
@@ -535,7 +537,7 @@ namespace NESCore
             LogInstruction(pcIncrease - 1, $"ADC #${value:X}");
             A &= value;
             Bit.Val(ref P, Flags.Zero, A == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
 
             cyclesThisSec += cycles;
             PC += pcIncrease;
@@ -560,8 +562,8 @@ namespace NESCore
 
             byte tmp = (byte)(A & value);
             Bit.Val(ref P, Flags.Zero, tmp == 0);
-            Bit.Val(ref P, Flags.Overflow, Bit.Test(value, 6));
-            Bit.Val(ref P, Flags.Negative, Bit.Test(value, 7));
+            Bit.Val(ref P, Flags.Overflow, Bit.Test(value, Flags.Overflow));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(value, Flags.Negative));
 
             cyclesThisSec += cycles;
             PC += pcIncrease;
@@ -610,7 +612,7 @@ namespace NESCore
             Bit.Val(ref P, Flags.Carry, register >= value);
 
             //Need to do this since there are some positive numbers that should trigger this flag. i.e. 0x80
-            Bit.Val(ref P, Flags.Negative, Bit.Test(tmp, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(tmp, Flags.Negative));
             Bit.Val(ref P, Flags.Zero, register == value);
 
             PC += pcIncrease;
@@ -644,7 +646,7 @@ namespace NESCore
             Ram.WriteByte(memAddr, value);
 
             Bit.Val(ref P, Flags.Zero, value == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(value, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(value, Flags.Negative));
 
             PC += pcIncrease;
             cyclesThisSec += cycles;
@@ -669,7 +671,7 @@ namespace NESCore
 
             A ^= value;
 
-            Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
             Bit.Val(ref P, Flags.Zero, A == 0);
 
             PC += pcIncrease;
@@ -742,7 +744,7 @@ namespace NESCore
             register = value;
 
             Bit.Val(ref P, Flags.Zero, register == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(register, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(register, Flags.Negative));
 
             PC += pcIncrease;
             cyclesThisSec += cycles;
@@ -779,7 +781,7 @@ namespace NESCore
             var shifted = (byte) (value >> 1);
 
             Bit.Val(ref P, Flags.Zero, shifted == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, Flags.Negative));
 
             PC += pcIncrease;
             cyclesThisSec += cycles;
@@ -870,7 +872,7 @@ namespace NESCore
             LogInstruction(0, mnemonic);
             destination = source;
             Bit.Val(ref P, Flags.Zero, destination == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(destination, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(destination, Flags.Negative));
             PC++;
             cyclesThisSec += 2;
         }
@@ -880,7 +882,7 @@ namespace NESCore
             LogInstruction(0, mnemonic);
             register += (byte)delta;
             Bit.Val(ref P, Flags.Zero, register == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(register, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(register, Flags.Negative));
             PC++;
             cyclesThisSec += 2;
         }
@@ -914,7 +916,7 @@ namespace NESCore
             LogInstruction(pcIncrease - 1, $"{mnemonic} ${value:X}");
             var cachedFlagC = Bit.Test(P, Flags.Carry);
 
-            var cachedPosition = direction == RotateDirection.Left ? 7 : 0;
+            var cachedPosition = direction == RotateDirection.Left ? Flags.Negative : Flags.Carry;
             var cached = Bit.Test(value, cachedPosition);
 
             byte shifted;
@@ -923,7 +925,7 @@ namespace NESCore
             {
                 shifted = (byte) (value >> 1);
             
-                Bit.Val(ref shifted, 7, cachedFlagC);
+                Bit.Val(ref shifted, Flags.Negative, cachedFlagC);
                 Bit.Val(ref P, Flags.Carry, cached);
             }
             else
@@ -935,7 +937,7 @@ namespace NESCore
             }
             
             Bit.Val(ref P, Flags.Zero, shifted == 0);
-            Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, 7));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, Flags.Negative));
             
             PC += pcIncrease;
             cyclesThisSec += cycles;
@@ -1040,7 +1042,113 @@ namespace NESCore
         }
         #endregion
 
+        #region Store register
 
+        void StoreRegister(byte value, ushort addr, int cycles, ushort pcIncrease, string mnemonic)
+        {
+            LogInstruction(pcIncrease - 1, $"{mnemonic} ${addr:X} = {value:X}");
+            Ram.WriteByte(addr, value);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void StaZPage() => StoreRegister(A, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STA");
+        void StaZPageX() => StoreRegister(A, Ram.ZPageX(Ram.Byte(PC + 1)), 4, 2, "STA");
+        void StaAbsolute() => StoreRegister(A, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STA");
+        void StaAbsoluteX() => StoreRegister(A, Ram.AbsoluteX(Ram.Word(PC + 1)), 5, 3, "STA");
+        void StaAbsoluteY() => StoreRegister(A, Ram.AbsoluteY(Ram.Word(PC + 1)), 5, 3, "STA");
+        void StaIndirectX() => StoreRegister(A, Ram.IndirectX(Ram.Byte(PC + 1)), 6, 2, "STA");
+        void StaIndirectY() => StoreRegister(A, Ram.IndirectY(Ram.Byte(PC + 1)), 6, 2, "STA");
+        void StxZPage() => StoreRegister(X, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STX");
+        void StxZPageY() => StoreRegister(X, Ram.ZPageY(Ram.Byte(PC + 1)), 4, 2, "STX");
+        void StxAbsolute() => StoreRegister(X, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STX");
+        void StyZPage() => StoreRegister(Y, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STY");
+        void StyZPageX() => StoreRegister(Y, Ram.ZPageX(Ram.Byte(PC + 1)), 4, 2, "STY");
+        void StyAbsolute() => StoreRegister(Y, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STY");
+
+        #endregion
+
+        #region Stack instructions
+
+        void Txs() => TransferRegister(X, ref SP, "TXS");
+        void Tsx() => TransferRegister(SP, ref X, "TSX");
+
+        void Pha()
+        {
+            LogInstruction(0, "PHA");
+            Ram.PushByte(A);
+            PC++;
+            cyclesThisSec += 3;
+        }
+
+        void Pla()
+        {
+            LogInstruction(0, "PLA");
+            A = Ram.PopByte();
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
+
+            PC++;
+            cyclesThisSec += 4;
+        }
+
+        void Php()
+        {
+            LogInstruction(0, "PHP");
+            Ram.PushByte(P);
+
+            PC++;
+            cyclesThisSec += 3;
+        }
+
+        void Plp()
+        {
+            LogInstruction(0, "PLP");
+            P = Ram.PopByte();
+
+            //Bit 5 of P is unused, so clear it. It should always be 1.
+            Bit.Set(ref P, 5);
+            Bit.Clear(ref P, Flags.Break);
+
+            PC++;
+            cyclesThisSec += 4;
+        }
+        
+        #endregion
+        
+        #region ASO/SLO This opcode ASLs the contents of a memory location and then ORs the result with the accumulator. 
+        
+        void Aso(ushort addr, int cycles, ushort pcIncrease) {
+            LogInstruction(pcIncrease - 1, $"ASO ${addr:X}");
+
+            //ASL
+            var value = Ram.Byte(addr);
+            Bit.Val(ref P, Flags.Carry, Bit.Test(value, Flags.Negative));
+
+            var shifted = (byte) (value << 1);
+            Ram.WriteByte(addr, shifted);
+
+            //Now the ORA
+            A = (byte) (A | shifted);
+            //Set the flags
+            Bit.Val(ref P, Flags.Zero, A == 0x00);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
+
+            //Update cycles and pc
+            cyclesThisSec += cycles;
+            PC += pcIncrease;
+        }
+
+        void AsoAbsolute() => Aso(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
+        void AsoAbsoluteX() => Aso(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
+        void AsoAbsoluteY() => Aso(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
+        void AsoZPage() => Aso(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
+        void AsoZPageX() => Aso(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
+        void AsoIndirectX() => Aso(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
+        void AsoIndirectY() => Aso(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
+        
+        #endregion
         
         private void LogInstruction(int numParams, string mnemonic)
         {
