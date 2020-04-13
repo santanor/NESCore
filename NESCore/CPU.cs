@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Xml.Xsl;
 using Serilog;
 
 namespace NESCore
@@ -11,7 +12,7 @@ namespace NESCore
         /// <summary>
         /// Accumulator, deal with carry, overflow and so on...
         /// </summary>
-        public byte A;
+        private byte A;
 
         /// <summary>
         /// General purpose register
@@ -26,7 +27,7 @@ namespace NESCore
         /// <summary>
         /// The opcode of this cycle
         /// </summary>
-        public byte currentOpcode;
+        private byte currentOpcode;
 
         /// <summary>
         /// Counter of elapsed cycles (Hz) this current second.
@@ -128,14 +129,14 @@ namespace NESCore
                 Invalid, //0x23
                 BitZPage, //0x24
                 AndZPage, //0x25
-                Invalid, //0x26
+                RolZPage, //0x26
                 Invalid, //0x27
                 Invalid, //0x28
                 AndImmediate, //0x29
-                Invalid, //0x2A
+                RolAccumulator, //0x2A
                 BitAbsolute, //0x2C
                 AndAbsolute, //0x2D
-                Invalid, //0x2E
+                RolAbsolute, //0x2E
                 Invalid, //0x2F
                 Bmi, //0x30
                 AndIndirectY, //0x31
@@ -143,7 +144,7 @@ namespace NESCore
                 Invalid, //0x33
                 Nop, //0x34
                 AndZPageX, //0x35
-                Invalid, //0x36
+                RolZPageX, //0x36
                 Invalid, //0x37
                 Sec, //0x38
                 AndAbsoluteY, //0x39
@@ -151,9 +152,9 @@ namespace NESCore
                 Invalid, //0x3B
                 Nop, //0x3C
                 AndAbsoluteX, //0x3D
-                Invalid, //0x3E
+                RolAbsoluteX, //0x3E
                 Invalid, //0x3F
-                Invalid, //0x40
+                Rti, //0x40
                 EorIndirectX, //0x41
                 Halt, //0x42
                 Invalid, //0x43
@@ -185,21 +186,21 @@ namespace NESCore
                 EorAbsoluteX, //0x5D
                 LsrAbsoluteX, //0x5E
                 Invalid, //0x5F
-                Invalid, //0x60
+                Rts, //0x60
                 AdcIndirectX, //0x61
                 Halt, //0x62
                 Invalid, //0x63
                 Nop, //0x64
                 AdcZPage, //0x65
-                Invalid, //0x66
+                RorZPage, //0x66
                 Invalid, //0x67
                 Invalid, //0x68
                 AdcImmediate, //0x69
-                Invalid, //0x6A
+                RorAccumulator, //0x6A
                 Invalid, //0x6B
                 JmpIndirect, //0x6C
                 AdcAbsolute, //0x6D
-                Invalid, //0x6E
+                RorAbsolute, //0x6E
                 Invalid, //0x6F
                 Bvs, //0x70
                 AdcIndirectY, //0x71
@@ -207,7 +208,7 @@ namespace NESCore
                 Invalid, //0x73
                 Nop, //0x74
                 AdcZPageX, //0x75
-                Invalid, //0x76
+                RorZPageX, //0x76
                 Invalid, //0x77
                 Sei, //0x78
                 AdcAbsoluteY, //0x79
@@ -215,7 +216,7 @@ namespace NESCore
                 Invalid, //0x7B
                 Nop, //0x7C
                 AdcAbsoluteX, //0x7D
-                Invalid, //0x7E
+                RorAbsoluteX, //0x7E
                 Invalid, //0x7F
                 Nop, //0x80
                 Invalid, //0x81
@@ -314,35 +315,35 @@ namespace NESCore
                 DecAbsoluteX, //0xDE
                 Invalid, //0xDF
                 CpxImmediate, //0xE0
-                Invalid, //0xE1
+                SbcIndirectX, //0xE1
                 Nop, //0xE2
                 Invalid, //0xE3
                 CpxZPage, //0xE4
-                Invalid, //0xE5
+                SbcZPage, //0xE5
                 IncZPage, //0xE6
                 Invalid, //0xE7
                 Inx, //0xE8
-                Invalid, //0xE9
+                SbcImmediate, //0xE9
                 Nop, //0xEA
                 Invalid, //0xEB
                 CpxAbsolute, //0xEC
-                Invalid, //0xED
+                SbcAbsolute, //0xED
                 IncAbsolute, //0xEE
                 Invalid, //0xEF
                 Beq, //0xF0
-                Invalid, //0xF1
+                SbcIndirectY, //0xF1
                 Halt, //0xF2
                 Invalid, //0xF3
                 Nop, //0xF4
-                Invalid, //0xF5
+                SbcZPageX, //0xF5
                 IncZPageX, //0xF6
                 Invalid, //0xF7
                 Sed, //0xF8
-                Invalid, //0xF9
+                AdcAbsoluteY, //0xF9
                 Nop, //0xFA
                 Invalid, //0xFB
                 Nop, //0xFC
-                Invalid, //0xFD
+                SbcAbsoluteX, //0xFD
                 IncAbsoluteX, //0xFE
                 Invalid, //0xFF
             };
@@ -469,6 +470,15 @@ namespace NESCore
         private void Adc(byte value, int cycles, ushort pcIncrease)
         {
             LogInstruction(pcIncrease - 1, $"ADC #${value:X}");
+
+            AdcInternal(value);
+            
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+        
+        void AdcInternal(byte value)
+        {
             var carry = Bit.Test(P, Flags.Carry) ? 1 : 0;
             var result = A + carry + value;
             carry = (byte) ((result & 0x100) >> 8);
@@ -482,9 +492,6 @@ namespace NESCore
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Overflow, isOverflown > 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, 7));
-
-            PC += pcIncrease;
-            cyclesThisSec += cycles;
         }
 
         private void AdcImmediate() => Adc(Ram.Byte(PC + 1), 2, 2);
@@ -498,6 +505,29 @@ namespace NESCore
         
         #endregion
 
+        #region SBC Substract With Carry
+
+        void Sbc(byte value, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"SBC #{value:X}");
+
+            AdcInternal((byte) ~value);
+            
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void SbcImmediate() => Sbc(Ram.Byte(PC + 1), 2, 2);
+        void SbcZPage() => Sbc(Ram.ZPageParam(), 3, 2);
+        void SbcZPageX() => Sbc(Ram.ZPageXParam(), 4, 2);
+        void SbcAbsolute() => Sbc(Ram.AbsoluteParam(), 4, 3);
+        void SbcAbsoluteX() => Sbc(Ram.AbsoluteXParam(true), 4, 3);
+        void SbcAbsoluteY() => Sbc(Ram.AbsoluteYParam(true), 4, 3);
+        void SbcIndirectX() => Sbc(Ram.IndirectXParam(), 6, 2);
+        void SbcIndirectY() => Sbc(Ram.IndirectYParam(true), 5, 2);
+        
+        #endregion
+        
         #region AND Bitwise AND with accumulator
 
         private void And(byte value, int cycles, ushort pcIncrease)
@@ -865,6 +895,152 @@ namespace NESCore
         void Iny() => DeltaRegister(ref Y, 1, "INY");
         
         #endregion
+        
+        #region ROR/ROL Rotate region
+
+        byte Rol(byte value, int cycles, ushort pcIncrease)
+        {
+            return Rotate(value, cycles, pcIncrease,"ROL", RotateDirection.Left);
+        }
+
+        byte Ror(byte value, int cycles, ushort pcIncrease)
+        {
+            return Rotate(value, cycles, pcIncrease, "ROR", RotateDirection.Right);
+        }
+
+        private enum RotateDirection {Left, Right}
+        byte Rotate(byte value, int cycles, ushort pcIncrease, string mnemonic, RotateDirection direction )
+        {
+            LogInstruction(pcIncrease - 1, $"{mnemonic} ${value:X}");
+            var cachedFlagC = Bit.Test(P, Flags.Carry);
+
+            var cachedPosition = direction == RotateDirection.Left ? 7 : 0;
+            var cached = Bit.Test(value, cachedPosition);
+
+            byte shifted;
+            
+            if (direction == RotateDirection.Right)
+            {
+                shifted = (byte) (value >> 1);
+            
+                Bit.Val(ref shifted, 7, cachedFlagC);
+                Bit.Val(ref P, Flags.Carry, cached);
+            }
+            else
+            {
+                Bit.Val(ref P, Flags.Carry, cached);
+                shifted = (byte) (value << 1);
+
+                Bit.Val(ref shifted, 0, cachedFlagC);
+            }
+            
+            Bit.Val(ref P, Flags.Zero, shifted == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, 7));
+            
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+
+            return shifted;
+        }
+
+        void RolAccumulator()
+        {
+            A = Rol(A, 2, 1);
+        }
+
+        void RolZPage()
+        {
+            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var data = Ram.ZPageParam();
+            data = Rol(data, 5, 2);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RolZPageX()
+        {
+            var addr = Ram.ZPageX(Ram.Byte(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Rol(data, 6, 2);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RolAbsolute()
+        {
+            var addr = Ram.Absolute(Ram.Word(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Rol(data, 6, 3);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RolAbsoluteX()
+        {
+            var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Rol(data, 7, 3);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RorAccumulator()
+        {
+            A = Ror(A, 2, 1);
+        }
+
+        void RorZPage()
+        {
+            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var data = Ram.ZPageParam();
+            data = Ror(data, 5, 2);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RorZPageX()
+        {
+            var addr = Ram.ZPageX(Ram.Byte(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Ror(data, 6, 2);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RorAbsolute()
+        {
+            var addr = Ram.Absolute(Ram.Word(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Ror(data, 6, 3);
+            Ram.WriteByte(addr, data);
+        }
+
+        void RorAbsoluteX()
+        {
+            var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Ror(data, 7, 3);
+            Ram.WriteByte(addr, data);
+        }
+        
+        #endregion
+        
+        #region RTI/RTS Returns
+
+        void Rti()
+        {
+            LogInstruction(0, "RTI");
+            P = Ram.PopByte();
+            Bit.Set(ref P, Flags.Unused);//It has to be one. Always
+            PC = Ram.PopWord(); //Unlike RTS. RTI pulls the correct PC address. No need to increment
+            cyclesThisSec += 6;
+        }
+
+        void Rts()
+        {
+            LogInstruction(0, "RTS");
+            PC = Ram.PopWord();
+
+            PC++; // JSR pushes the address -1, so when we recover (here) we have to add 1 to make up for that "1" lost
+            cyclesThisSec += 6;
+        }
+        #endregion
+
+
         
         private void LogInstruction(int numParams, string mnemonic)
         {

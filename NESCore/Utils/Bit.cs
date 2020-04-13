@@ -29,12 +29,22 @@ namespace NESCore
 
         public static void Set(ref byte b, Flags bitPos)
         {
-            b |= (byte)(1 << (int) bitPos);
+            Set(ref b, (int) bitPos);
+        }
+        
+        public static void Set(ref byte b, in int bitPos)
+        {
+            b |= (byte)(1 << bitPos);
         }
 
         public static void Clear(ref byte b, Flags bitPos)
         {
-            b &= (byte)(~(1 << (int)bitPos));
+            Clear(ref b, (int) bitPos);
+        }
+        
+        public static void Clear(ref byte b, int bitPos)
+        {
+            b &= (byte)~(1 << bitPos);
         }
 
         /// <summary>
@@ -51,6 +61,20 @@ namespace NESCore
                 Clear(ref b, position);
             }
         }
-
+        
+        /// <summary>
+        /// Sets the bit specific position in the byte to 1|0 acording to the specified value
+        /// </summary>
+        public static void Val(ref byte b, int position, bool value)
+        {
+            if (value)
+            {
+                Set(ref b, position);
+            }
+            else
+            {
+                Clear(ref b, position);
+            }
+        }
     }
 }
