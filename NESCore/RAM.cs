@@ -275,6 +275,22 @@ namespace NESCore
             return result;
         }
 
+        public ushort IndirectParam()
+        {
+            ushort addr = Word(Cpu.PC + 1);
+            ushort targetAddr = 0x0000;
+            // This is a 6502 bug when instead of reading from $C0FF/$C100 it reads from $C0FF/$C000
+            if ((addr & 0xFF) == 0xFF) {
+                // Buggy code
+                targetAddr = (ushort) ((Byte(addr & 0xFF00) << 8) + Byte(addr));
+            } else {
+                // Normal code
+                targetAddr = Word(addr);
+            }
+
+            return targetAddr;
+        }
+
 
         public void CheckPageCrossed(ushort addr1, ushort addr2)
         {

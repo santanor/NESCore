@@ -122,7 +122,7 @@ namespace NESCore
                 Invalid, //0x1C
                 OraAbsoluteX, //0x1D
                 AslAbsoluteX, //0x1E
-                Invalid, //0x20
+                Jsr, //0x20
                 AndIndirectX, //0x21
                 Halt, //0x22
                 Invalid, //0x23
@@ -165,7 +165,7 @@ namespace NESCore
                 EorImmediate, //0x49
                 Invalid, //0x4A
                 Invalid, //0x4B
-                Invalid, //0x4C
+                JmpAbsolute, //0x4C
                 EorAbsolute, //0x4D
                 Invalid, //0x4E
                 Invalid, //0x4F
@@ -197,7 +197,7 @@ namespace NESCore
                 AdcImmediate, //0x69
                 Invalid, //0x6A
                 Invalid, //0x6B
-                Invalid, //0x6C
+                JmpIndirect, //0x6C
                 AdcAbsolute, //0x6D
                 Invalid, //0x6E
                 Invalid, //0x6F
@@ -249,37 +249,37 @@ namespace NESCore
                 Invalid, //0x9D
                 Invalid, //0x9E
                 Invalid, //0x9F
-                Invalid, //0xA0
-                Invalid, //0xA1
-                Invalid, //0xA2
+                LdyImmediate, //0xA0
+                LdaIndirectX, //0xA1
+                LdxImmediate, //0xA2
                 Invalid, //0xA3
-                Invalid, //0xA4
-                Invalid, //0xA5
-                Invalid, //0xA6
+                LdyZPage, //0xA4
+                LdaZPage, //0xA5
+                LdxZPage, //0xA6
                 Invalid, //0xA7
                 Invalid, //0xA8
-                Invalid, //0xA9
+                LdaImmediate, //0xA9
                 Invalid, //0xAA
                 Invalid, //0xAB
-                Invalid, //0xAC
-                Invalid, //0xAD
-                Invalid, //0xAE
+                LdyAbsolute, //0xAC
+                LdaAbsolute, //0xAD
+                LdxAbsolute, //0xAE
                 Invalid, //0xAF
                 Bcs, //0xB0
-                Invalid, //0xB1
+                LdaIndirectY, //0xB1
                 Halt, //0xB2
                 Invalid, //0xB3
-                Invalid, //0xB4
-                Invalid, //0xB5
-                Invalid, //0xB6
+                LdyZPageX, //0xB4
+                LdaZPageX, //0xB5
+                LdxZPageY, //0xB6
                 Invalid, //0xB7
                 Clv, //0xB8
-                Invalid, //0xB9
+                LdaAbsoluteY, //0xB9
                 Invalid, //0xBA
                 Invalid, //0xBB
-                Invalid, //0xBC
-                Invalid, //0xBD
-                Invalid, //0xBE
+                LdyAbsoluteX, //0xBC
+                LdaAbsoluteX, //0xBD
+                LdxAbsoluteY, //0xBE
                 Invalid, //0xBF
                 CpyImmediate, //0xC0
                 CmpIndirectX, //0xC1
@@ -674,6 +674,67 @@ namespace NESCore
         void Clv() => SetFlagValue(Flags.Overflow, false, "CLV");
         void Cld() => SetFlagValue(Flags.Decimal, false, "CLD");
         void Sed() => SetFlagValue(Flags.Decimal, true, "SED");
+        #endregion
+        
+        #region Jump instructions
+
+        void Jmp(ushort addr, int cycles)
+        {
+            LogInstruction(2, $"JMP ${addr:X}");
+
+            PC = addr;
+            cyclesThisSec += cycles;
+        }
+
+        void JmpAbsolute() => Jmp(Ram.Word(PC + 1), 3);
+        void JmpIndirect() => Jmp(Ram.IndirectParam(), 5);
+
+        void Jsr()
+        {
+            var cachedPc = (ushort) (PC + 0x02);
+            var addr = Ram.Absolute(Ram.Word(PC + 1));
+            LogInstruction(2, $"JSR #${addr:X}");
+            
+            Ram.PushWord(cachedPc); // Stores the address of the next opcode minus one
+
+            PC = addr;
+            cyclesThisSec += 6;
+        }
+        
+        #endregion
+        
+        #region Load Registers
+
+        void LoadRegister(ref byte register, byte value, int cycles, ushort pcIncrease, string mnemonic)
+        {
+            LogInstruction(pcIncrease - 1, $"{mnemonic} ${value:X}");
+            register = value;
+
+            Bit.Val(ref P, Flags.Zero, register == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(register, 7));
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+        void LdaImmediate() => LoadRegister(ref A, Ram.Byte(PC + 1), 2, 2, "LDA");
+        void LdaZPage() => LoadRegister(ref A, Ram.ZPageParam(), 3, 2, "LDA");
+        void LdaZPageX() => LoadRegister(ref A, Ram.ZPageXParam(), 4, 2, "LDA");
+        void LdaAbsolute() => LoadRegister(ref A, Ram.AbsoluteParam(), 4, 3, "LDA");
+        void LdaAbsoluteX() => LoadRegister(ref A, Ram.AbsoluteXParam(true), 4, 3, "LDA");
+        void LdaAbsoluteY() => LoadRegister(ref A, Ram.AbsoluteYParam(true), 4, 3, "LDA");
+        void LdaIndirectX() => LoadRegister(ref A, Ram.IndirectXParam(), 6, 2, "LDA");
+        void LdaIndirectY() => LoadRegister(ref A, Ram.IndirectYParam(true), 5, 2, "LDA");
+        void LdxImmediate() => LoadRegister(ref X, Ram.Byte(PC + 1), 2, 2, "LDX");
+        void LdxZPage() => LoadRegister(ref X, Ram.ZPageParam(), 3, 2, "LDX");
+        void LdxZPageY() => LoadRegister(ref X, Ram.ZPageYParam(), 4, 2, "LDX");
+        void LdxAbsolute() => LoadRegister(ref X, Ram.AbsoluteParam(), 4, 3, "LDX");
+        void LdxAbsoluteY() => LoadRegister(ref X, Ram.AbsoluteYParam(true), 4, 3, "LDX");
+        void LdyImmediate() => LoadRegister(ref Y, Ram.Byte(PC + 1), 2, 2, "LDY");
+        void LdyZPage() => LoadRegister(ref Y, Ram.ZPageParam(), 3, 2, "LDY");
+        void LdyZPageX() => LoadRegister(ref Y, Ram.ZPageXParam(), 4, 2, "LDY");
+        void LdyAbsolute() => LoadRegister(ref Y, Ram.AbsoluteParam(), 4, 3, "LDY");
+        void LdyAbsoluteX() => LoadRegister(ref Y, Ram.AbsoluteXParam(true), 4, 3, "LDY");
+        
         #endregion
         
         private void LogInstruction(int numParams, string mnemonic)
