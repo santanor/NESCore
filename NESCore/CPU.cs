@@ -95,7 +95,7 @@ namespace NESCore
                 OraIndirectX, //0x01
                 Halt, //0x02
                 Invalid, //0x03
-                Invalid, //0x04
+                Nop, //0x04
                 OraZPage, //0x05
                 AslZPage, //0x06
                 Invalid, //0x07
@@ -103,7 +103,7 @@ namespace NESCore
                 OraImmediate, //0x09
                 AslAccumulator, //0x0A
                 Invalid, //0x0B
-                Invalid, //0x0C
+                Nop, //0x0C
                 OraAbsolute, //0x0D
                 AslAbsolute, //0x0E
                 Invalid, //0x0F
@@ -111,15 +111,15 @@ namespace NESCore
                 OraIndirectY, //0x11
                 Halt, //0x12
                 Invalid, //0x13
-                Invalid, //0x14
+                Nop, //0x14
                 OraZPageX, //0x15
                 AslZPageX, //0x16
                 Invalid, //0x17
                 Clc, //0x18
                 OraAbsoluteY, //0x19
-                Invalid, //0x1A
+                Nop, //0x1A
                 Invalid, //0x1B
-                Invalid, //0x1C
+                Nop, //0x1C
                 OraAbsoluteX, //0x1D
                 AslAbsoluteX, //0x1E
                 Jsr, //0x20
@@ -141,15 +141,15 @@ namespace NESCore
                 AndIndirectY, //0x31
                 Halt, //0x32
                 Invalid, //0x33
-                Invalid, //0x34
+                Nop, //0x34
                 AndZPageX, //0x35
                 Invalid, //0x36
                 Invalid, //0x37
                 Sec, //0x38
                 AndAbsoluteY, //0x39
-                Invalid, //0x3A
+                Nop, //0x3A
                 Invalid, //0x3B
-                Invalid, //0x3C
+                Nop, //0x3C
                 AndAbsoluteX, //0x3D
                 Invalid, //0x3E
                 Invalid, //0x3F
@@ -157,39 +157,39 @@ namespace NESCore
                 EorIndirectX, //0x41
                 Halt, //0x42
                 Invalid, //0x43
-                Invalid, //0x44
+                Nop, //0x44
                 EorZPage, //0x45
-                Invalid, //0x46
+                LsrZPage, //0x46
                 Invalid, //0x47
                 Invalid, //0x48
                 EorImmediate, //0x49
-                Invalid, //0x4A
+                LsrAccumulator, //0x4A
                 Invalid, //0x4B
                 JmpAbsolute, //0x4C
                 EorAbsolute, //0x4D
-                Invalid, //0x4E
+                LsrAbsolute, //0x4E
                 Invalid, //0x4F
                 Bvc, //0x50
                 EorIndirectY, //0x51
                 Halt, //0x52
                 Invalid, //0x53
-                Invalid, //0x54
+                Nop, //0x54
                 EorZPageX, //0x55
-                Invalid, //0x56
+                LsrZPageX, //0x56
                 Invalid, //0x57
                 Cli, //0x58
                 EorAbsoluteY, //0x59
-                Invalid, //0x5A
+                Nop, //0x5A
                 Invalid, //0x5B
-                Invalid, //0x5C
+                Nop, //0x5C
                 EorAbsoluteX, //0x5D
-                Invalid, //0x5E
+                LsrAbsoluteX, //0x5E
                 Invalid, //0x5F
                 Invalid, //0x60
                 AdcIndirectX, //0x61
                 Halt, //0x62
                 Invalid, //0x63
-                Invalid, //0x64
+                Nop, //0x64
                 AdcZPage, //0x65
                 Invalid, //0x66
                 Invalid, //0x67
@@ -205,29 +205,29 @@ namespace NESCore
                 AdcIndirectY, //0x71
                 Halt, //0x72
                 Invalid, //0x73
-                Invalid, //0x74
+                Nop, //0x74
                 AdcZPageX, //0x75
                 Invalid, //0x76
                 Invalid, //0x77
                 Sei, //0x78
                 AdcAbsoluteY, //0x79
-                Invalid, //0x7A
+                Nop, //0x7A
                 Invalid, //0x7B
-                Invalid, //0x7C
+                Nop, //0x7C
                 AdcAbsoluteX, //0x7D
                 Invalid, //0x7E
                 Invalid, //0x7F
-                Invalid, //0x80
+                Nop, //0x80
                 Invalid, //0x81
-                Invalid, //0x82
+                Nop, //0x82
                 Invalid, //0x83
                 Invalid, //0x84
                 Invalid, //0x85
                 Invalid, //0x86
                 Invalid, //0x87
-                Invalid, //0x88
-                Invalid, //0x89
-                Invalid, //0x8A
+                Dey, //0x88
+                Nop, //0x89
+                Txa, //0x8A
                 Invalid, //0x8B
                 Invalid, //0x8C
                 Invalid, //0x8D
@@ -241,7 +241,7 @@ namespace NESCore
                 Invalid, //0x95
                 Invalid, //0x96
                 Invalid, //0x97
-                Invalid, //0x98
+                Tya, //0x98
                 Invalid, //0x99
                 Invalid, //0x9A
                 Invalid, //0x9B
@@ -257,9 +257,9 @@ namespace NESCore
                 LdaZPage, //0xA5
                 LdxZPage, //0xA6
                 Invalid, //0xA7
-                Invalid, //0xA8
+                Tay, //0xA8
                 LdaImmediate, //0xA9
-                Invalid, //0xAA
+                Tax, //0xAA
                 Invalid, //0xAB
                 LdyAbsolute, //0xAC
                 LdaAbsolute, //0xAD
@@ -283,15 +283,15 @@ namespace NESCore
                 Invalid, //0xBF
                 CpyImmediate, //0xC0
                 CmpIndirectX, //0xC1
-                Invalid, //0xC2
+                Nop, //0xC2
                 Invalid, //0xC3
                 CpyZPage, //0xC4
                 CmpZPage, //0xC5
                 DecZPage, //0xC6
                 Invalid, //0xC7
-                Invalid, //0xC8
+                Iny, //0xC8
                 CmpImmediate, //0xC9
-                Invalid, //0xCA
+                Dex, //0xCA
                 Invalid, //0xCB
                 CpyAbsolute, //0xCC
                 CmpAbsolute, //0xCD
@@ -301,29 +301,29 @@ namespace NESCore
                 CmpIndirectY, //0xD1
                 Halt, //0xD2
                 Invalid, //0xD3
-                Invalid, //0xD4
+                Nop, //0xD4
                 CmpZPageX, //0xD5
                 DecZPageX, //0xD6
                 Invalid, //0xD7
                 Cld, //0xD8
                 CmpAbsoluteY, //0xD9
-                Invalid, //0xDA
+                Nop, //0xDA
                 Invalid, //0xDB
-                Invalid, //0xDC
+                Nop, //0xDC
                 CmpAbsoluteX, //0xDD
                 DecAbsoluteX, //0xDE
                 Invalid, //0xDF
                 CpxImmediate, //0xE0
                 Invalid, //0xE1
-                Invalid, //0xE2
+                Nop, //0xE2
                 Invalid, //0xE3
                 CpxZPage, //0xE4
                 Invalid, //0xE5
                 IncZPage, //0xE6
                 Invalid, //0xE7
-                Invalid, //0xE8
+                Inx, //0xE8
                 Invalid, //0xE9
-                Invalid, //0xEA
+                Nop, //0xEA
                 Invalid, //0xEB
                 CpxAbsolute, //0xEC
                 Invalid, //0xED
@@ -333,15 +333,15 @@ namespace NESCore
                 Invalid, //0xF1
                 Halt, //0xF2
                 Invalid, //0xF3
-                Invalid, //0xF4
+                Nop, //0xF4
                 Invalid, //0xF5
                 IncZPageX, //0xF6
                 Invalid, //0xF7
                 Sed, //0xF8
                 Invalid, //0xF9
-                Invalid, //0xFA
+                Nop, //0xFA
                 Invalid, //0xFB
-                Invalid, //0xFC
+                Nop, //0xFC
                 Invalid, //0xFD
                 IncAbsoluteX, //0xFE
                 Invalid, //0xFF
@@ -705,6 +705,7 @@ namespace NESCore
         
         #region Load Registers
 
+        // ReSharper disable once RedundantAssignment
         void LoadRegister(ref byte register, byte value, int cycles, ushort pcIncrease, string mnemonic)
         {
             LogInstruction(pcIncrease - 1, $"{mnemonic} ${value:X}");
@@ -734,6 +735,134 @@ namespace NESCore
         void LdyZPageX() => LoadRegister(ref Y, Ram.ZPageXParam(), 4, 2, "LDY");
         void LdyAbsolute() => LoadRegister(ref Y, Ram.AbsoluteParam(), 4, 3, "LDY");
         void LdyAbsoluteX() => LoadRegister(ref Y, Ram.AbsoluteXParam(true), 4, 3, "LDY");
+        
+        #endregion
+        
+        #region LSR Logical Shift Right
+
+        byte Lsr(byte value, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"LSR #{value:X}");
+
+            Bit.Val(ref P, Flags.Carry, Bit.Test(value, 0));
+
+            var shifted = (byte) (value >> 1);
+
+            Bit.Val(ref P, Flags.Zero, shifted == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, 7));
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+
+            return shifted;
+        }
+
+        void LsrAccumulator()
+        {
+            A = Lsr(A, 2, 1);
+        }
+
+        void LsrZPage()
+        {
+            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var data = Ram.ZPageParam();
+            data = Lsr(data, 5, 2);
+            Ram.WriteByte(addr, data);
+        }
+
+        void LsrZPageX()
+        {
+            var addr = Ram.ZPageX(Ram.Byte(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Lsr(data, 6, 2);
+            Ram.WriteByte(addr, data);
+        }
+
+        void LsrAbsolute()
+        {
+            var addr = Ram.Absolute(Ram.Word(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Lsr(data, 6, 3);
+            Ram.WriteByte(addr, data);
+        }
+
+        void LsrAbsoluteX()
+        {
+            var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
+            var data = Ram.Byte(addr);
+            data = Lsr(data, 7, 3);
+            Ram.WriteByte(addr, data);
+        }
+        
+        #endregion
+        
+        #region NOP
+
+        void Nop()
+        {
+            LogInstruction(0, "NOP");
+            switch (Ram.Byte(PC)){
+                case 0x1A: case 0x3A: case 0x5A: case 0x7A: case 0xDA: case 0xEA: case 0xFA:
+                    PC++;
+                    cyclesThisSec += 2;
+                    break;
+
+                case 0x80: case 0x82: case 0x89: case 0xC2: case 0xE2:
+                    PC += 2;
+                    cyclesThisSec += 2;
+                    break;
+                case 0x0C:
+                    PC += 3;
+                    cyclesThisSec += 4;
+                    break;
+                case 0x1C: case 0x3C: case 0x5C: case 0x7C: case 0xDC: case 0xFC:
+                    PC += 3;
+                    Ram.AbsoluteXParam(true);
+                    cyclesThisSec += 4;
+                    break;
+                case 0x04: case 0x44: case 0x64:
+                    PC += 2;
+                    cyclesThisSec += 3;
+                    break;
+                case 0x14: case 0x34: case 0x54:  case 0x74: case 0xD4: case 0xF4:
+                    PC += 2;
+                    cyclesThisSec += 4;
+                    break;
+            }
+        }
+        #endregion
+        
+        #region Register Instructions
+
+        // ReSharper disable once RedundantAssignment
+        void TransferRegister(byte source, ref byte destination, string mnemonic)
+        {
+            LogInstruction(0, mnemonic);
+            destination = source;
+            Bit.Val(ref P, Flags.Zero, destination == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(destination, 7));
+            PC++;
+            cyclesThisSec += 2;
+        }
+
+        void DeltaRegister(ref byte register, int delta, string mnemonic)
+        {
+            LogInstruction(0, mnemonic);
+            register += (byte)delta;
+            Bit.Val(ref P, Flags.Zero, register == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(register, 7));
+            PC++;
+            cyclesThisSec += 2;
+        }
+
+        void Tax() => TransferRegister(A, ref X, "TAX");
+        void Txa() => TransferRegister(X, ref A, "TXA");
+        void Dex() => DeltaRegister(ref X, -1, "DEX");
+        void Inx() => DeltaRegister(ref X, 1, "INX");
+        void Tay() => TransferRegister(A, ref Y, "TAY");
+        void Tya() => TransferRegister(Y, ref A, "TYA");
+        void Dey() => DeltaRegister(ref Y, -1, "DEY");
+        void Iny() => DeltaRegister(ref Y, 1, "INY");
         
         #endregion
         
