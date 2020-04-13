@@ -287,7 +287,7 @@ namespace NESCore
                 Invalid, //0xC3
                 CpyZPage, //0xC4
                 CmpZPage, //0xC5
-                Invalid, //0xC6
+                DecZPage, //0xC6
                 Invalid, //0xC7
                 Invalid, //0xC8
                 CmpImmediate, //0xC9
@@ -295,7 +295,7 @@ namespace NESCore
                 Invalid, //0xCB
                 CpyAbsolute, //0xCC
                 CmpAbsolute, //0xCD
-                Invalid, //0xCE
+                DecAbsolute, //0xCE
                 Invalid, //0xCF
                 Bne, //0xD0
                 CmpIndirectY, //0xD1
@@ -303,7 +303,7 @@ namespace NESCore
                 Invalid, //0xD3
                 Invalid, //0xD4
                 CmpZPageX, //0xD5
-                Invalid, //0xD6
+                DecZPageX, //0xD6
                 Invalid, //0xD7
                 Invalid, //0xD8
                 CmpAbsoluteY, //0xD9
@@ -311,7 +311,7 @@ namespace NESCore
                 Invalid, //0xDB
                 Invalid, //0xDC
                 CmpAbsoluteX, //0xDD
-                Invalid, //0xDE
+                DecAbsoluteX, //0xDE
                 Invalid, //0xDF
                 CpxImmediate, //0xE0
                 Invalid, //0xE1
@@ -319,7 +319,7 @@ namespace NESCore
                 Invalid, //0xE3
                 CpxZPage, //0xE4
                 Invalid, //0xE5
-                Invalid, //0xE6
+                IncZPage, //0xE6
                 Invalid, //0xE7
                 Invalid, //0xE8
                 Invalid, //0xE9
@@ -327,7 +327,7 @@ namespace NESCore
                 Invalid, //0xEB
                 CpxAbsolute, //0xEC
                 Invalid, //0xED
-                Invalid, //0xEE
+                IncAbsolute, //0xEE
                 Invalid, //0xEF
                 Beq, //0xF0
                 Invalid, //0xF1
@@ -335,7 +335,7 @@ namespace NESCore
                 Invalid, //0xF3
                 Invalid, //0xF4
                 Invalid, //0xF5
-                Invalid, //0xF6
+                IncZPageX, //0xF6
                 Invalid, //0xF7
                 Invalid, //0xF8
                 Invalid, //0xF9
@@ -343,7 +343,7 @@ namespace NESCore
                 Invalid, //0xFB
                 Invalid, //0xFC
                 Invalid, //0xFD
-                Invalid, //0xFE
+                IncAbsoluteX, //0xFE
                 Invalid, //0xFF
             };
 
@@ -601,6 +601,33 @@ namespace NESCore
         void CpyImmediate() => Cmp(Y, Ram.Byte(PC + 1), 2, 2, "CPY");
         void CpyZPage() => Cmp(Y, Ram.ZPageParam(), 3, 2, "CPY");
         void CpyAbsolute() => Cmp(Y, Ram.AbsoluteParam(), 4, 3, "CPY");
+        
+        #endregion
+        
+        #region INC/DEC Increment and Decrement Memory
+
+        void DeltaMemory(ushort memAddr, int delta, int cycles, ushort pcIncrease, string mnemonic)
+        {
+            LogInstruction(pcIncrease -1, $"{mnemonic} ${memAddr:X} = {(memAddr + delta):X}");
+            var value = Ram.Byte(memAddr);
+            value += (byte)delta;
+            Ram.WriteByte(memAddr, value);
+
+            Bit.Val(ref P, Flags.Zero, value == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(value, 7));
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void DecZPage() => DeltaMemory(Ram.ZPage(Ram.Byte(PC + 1)), -1, 5, 2, "DEC");
+        void DecZPageX() => DeltaMemory(Ram.ZPageX(Ram.Byte(PC + 1)), -1, 6, 2, "DEC");
+        void DecAbsolute() => DeltaMemory(Ram.Absolute(Ram.Byte(PC + 1)), -1, 6, 3, "DEC");
+        void DecAbsoluteX() => DeltaMemory(Ram.AbsoluteX(Ram.Byte(PC + 1)), -1, 7, 3, "DEC");
+        void IncZPage() => DeltaMemory(Ram.ZPage(Ram.Byte(PC + 1)), 1, 5, 2, "INC");
+        void IncZPageX() => DeltaMemory(Ram.ZPageX(Ram.Byte(PC + 1)), 1, 6, 2, "INC");
+        void IncAbsolute() => DeltaMemory(Ram.Absolute(Ram.Byte(PC + 1)), 1, 6, 3, "INC");
+        void IncAbsoluteX() => DeltaMemory(Ram.AbsoluteX(Ram.Byte(PC + 1)), 1, 7, 3, "INC");
         
         #endregion
         

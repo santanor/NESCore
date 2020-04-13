@@ -12,7 +12,6 @@ namespace Tests
         private ROM rom;
         private NES nes;
 
-        [SetUp]
         public void Setup()
         {
             var (success, romResult) = ROM.FromFile("./TestData/nestest.nes");;
@@ -27,7 +26,6 @@ namespace Tests
         }
 
 
-        [Test]
         public void Nestest()
         {
             nes.Cpu.Run();
