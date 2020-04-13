@@ -281,43 +281,43 @@ namespace NESCore
                 Invalid, //0xBD
                 Invalid, //0xBE
                 Invalid, //0xBF
-                Invalid, //0xC0
-                Invalid, //0xC1
+                CpyImmediate, //0xC0
+                CmpIndirectX, //0xC1
                 Invalid, //0xC2
                 Invalid, //0xC3
-                Invalid, //0xC4
-                Invalid, //0xC5
+                CpyZPage, //0xC4
+                CmpZPage, //0xC5
                 Invalid, //0xC6
                 Invalid, //0xC7
                 Invalid, //0xC8
-                Invalid, //0xC9
+                CmpImmediate, //0xC9
                 Invalid, //0xCA
                 Invalid, //0xCB
-                Invalid, //0xCC
-                Invalid, //0xCD
+                CpyAbsolute, //0xCC
+                CmpAbsolute, //0xCD
                 Invalid, //0xCE
                 Invalid, //0xCF
                 Bne, //0xD0
-                Invalid, //0xD1
+                CmpIndirectY, //0xD1
                 Halt, //0xD2
                 Invalid, //0xD3
                 Invalid, //0xD4
-                Invalid, //0xD5
+                CmpZPageX, //0xD5
                 Invalid, //0xD6
                 Invalid, //0xD7
                 Invalid, //0xD8
-                Invalid, //0xD9
+                CmpAbsoluteY, //0xD9
                 Invalid, //0xDA
                 Invalid, //0xDB
                 Invalid, //0xDC
-                Invalid, //0xDD
+                CmpAbsoluteX, //0xDD
                 Invalid, //0xDE
                 Invalid, //0xDF
-                Invalid, //0xE0
+                CpxImmediate, //0xE0
                 Invalid, //0xE1
                 Invalid, //0xE2
                 Invalid, //0xE3
-                Invalid, //0xE4
+                CpxZPage, //0xE4
                 Invalid, //0xE5
                 Invalid, //0xE6
                 Invalid, //0xE7
@@ -325,7 +325,7 @@ namespace NESCore
                 Invalid, //0xE9
                 Invalid, //0xEA
                 Invalid, //0xEB
-                Invalid, //0xEC
+                CpxAbsolute, //0xEC
                 Invalid, //0xED
                 Invalid, //0xEE
                 Invalid, //0xEF
@@ -566,6 +566,41 @@ namespace NESCore
         private void Bcs() => TryBranch(Flags.Carry, true, "BCS");
         private void Bne() => TryBranch(Flags.Zero, false, "BNE");
         private void Beq() => TryBranch(Flags.Zero, true, "BEQ");
+        
+        #endregion
+        
+        #region CMP, CPY, CPX Compare Registers
+
+        private void Cmp(byte register, byte value, int cycles, ushort pcIncrease, string regMnemonic)
+        {
+            LogInstruction(pcIncrease - 1, $"{regMnemonic} #{value:X}");
+
+            var tmp = (byte)(register - value);
+
+            Bit.Val(ref P, Flags.Carry, register >= value);
+
+            //Need to do this since there are some positive numbers that should trigger this flag. i.e. 0x80
+            Bit.Val(ref P, Flags.Negative, Bit.Test(tmp, 7));
+            Bit.Val(ref P, Flags.Zero, register == value);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void CmpImmediate() => Cmp(A, Ram.Byte(PC + 1), 2, 2, "CMP");
+        void CmpZPage() => Cmp(A, Ram.ZPageParam(), 3, 2, "CMP");
+        void CmpZPageX() => Cmp(A, Ram.ZPageXParam(), 4, 2, "CMP");
+        void CmpAbsolute() => Cmp(A, Ram.AbsoluteParam(), 4, 3, "CMP");
+        void CmpAbsoluteX() => Cmp(A, Ram.AbsoluteXParam(true), 4, 3, "CMP");
+        void CmpAbsoluteY() => Cmp(A, Ram.AbsoluteYParam(true), 4, 3, "CMP");
+        void CmpIndirectX() => Cmp(A, Ram.IndirectXParam(), 6, 2, "CMP");
+        void CmpIndirectY() => Cmp(A, Ram.IndirectYParam(true), 5, 2, "CMP");
+        void CpxImmediate() => Cmp(X, Ram.Byte(PC + 1), 2, 2, "CPX");
+        void CpxZPage() => Cmp(X, Ram.ZPageParam(), 3, 2, "CPX");
+        void CpxAbsolute() => Cmp(X, Ram.AbsoluteParam(), 4, 3, "CPX");
+        void CpyImmediate() => Cmp(Y, Ram.Byte(PC + 1), 2, 2, "CPY");
+        void CpyZPage() => Cmp(Y, Ram.ZPageParam(), 3, 2, "CPY");
+        void CpyAbsolute() => Cmp(Y, Ram.AbsoluteParam(), 4, 3, "CPY");
         
         #endregion
         
