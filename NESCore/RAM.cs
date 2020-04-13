@@ -276,7 +276,7 @@ namespace NESCore
         }
 
 
-        private void CheckPageCrossed(ushort addr1, ushort addr2)
+        public void CheckPageCrossed(ushort addr1, ushort addr2)
         {
             if ((addr1 & 0xFF00) != (addr2 & 0xFF00))
             {

@@ -107,7 +107,7 @@ namespace NESCore
                 OraAbsolute, //0x0D
                 AslAbsolute, //0x0E
                 Invalid, //0x0F
-                Invalid, //0x10
+                Bpl, //0x10
                 OraIndirectY, //0x11
                 Halt, //0x12
                 Invalid, //0x13
@@ -126,18 +126,18 @@ namespace NESCore
                 AndIndirectX, //0x21
                 Halt, //0x22
                 Invalid, //0x23
-                Invalid, //0x24
+                BitZPage, //0x24
                 AndZPage, //0x25
                 Invalid, //0x26
                 Invalid, //0x27
                 Invalid, //0x28
                 AndImmediate, //0x29
                 Invalid, //0x2A
-                Invalid, //0x2C
+                BitAbsolute, //0x2C
                 AndAbsolute, //0x2D
                 Invalid, //0x2E
                 Invalid, //0x2F
-                Invalid, //0x30
+                Bmi, //0x30
                 AndIndirectY, //0x31
                 Halt, //0x32
                 Invalid, //0x33
@@ -169,7 +169,7 @@ namespace NESCore
                 Invalid, //0x4D
                 Invalid, //0x4E
                 Invalid, //0x4F
-                Invalid, //0x50
+                Bvc, //0x50
                 Invalid, //0x51
                 Halt, //0x52
                 Invalid, //0x53
@@ -201,7 +201,7 @@ namespace NESCore
                 AdcAbsolute, //0x6D
                 Invalid, //0x6E
                 Invalid, //0x6F
-                Invalid, //0x70
+                Bvs, //0x70
                 AdcIndirectY, //0x71
                 Halt, //0x72
                 Invalid, //0x73
@@ -233,7 +233,7 @@ namespace NESCore
                 Invalid, //0x8D
                 Invalid, //0x8E
                 Invalid, //0x8F
-                Invalid, //0x90
+                Bcc, //0x90
                 Invalid, //0x91
                 Halt, //0x92
                 Invalid, //0x93
@@ -265,7 +265,7 @@ namespace NESCore
                 Invalid, //0xAD
                 Invalid, //0xAE
                 Invalid, //0xAF
-                Invalid, //0xB0
+                Bcs, //0xB0
                 Invalid, //0xB1
                 Halt, //0xB2
                 Invalid, //0xB3
@@ -297,7 +297,7 @@ namespace NESCore
                 Invalid, //0xCD
                 Invalid, //0xCE
                 Invalid, //0xCF
-                Invalid, //0xD0
+                Bne, //0xD0
                 Invalid, //0xD1
                 Halt, //0xD2
                 Invalid, //0xD3
@@ -329,7 +329,7 @@ namespace NESCore
                 Invalid, //0xED
                 Invalid, //0xEE
                 Invalid, //0xEF
-                Invalid, //0xF0
+                Beq, //0xF0
                 Invalid, //0xF1
                 Halt, //0xF2
                 Invalid, //0xF3
@@ -519,6 +519,53 @@ namespace NESCore
         private void AndAbsoluteY() => And(Ram.AbsoluteYParam(true), 4, 3);
         private void AndIndirectX() => And(Ram.IndirectXParam(), 6, 2);
         private void AndIndirectY() => And(Ram.IndirectYParam(true), 5, 2);
+        
+        #endregion
+        
+        #region BIT test BITs
+
+        private void BIT(byte value, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"BIT #${value:X}");
+
+            byte tmp = (byte)(A & value);
+            Bit.Val(ref P, Flags.Zero, tmp == 0);
+            Bit.Val(ref P, Flags.Overflow, Bit.Test(value, 6));
+            Bit.Val(ref P, Flags.Negative, Bit.Test(value, 7));
+
+            cyclesThisSec += cycles;
+            PC += pcIncrease;
+        }
+
+        private void BitZPage() => BIT(Ram.ZPageParam(), 3, 2);
+        private void BitAbsolute() => BIT(Ram.AbsoluteParam(), 4, 3);
+        #endregion
+        
+        #region Branch Instructions
+
+        private void TryBranch(Flags flag, bool reqFlagValue, string mnemonic)
+        {
+            ushort value = Ram.Word(PC + 1); //byte is unsigned but we need a signed char
+            LogInstruction(1, $"{mnemonic} ${PC + 2 + value:X}");
+            cyclesThisSec += 2;//This is always constant
+            PC += 2;
+            
+            if (Bit.Test(P, flag) == reqFlagValue)
+            {
+                Ram.CheckPageCrossed((ushort) (PC + value), PC);
+                PC += value;
+                cyclesThisSec++;
+            }
+        }
+
+        private void Bpl() => TryBranch(Flags.Negative, false, "BPL");
+        private void Bmi() => TryBranch(Flags.Negative, true, "BMI");
+        private void Bvc() => TryBranch(Flags.Overflow, false, "BVC");
+        private void Bvs() => TryBranch(Flags.Overflow, true, "BVS");
+        private void Bcc() => TryBranch(Flags.Carry, false, "BCC");
+        private void Bcs() => TryBranch(Flags.Carry, true, "BCS");
+        private void Bne() => TryBranch(Flags.Zero, false, "BNE");
+        private void Beq() => TryBranch(Flags.Zero, true, "BEQ");
         
         #endregion
         
