@@ -104,7 +104,7 @@ namespace NESCore
                 Php, //0x08
                 OraImmediate, //0x09
                 AslAccumulator, //0x0A
-                Invalid, //0x0B
+                Anc, //0x0B
                 Nop, //0x0C
                 OraAbsolute, //0x0D
                 AslAbsolute, //0x0E
@@ -128,42 +128,43 @@ namespace NESCore
                 Jsr, //0x20
                 AndIndirectX, //0x21
                 Halt, //0x22
-                Invalid, //0x23
+                RlaIndirectX, //0x23
                 BitZPage, //0x24
                 AndZPage, //0x25
                 RolZPage, //0x26
-                Invalid, //0x27
+                RlaZPage, //0x27
                 Plp, //0x28
                 AndImmediate, //0x29
-                RolAccumulator, //0x2A
+                RolAccumulator, //0x2A,
+                Anc, //0x2B
                 BitAbsolute, //0x2C
                 AndAbsolute, //0x2D
                 RolAbsolute, //0x2E
-                Invalid, //0x2F
+                RlaAbsolute, //0x2F
                 Bmi, //0x30
                 AndIndirectY, //0x31
                 Halt, //0x32
-                Invalid, //0x33
+                RlaIndirectY, //0x33
                 Nop, //0x34
                 AndZPageX, //0x35
                 RolZPageX, //0x36
-                Invalid, //0x37
+                RlaZPageX, //0x37
                 Sec, //0x38
                 AndAbsoluteY, //0x39
                 Nop, //0x3A
-                Invalid, //0x3B
+                RlaAbsoluteY, //0x3B
                 Nop, //0x3C
                 AndAbsoluteX, //0x3D
                 RolAbsoluteX, //0x3E
-                Invalid, //0x3F
+                RlaAbsoluteX, //0x3F
                 Rti, //0x40
                 EorIndirectX, //0x41
                 Halt, //0x42
-                Invalid, //0x43
+                LseIndirectX, //0x43
                 Nop, //0x44
                 EorZPage, //0x45
                 LsrZPage, //0x46
-                Invalid, //0x47
+                LseZPage, //0x47
                 Pha, //0x48
                 EorImmediate, //0x49
                 LsrAccumulator, //0x4A
@@ -171,23 +172,23 @@ namespace NESCore
                 JmpAbsolute, //0x4C
                 EorAbsolute, //0x4D
                 LsrAbsolute, //0x4E
-                Invalid, //0x4F
+                LseAbsolute, //0x4F
                 Bvc, //0x50
                 EorIndirectY, //0x51
                 Halt, //0x52
-                Invalid, //0x53
+                LseIndirectY, //0x53
                 Nop, //0x54
                 EorZPageX, //0x55
                 LsrZPageX, //0x56
-                Invalid, //0x57
+                LseZPageX, //0x57
                 Cli, //0x58
                 EorAbsoluteY, //0x59
                 Nop, //0x5A
-                Invalid, //0x5B
+                LseAbsoluteY, //0x5B
                 Nop, //0x5C
                 EorAbsoluteX, //0x5D
                 LsrAbsoluteX, //0x5E
-                Invalid, //0x5F
+                LseAbsoluteX, //0x5F
                 Rts, //0x60
                 AdcIndirectX, //0x61
                 Halt, //0x62
@@ -374,7 +375,7 @@ namespace NESCore
         {
             Log.Error($"Unkown OPcode: {Ram.Byte(PC):X}");
         }
-
+        
         private void Break()
         {
             LogInstruction(0, $"BRK");
@@ -669,13 +670,18 @@ namespace NESCore
         {
             LogInstruction(pcIncrease - 1, $"EOR ${value:X}");
 
+            EorInternal(value);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void EorInternal(byte value)
+        {
             A ^= value;
 
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
             Bit.Val(ref P, Flags.Zero, A == 0);
-
-            PC += pcIncrease;
-            cyclesThisSec += cycles;
         }
 
         void EorImmediate() => Eor(Ram.Byte(PC + 1), 2, 2);
@@ -776,15 +782,21 @@ namespace NESCore
         {
             LogInstruction(pcIncrease - 1, $"LSR #{value:X}");
 
+            
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+
+            return LsrInternal(value);
+        }
+
+        byte LsrInternal(byte value)
+        {
             Bit.Val(ref P, Flags.Carry, Bit.Test(value, 0));
 
             var shifted = (byte) (value >> 1);
 
             Bit.Val(ref P, Flags.Zero, shifted == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, Flags.Negative));
-
-            PC += pcIncrease;
-            cyclesThisSec += cycles;
 
             return shifted;
         }
@@ -1147,6 +1159,82 @@ namespace NESCore
         void AsoZPageX() => Aso(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
         void AsoIndirectX() => Aso(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
         void AsoIndirectY() => Aso(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
+        
+        #endregion
+        
+        #region ANC
+
+        /// <summary>
+        /// ANC ANDs the contents of the A register with an immediate value and then 
+        /// moves bit 7 of A into the Carry flag.  This opcode works basically 
+        /// identically to AND #immed. except that the Carry flag is set to the same 
+        /// state that the Negative flag is set to.
+        /// </summary>
+        void Anc()
+        {
+            AndImmediate();
+            Bit.Val(ref P, Flags.Carry, Bit.Test(A, Flags.Negative));
+        }
+        #endregion
+        
+        #region RLA
+
+        void Rla(ushort addr, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"RLA ${addr:X}");
+
+            var value = Ram.Byte(addr);
+
+            var cachedFlagC = Bit.Test(P, Flags.Carry);
+            var cached7 = Bit.Test(value, Flags.Negative);
+
+            Bit.Val(ref P, Flags.Carry, cached7);
+            var shifted = (byte) (value << 1);
+
+            Bit.Val(ref shifted, 0, cachedFlagC);
+            Ram.WriteByte(addr, shifted);
+
+            A &= shifted;
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
+
+            cyclesThisSec += cycles;
+            PC += pcIncrease;
+        }
+
+        void RlaAbsolute() => Rla(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
+        void RlaAbsoluteX() => Rla(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
+        void RlaAbsoluteY() => Rla(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
+        void RlaZPage() => Rla(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
+        void RlaZPageX() => Rla(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
+        void RlaIndirectX() => Rla(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
+        void RlaIndirectY() => Rla(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
+        
+        #endregion
+        
+        #region LSE
+
+        void Lse(ushort addr, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"LSE ${addr:X}");
+
+            byte data = Ram.Byte(addr);
+            data = LsrInternal(data);
+            Ram.WriteByte(addr, data);
+
+            EorInternal(data);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void LseAbsolute() => Lse(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
+        void LseAbsoluteX() => Lse(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
+        void LseAbsoluteY() => Lse(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
+        void LseZPage() => Lse(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
+        void LseZPageX() => Lse(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
+        void LseIndirectX() => Lse(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
+        void LseIndirectY() => Lse(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
         
         #endregion
         
