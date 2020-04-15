@@ -168,7 +168,7 @@ namespace NESCore
                 Pha, //0x48
                 EorImmediate, //0x49
                 LsrAccumulator, //0x4A
-                Invalid, //0x4B
+                Alr, //0x4B
                 JmpAbsolute, //0x4C
                 EorAbsolute, //0x4D
                 LsrAbsolute, //0x4E
@@ -192,163 +192,163 @@ namespace NESCore
                 Rts, //0x60
                 AdcIndirectX, //0x61
                 Halt, //0x62
-                Invalid, //0x63
+                RraIndirectX, //0x63
                 Nop, //0x64
                 AdcZPage, //0x65
                 RorZPage, //0x66
-                Invalid, //0x67
+                RraZPage, //0x67
                 Pla, //0x68
                 AdcImmediate, //0x69
                 RorAccumulator, //0x6A
-                Invalid, //0x6B
+                Arr, //0x6B
                 JmpIndirect, //0x6C
                 AdcAbsolute, //0x6D
                 RorAbsolute, //0x6E
-                Invalid, //0x6F
+                RraAbsolute, //0x6F
                 Bvs, //0x70
                 AdcIndirectY, //0x71
                 Halt, //0x72
-                Invalid, //0x73
+                RraIndirectY, //0x73
                 Nop, //0x74
                 AdcZPageX, //0x75
                 RorZPageX, //0x76
-                Invalid, //0x77
+                RraZPageX, //0x77
                 Sei, //0x78
                 AdcAbsoluteY, //0x79
                 Nop, //0x7A
-                Invalid, //0x7B
+                RraAbsoluteY, //0x7B
                 Nop, //0x7C
                 AdcAbsoluteX, //0x7D
                 RorAbsoluteX, //0x7E
-                Invalid, //0x7F
+                RraAbsoluteX, //0x7F
                 Nop, //0x80
                 StaIndirectX, //0x81
                 Nop, //0x82
-                Invalid, //0x83
+                AxsIndirectX, //0x83
                 StyZPage, //0x84
                 StaZPage, //0x85
                 StxZPage, //0x86
-                Invalid, //0x87
+                AxsZPage, //0x87
                 Dey, //0x88
                 Nop, //0x89
                 Txa, //0x8A
-                Invalid, //0x8B
+                Halt, //0x8B
                 StyAbsolute, //0x8C
                 StaAbsolute, //0x8D
                 StxAbsolute, //0x8E
-                Invalid, //0x8F
+                AxsAbsolute, //0x8F
                 Bcc, //0x90
                 StaIndirectY, //0x91
                 Halt, //0x92
-                Invalid, //0x93
+                Halt, //0x93
                 StyZPageX, //0x94
                 StaZPageX, //0x95
                 StxZPageY, //0x96
-                Invalid, //0x97
+                AxsZPageY, //0x97
                 Tya, //0x98
                 StaAbsoluteY, //0x99
                 Txs, //0x9A
-                Invalid, //0x9B
-                Invalid, //0x9C
+                Halt, //0x9B
+                Halt, //0x9C
                 StaAbsoluteX, //0x9D
-                Invalid, //0x9E
-                Invalid, //0x9F
+                Halt, //0x9E
+                Halt, //0x9F
                 LdyImmediate, //0xA0
                 LdaIndirectX, //0xA1
                 LdxImmediate, //0xA2
-                Invalid, //0xA3
+                LaxIndirectX, //0xA3
                 LdyZPage, //0xA4
                 LdaZPage, //0xA5
                 LdxZPage, //0xA6
-                Invalid, //0xA7
+                LaxZPage, //0xA7
                 Tay, //0xA8
                 LdaImmediate, //0xA9
                 Tax, //0xAA
-                Invalid, //0xAB
+                Halt, //0xAB
                 LdyAbsolute, //0xAC
                 LdaAbsolute, //0xAD
                 LdxAbsolute, //0xAE
-                Invalid, //0xAF
+                LaxAbsolute, //0xAF
                 Bcs, //0xB0
                 LdaIndirectY, //0xB1
                 Halt, //0xB2
-                Invalid, //0xB3
+                LaxIndirectY, //0xB3
                 LdyZPageX, //0xB4
                 LdaZPageX, //0xB5
                 LdxZPageY, //0xB6
-                Invalid, //0xB7
+                LaxZPageY, //0xB7
                 Clv, //0xB8
                 LdaAbsoluteY, //0xB9
                 Tsx, //0xBA
-                Invalid, //0xBB
+                Halt, //0xBB
                 LdyAbsoluteX, //0xBC
                 LdaAbsoluteX, //0xBD
                 LdxAbsoluteY, //0xBE
-                Invalid, //0xBF
+                LaxAbsoluteY, //0xBF
                 CpyImmediate, //0xC0
                 CmpIndirectX, //0xC1
                 Nop, //0xC2
-                Invalid, //0xC3
+                DcmIndirectX, //0xC3
                 CpyZPage, //0xC4
                 CmpZPage, //0xC5
                 DecZPage, //0xC6
-                Invalid, //0xC7
+                DcmZPage, //0xC7
                 Iny, //0xC8
                 CmpImmediate, //0xC9
                 Dex, //0xCA
-                Invalid, //0xCB
+                Halt, //0xCB
                 CpyAbsolute, //0xCC
                 CmpAbsolute, //0xCD
                 DecAbsolute, //0xCE
-                Invalid, //0xCF
+                DcmAbsolute, //0xCF
                 Bne, //0xD0
                 CmpIndirectY, //0xD1
                 Halt, //0xD2
-                Invalid, //0xD3
+                DcmIndirectY, //0xD3
                 Nop, //0xD4
                 CmpZPageX, //0xD5
                 DecZPageX, //0xD6
-                Invalid, //0xD7
+                DcmZPageX, //0xD7
                 Cld, //0xD8
                 CmpAbsoluteY, //0xD9
                 Nop, //0xDA
-                Invalid, //0xDB
+                DcmAbsoluteY, //0xDB
                 Nop, //0xDC
                 CmpAbsoluteX, //0xDD
                 DecAbsoluteX, //0xDE
-                Invalid, //0xDF
+                DcmAbsoluteX, //0xDF
                 CpxImmediate, //0xE0
                 SbcIndirectX, //0xE1
                 Nop, //0xE2
-                Invalid, //0xE3
+                InsIndirectX, //0xE3
                 CpxZPage, //0xE4
                 SbcZPage, //0xE5
                 IncZPage, //0xE6
-                Invalid, //0xE7
+                InsZPage, //0xE7
                 Inx, //0xE8
                 SbcImmediate, //0xE9
                 Nop, //0xEA
-                Invalid, //0xEB
+                SbcIndirectY, //0xEB
                 CpxAbsolute, //0xEC
                 SbcAbsolute, //0xED
                 IncAbsolute, //0xEE
-                Invalid, //0xEF
+                InsAbsolute, //0xEF
                 Beq, //0xF0
                 SbcIndirectY, //0xF1
                 Halt, //0xF2
-                Invalid, //0xF3
+                InsIndirectY, //0xF3
                 Nop, //0xF4
                 SbcZPageX, //0xF5
                 IncZPageX, //0xF6
-                Invalid, //0xF7
+                InsZPageX, //0xF7
                 Sed, //0xF8
                 AdcAbsoluteY, //0xF9
                 Nop, //0xFA
-                Invalid, //0xFB
+                InsAbsoluteY, //0xFB
                 Nop, //0xFC
                 SbcAbsoluteX, //0xFD
                 IncAbsoluteX, //0xFE
-                Invalid, //0xFF
+                InsAbsoluteX, //0xFF
             };
 
         }
@@ -914,18 +914,23 @@ namespace NESCore
 
         byte Rol(byte value, int cycles, ushort pcIncrease)
         {
-            return Rotate(value, cycles, pcIncrease,"ROL", RotateDirection.Left);
+            LogInstruction(pcIncrease - 1, $"ROL ${value:X}");
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+            return Rotate(value, RotateDirection.Left);
         }
 
         byte Ror(byte value, int cycles, ushort pcIncrease)
         {
-            return Rotate(value, cycles, pcIncrease, "ROR", RotateDirection.Right);
+            LogInstruction(pcIncrease - 1, $"ROR ${value:X}");
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+            return Rotate(value, RotateDirection.Right);
         }
 
         private enum RotateDirection {Left, Right}
-        byte Rotate(byte value, int cycles, ushort pcIncrease, string mnemonic, RotateDirection direction )
+        byte Rotate(byte value, RotateDirection direction )
         {
-            LogInstruction(pcIncrease - 1, $"{mnemonic} ${value:X}");
             var cachedFlagC = Bit.Test(P, Flags.Carry);
 
             var cachedPosition = direction == RotateDirection.Left ? Flags.Negative : Flags.Carry;
@@ -950,9 +955,6 @@ namespace NESCore
             
             Bit.Val(ref P, Flags.Zero, shifted == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, Flags.Negative));
-            
-            PC += pcIncrease;
-            cyclesThisSec += cycles;
 
             return shifted;
         }
@@ -1235,6 +1237,199 @@ namespace NESCore
         void LseZPageX() => Lse(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
         void LseIndirectX() => Lse(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
         void LseIndirectY() => Lse(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
+        
+        #endregion
+        
+        #region ALR
+
+        /// <summary>
+        /// ALR This opcode ANDs the contents of the A register with an immediate value and 
+        /// then LSRs the result.
+        /// </summary>
+        void Alr()
+        {
+            var value = Ram.Byte(PC + 1);
+            LogInstruction(1, $"ALR #{value:X}");
+            value &= A;
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
+
+            LsrInternal(value);
+        }
+
+        #endregion
+        
+        #region RRA
+
+        void Rra(ushort addr, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(pcIncrease - 1, $"RRA ${addr:X}");
+
+            var value = Ram.Byte(addr);
+            value =  Rotate(value, RotateDirection.Right);
+            Ram.WriteByte(addr, value);
+            
+            AdcInternal(value);
+            
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+        
+        void RraAbsolute() {
+            Rra(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
+        }
+
+        void RraAbsoluteX() {
+            Rra(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
+        }
+
+        void RraAbsoluteY() {
+            Rra(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
+        }
+
+        void RraZPage() {
+            Rra(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
+        }
+
+        void RraZPageX() {
+            Rra(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
+        }
+
+        void RraIndirectX() {
+            Rra(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
+        }
+
+        void RraIndirectY() {
+            Rra(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
+        }
+        
+        #endregion
+        
+        #region ARR
+
+        void Arr()
+        {
+            var value = Ram.Byte(PC + 1);
+            LogInstruction(1, $"AAR #{value:X}");
+            
+            value &= A;
+            Bit.Val(ref P, Flags.Zero, A == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
+
+            Rotate(value, RotateDirection.Right);
+        }
+        
+        #endregion
+        
+        #region AXS
+
+        void Axs(ushort addr, int cycles, ushort pcIncrease)
+        {
+            LogInstruction(1, $"SAX ${addr:X}");
+
+            var value = (byte) (A & X);
+            Ram.WriteByte(addr, value);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+        
+        void AxsIndirectX() {
+            Axs(Ram.IndirectX(Ram.Byte(PC + 1)), 6, 2);
+        }
+
+        void AxsZPage() {
+            Axs(Ram.ZPage(Ram.Byte(PC + 1)), 3, 2);
+        }
+
+        void AxsZPageY() {
+            Axs(Ram.ZPageY(Ram.Byte(PC + 1)), 4, 2);
+        }
+
+        void AxsAbsolute() {
+            Axs(Ram.Absolute(Ram.Word(PC + 1)), 4, 3);
+        }
+
+        
+        #endregion
+        
+        #region LAX
+        
+        void Lax(byte value, int cycles, ushort pcIncrease) 
+        {
+            LogInstruction(pcIncrease - 1, $"LAX ${value:X}");
+            X = value;
+            A = value;
+
+            Bit.Val(ref P, Flags.Zero, value == 0);
+            Bit.Val(ref P, Flags.Negative, Bit.Test(value, Flags.Negative));
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void LaxAbsolute()  => Lax(Ram.AbsoluteParam(), 4, 3);
+        void LaxAbsoluteY() => Lax(Ram.AbsoluteYParam(), 4, 3);
+        void LaxZPage() => Lax(Ram.ZPageParam(), 3, 2);
+        void LaxZPageY() => Lax(Ram.ZPageYParam(), 4, 2);
+        void LaxIndirectX() => Lax(Ram.IndirectXParam(), 6, 2);
+        void LaxIndirectY() => Lax(Ram.IndirectYParam(), 5, 2);
+
+        #endregion
+        
+        #region DCM
+        
+        void Dcm(ushort addr, int cycles, ushort pcIncrease) {
+            LogInstruction(pcIncrease - 1, $"DCP ${addr:X}");
+
+            var value = Ram.Byte(addr);
+            value--;
+            Ram.WriteByte(addr, value);
+            
+            var temp_result = (byte) (A - value);
+
+            Bit.Val(ref P, Flags.Carry, A >= value);
+
+            //Need to do this since there are some positive numbers that should trigger this flag. i.e. 0x80
+            Bit.Val(ref P, Flags.Negative, Bit.Test(temp_result, Flags.Negative));
+            Bit.Val(ref P, Flags.Zero, A == value);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void DcmAbsolute() => Dcm(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
+        void DcmAbsoluteX() => Dcm(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
+        void DcmAbsoluteY() => Dcm(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
+        void DcmZPage() => Dcm(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
+        void DcmZPageX() => Dcm(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
+        void DcmIndirectX() => Dcm(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
+        void DcmIndirectY() => Dcm(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
+        
+        
+        #endregion
+        
+        #region INS
+        
+        void Ins(ushort addr, int cycles, ushort pcIncrease) {
+            LogInstruction(pcIncrease - 1, $"INS ${addr:X}");
+
+            var value = Ram.Byte(addr);
+            value++;
+            Ram.WriteByte(addr, value);
+            AdcInternal((byte)~value);
+
+            PC += pcIncrease;
+            cyclesThisSec += cycles;
+        }
+
+        void InsAbsolute() => Ins(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
+        void InsAbsoluteX() => Ins(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
+        void InsAbsoluteY() => Ins(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
+        void InsZPage() => Ins(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
+        void InsZPageX() => Ins(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
+        void InsIndirectX() => Ins(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
+        void InsIndirectY() => Ins(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
         
         #endregion
         
