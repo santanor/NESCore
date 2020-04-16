@@ -29,7 +29,7 @@ namespace Tests
 
         public static (bool, ROM) GetTestROM()
         {
-            return ROM.FromFile("./TestData/nestest.nes");
+            return ROM.FromFile("./TestData/nestest/nestest.nes");
         }
 
         [Test]

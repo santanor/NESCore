@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using NESCore;
 using NUnit.Framework;
 
@@ -12,9 +15,10 @@ namespace Tests
         private ROM rom;
         private NES nes;
 
+        [SetUp]
         public void Setup()
         {
-            var (success, romResult) = ROM.FromFile("./TestData/nestest.nes");;
+            var (success, romResult) = ROM.FromFile("./TestData/nestest/nestest.nes");;
             Assert.True(success);
             Assert.IsNotNull(romResult);
 
@@ -23,12 +27,24 @@ namespace Tests
             nes = new NES();
             nes.LoadROM(rom);
             nes.Cpu.PC = 0xC000;
+            
         }
 
 
-        public void Nestest()
+        [Test]
+        public async Task Nestest()
         {
-            nes.Cpu.Run();
+            var cancellationToken = new CancellationToken();
+            var _ = Task.Run(nes.Run, cancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(3), CancellationToken.None);
+            
+            nes.Stop();
+            
+            //Now read the value on byte 002h
+            // 000h - tests completed successfully
+
+            var testResult = nes.Ram.Byte(0x02);
+            Assert.Zero(testResult);
         }
 
     }

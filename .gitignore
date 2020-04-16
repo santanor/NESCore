@@ -334,3 +334,4 @@ ASALocalRun/
  
  rom/**
 NESCore/rom/
+NESTest/TestData

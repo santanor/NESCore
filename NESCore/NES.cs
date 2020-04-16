@@ -8,7 +8,7 @@ namespace NESCore
     {
         public readonly RAM Ram;
         public readonly CPU Cpu;
-        public bool Running = true;
+        private bool running = true;
 
         public NES()
         {
@@ -21,9 +21,24 @@ namespace NESCore
             Cpu.PowerUp();
 
             Log.Logger = new LoggerConfiguration()
-                        .WriteTo.Console(outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                        .WriteTo.File("Logs/logfile.log",outputTemplate:"[{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                        .WriteTo.Console()
+                        .WriteTo.File("Logs/logfile.log")
                .CreateLogger();
+        }
+
+        public void Run()
+        {
+            running = true;
+
+            while (running)
+            {
+                Cpu.Cycle();
+            }
+        }
+
+        public void Stop()
+        {
+            running = false;
         }
 
         /// <summary>

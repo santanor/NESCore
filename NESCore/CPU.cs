@@ -353,14 +353,6 @@ namespace NESCore
 
         }
 
-        public void Run()
-        {
-            while (running)
-            {
-                Cycle();
-            }
-        }
-
         public void Stop() => running = false;
 
         public void Cycle()
@@ -1447,7 +1439,7 @@ namespace NESCore
             sb.Append("\t\t\t");
             sb.Append($"A:{A:X} X:{X:X} Y:{Y:X} P:{P:X} SP:{SP:X} CYC:{cyclesThisSec}");
 
-            Log.Debug(sb.ToString());
+            Log.Logger.Debug(sb.ToString());
         }
     }
 
