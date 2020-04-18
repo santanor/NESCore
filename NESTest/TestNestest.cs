@@ -36,7 +36,7 @@ namespace Tests
         {
             var cancellationToken = new CancellationToken();
             var _ = Task.Run(nes.Run, cancellationToken);
-            await Task.Delay(TimeSpan.FromSeconds(3), CancellationToken.None);
+            await Task.Delay(TimeSpan.FromMilliseconds(500), CancellationToken.None);
             
             nes.Stop();
             

@@ -357,7 +357,8 @@ namespace NESCore
 
         public void Cycle()
         {
-            opcodes[Ram.Byte(PC)].Invoke();
+            currentOpcode = Ram.Byte(PC);
+            opcodes[currentOpcode].Invoke();
         }
 
         /// <summary>
@@ -365,7 +366,7 @@ namespace NESCore
         /// </summary>
         private void Invalid()
         {
-            Log.Error($"Unkown OPcode: {Ram.Byte(PC):X}");
+            Log.Error($"Unkown OPcode: {Ram.Byte(PC):X2}");
         }
         
         private void Break()
@@ -382,7 +383,7 @@ namespace NESCore
 
         void Ora(byte param, int cycles, int pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"ORA #${param:X}");
+            LogInstruction(pcIncrease - 1, $"ORA #${param:X2}");
             A = (byte)(A | param);
 
             Bit.Val(ref P, Flags.Zero, A == 0);
@@ -409,7 +410,7 @@ namespace NESCore
 
         private void Asl(ref byte param, int cycles, int pcIncrease)
         {
-            LogInstruction(pcIncrease -1, $"ASL #${param:X}");
+            LogInstruction(pcIncrease -1, $"ASL #${param:X2}");
 
             var shifted = param << 1;
         }
@@ -464,7 +465,7 @@ namespace NESCore
 
         private void Adc(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"ADC #${value:X}");
+            LogInstruction(pcIncrease - 1, $"ADC #${value:X2}");
 
             AdcInternal(value);
             
@@ -504,7 +505,7 @@ namespace NESCore
 
         void Sbc(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"SBC #{value:X}");
+            LogInstruction(pcIncrease - 1, $"SBC #{value:X2}");
 
             AdcInternal((byte) ~value);
             
@@ -527,7 +528,7 @@ namespace NESCore
 
         private void And(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"ADC #${value:X}");
+            LogInstruction(pcIncrease - 1, $"ADC #${value:X2}");
             A &= value;
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
@@ -551,7 +552,7 @@ namespace NESCore
 
         private void BIT(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"BIT #${value:X}");
+            LogInstruction(pcIncrease - 1, $"BIT #${value:X2}");
 
             byte tmp = (byte)(A & value);
             Bit.Val(ref P, Flags.Zero, tmp == 0);
@@ -571,7 +572,7 @@ namespace NESCore
         private void TryBranch(Flags flag, bool reqFlagValue, string mnemonic)
         {
             ushort value = Ram.Word(PC + 1); //byte is unsigned but we need a signed char
-            LogInstruction(1, $"{mnemonic} ${PC + 2 + value:X}");
+            LogInstruction(1, $"{mnemonic} ${PC + 2 + value:X2}");
             cyclesThisSec += 2;//This is always constant
             PC += 2;
             
@@ -598,7 +599,7 @@ namespace NESCore
 
         private void Cmp(byte register, byte value, int cycles, ushort pcIncrease, string regMnemonic)
         {
-            LogInstruction(pcIncrease - 1, $"{regMnemonic} #{value:X}");
+            LogInstruction(pcIncrease - 1, $"{regMnemonic} #{value:X2}");
 
             var tmp = (byte)(register - value);
 
@@ -633,7 +634,7 @@ namespace NESCore
 
         void DeltaMemory(ushort memAddr, int delta, int cycles, ushort pcIncrease, string mnemonic)
         {
-            LogInstruction(pcIncrease -1, $"{mnemonic} ${memAddr:X} = {(memAddr + delta):X}");
+            LogInstruction(pcIncrease -1, $"{mnemonic} ${memAddr:X2} = {(memAddr + delta):X2}");
             var value = Ram.Byte(memAddr);
             value += (byte)delta;
             Ram.WriteByte(memAddr, value);
@@ -660,7 +661,7 @@ namespace NESCore
 
         void Eor(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"EOR ${value:X}");
+            LogInstruction(pcIncrease - 1, $"EOR ${value:X2}");
 
             EorInternal(value);
 
@@ -710,7 +711,7 @@ namespace NESCore
 
         void Jmp(ushort addr, int cycles)
         {
-            LogInstruction(2, $"JMP ${addr:X}");
+            LogInstruction(2, $"JMP ${addr:X2}");
 
             PC = addr;
             cyclesThisSec += cycles;
@@ -723,7 +724,7 @@ namespace NESCore
         {
             var cachedPc = (ushort) (PC + 0x02);
             var addr = Ram.Absolute(Ram.Word(PC + 1));
-            LogInstruction(2, $"JSR #${addr:X}");
+            LogInstruction(2, $"JSR #${addr:X2}");
             
             Ram.PushWord(cachedPc); // Stores the address of the next opcode minus one
 
@@ -738,7 +739,7 @@ namespace NESCore
         // ReSharper disable once RedundantAssignment
         void LoadRegister(ref byte register, byte value, int cycles, ushort pcIncrease, string mnemonic)
         {
-            LogInstruction(pcIncrease - 1, $"{mnemonic} ${value:X}");
+            LogInstruction(pcIncrease - 1, $"{mnemonic} #${value:X2}");
             register = value;
 
             Bit.Val(ref P, Flags.Zero, register == 0);
@@ -772,7 +773,7 @@ namespace NESCore
 
         byte Lsr(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"LSR #{value:X}");
+            LogInstruction(pcIncrease - 1, $"LSR #{value:X2}");
 
             
             PC += pcIncrease;
@@ -906,7 +907,7 @@ namespace NESCore
 
         byte Rol(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"ROL ${value:X}");
+            LogInstruction(pcIncrease - 1, $"ROL ${value:X2}");
             PC += pcIncrease;
             cyclesThisSec += cycles;
             return Rotate(value, RotateDirection.Left);
@@ -914,7 +915,7 @@ namespace NESCore
 
         byte Ror(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"ROR ${value:X}");
+            LogInstruction(pcIncrease - 1, $"ROR ${value:X2}");
             PC += pcIncrease;
             cyclesThisSec += cycles;
             return Rotate(value, RotateDirection.Right);
@@ -1052,7 +1053,7 @@ namespace NESCore
 
         void StoreRegister(byte value, ushort addr, int cycles, ushort pcIncrease, string mnemonic)
         {
-            LogInstruction(pcIncrease - 1, $"{mnemonic} ${addr:X} = {value:X}");
+            LogInstruction(pcIncrease - 1, $"{mnemonic} ${addr:X2} = {value:X2}");
             Ram.WriteByte(addr, value);
 
             PC += pcIncrease;
@@ -1126,7 +1127,7 @@ namespace NESCore
         #region ASO/SLO This opcode ASLs the contents of a memory location and then ORs the result with the accumulator. 
         
         void Aso(ushort addr, int cycles, ushort pcIncrease) {
-            LogInstruction(pcIncrease - 1, $"ASO ${addr:X}");
+            LogInstruction(pcIncrease - 1, $"ASO ${addr:X2}");
 
             //ASL
             var value = Ram.Byte(addr);
@@ -1175,7 +1176,7 @@ namespace NESCore
 
         void Rla(ushort addr, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"RLA ${addr:X}");
+            LogInstruction(pcIncrease - 1, $"RLA ${addr:X2}");
 
             var value = Ram.Byte(addr);
 
@@ -1210,7 +1211,7 @@ namespace NESCore
 
         void Lse(ushort addr, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"LSE ${addr:X}");
+            LogInstruction(pcIncrease - 1, $"LSE ${addr:X2}");
 
             byte data = Ram.Byte(addr);
             data = LsrInternal(data);
@@ -1241,7 +1242,7 @@ namespace NESCore
         void Alr()
         {
             var value = Ram.Byte(PC + 1);
-            LogInstruction(1, $"ALR #{value:X}");
+            LogInstruction(1, $"ALR #{value:X2}");
             value &= A;
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
@@ -1255,7 +1256,7 @@ namespace NESCore
 
         void Rra(ushort addr, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"RRA ${addr:X}");
+            LogInstruction(pcIncrease - 1, $"RRA ${addr:X2}");
 
             var value = Ram.Byte(addr);
             value =  Rotate(value, RotateDirection.Right);
@@ -1302,7 +1303,7 @@ namespace NESCore
         void Arr()
         {
             var value = Ram.Byte(PC + 1);
-            LogInstruction(1, $"AAR #{value:X}");
+            LogInstruction(1, $"AAR #{value:X2}");
             
             value &= A;
             Bit.Val(ref P, Flags.Zero, A == 0);
@@ -1317,7 +1318,7 @@ namespace NESCore
 
         void Axs(ushort addr, int cycles, ushort pcIncrease)
         {
-            LogInstruction(1, $"SAX ${addr:X}");
+            LogInstruction(1, $"SAX ${addr:X2}");
 
             var value = (byte) (A & X);
             Ram.WriteByte(addr, value);
@@ -1349,7 +1350,7 @@ namespace NESCore
         
         void Lax(byte value, int cycles, ushort pcIncrease) 
         {
-            LogInstruction(pcIncrease - 1, $"LAX ${value:X}");
+            LogInstruction(pcIncrease - 1, $"LAX ${value:X2}");
             X = value;
             A = value;
 
@@ -1372,7 +1373,7 @@ namespace NESCore
         #region DCM
         
         void Dcm(ushort addr, int cycles, ushort pcIncrease) {
-            LogInstruction(pcIncrease - 1, $"DCP ${addr:X}");
+            LogInstruction(pcIncrease - 1, $"DCP ${addr:X2}");
 
             var value = Ram.Byte(addr);
             value--;
@@ -1404,7 +1405,7 @@ namespace NESCore
         #region INS
         
         void Ins(ushort addr, int cycles, ushort pcIncrease) {
-            LogInstruction(pcIncrease - 1, $"INS ${addr:X}");
+            LogInstruction(pcIncrease - 1, $"INS ${addr:X2}");
 
             var value = Ram.Byte(addr);
             value++;
@@ -1428,18 +1429,22 @@ namespace NESCore
         private void LogInstruction(int numParams, string mnemonic)
         {
             var sb = new StringBuilder();
-            sb.Append($"{PC:X} {currentOpcode:X} ", PC, currentOpcode);
+            sb.Append($"{PC:X2} {currentOpcode:X2}  ");
 
             for (var i = 1; i <= numParams; i++) {
-                sb.Append($"{Ram.Byte(PC + i):X} ");
+                sb.Append($"{Ram.Byte(PC + i):X2} ");
             }
 
-            sb.Append('\t');
+            //The mnemonic should start at position 16. 
+            var padding = 15 - sb.Length;
+            sb.Append(string.Empty.PadRight(padding));
             sb.Append(mnemonic);
-            sb.Append("\t\t\t");
-            sb.Append($"A:{A:X} X:{X:X} Y:{Y:X} P:{P:X} SP:{SP:X} CYC:{cyclesThisSec}");
 
-            Log.Logger.Debug(sb.ToString());
+            padding = 48 - sb.Length;
+            sb.Append(string.Empty.PadRight(padding));
+            sb.Append($"A:{A:X2} X:{X:X2} Y:{Y:X2} P:{P:X2} SP:{SP:X2} CYC:{cyclesThisSec}");
+
+            Log.Information(sb.ToString());
         }
     }
 

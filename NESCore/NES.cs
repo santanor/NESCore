@@ -21,8 +21,8 @@ namespace NESCore
             Cpu.PowerUp();
 
             Log.Logger = new LoggerConfiguration()
-                        .WriteTo.Console()
-                        .WriteTo.File("Logs/logfile.log")
+                        .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
+                        .WriteTo.File("Logs/logfile.log", outputTemplate: "{Message:lj}{NewLine}")
                .CreateLogger();
         }
 
