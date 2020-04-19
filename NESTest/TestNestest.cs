@@ -36,14 +36,14 @@ namespace Tests
         {
             var cancellationToken = new CancellationToken();
             var _ = Task.Run(nes.Run, cancellationToken);
-            await Task.Delay(TimeSpan.FromMilliseconds(500), CancellationToken.None);
+            await Task.Delay(TimeSpan.FromMilliseconds(300), CancellationToken.None);
             
             nes.Stop();
             
             //Now read the value on byte 002h
             // 000h - tests completed successfully
 
-            var testResult = nes.Ram.Byte(0x02);
+            var testResult = nes.Ram.Byte(0x01);
             Assert.Zero(testResult);
         }
 

@@ -8,6 +8,7 @@ namespace NESCore
     {
         public readonly RAM Ram;
         public readonly CPU Cpu;
+        public readonly PPU Ppu;
         private bool running = true;
 
         public NES()
@@ -18,6 +19,11 @@ namespace NESCore
                 Ram = Ram
             };
             Ram.Cpu = Cpu;
+            
+            Ppu = new PPU();
+
+            Cpu.Ppu = Ppu;
+            
             Cpu.PowerUp();
 
             Log.Logger = new LoggerConfiguration()
@@ -32,7 +38,9 @@ namespace NESCore
 
             while (running)
             {
-                Cpu.Cycle();
+                var cpuCycles = Cpu.Instruction();
+                Ppu.RunCycles(cpuCycles*3);
+                
             }
         }
 
