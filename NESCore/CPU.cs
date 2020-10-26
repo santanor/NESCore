@@ -761,14 +761,28 @@ namespace NESCore
         #region Load Registers
 
         // ReSharper disable once RedundantAssignment
-        void LoadRegister(ref byte register, byte value, int cycles, ushort pcIncrease, string mnemonic)
+        /// <summary>
+        /// Loads a register with the specified value
+        /// </summary>
+        /// <param name="register"></param>
+        /// <param name="value"></param>
+        /// <param name="cycles"></param>
+        /// <param name="pcIncrease"></param>
+        /// <param name="mnemonic">Log mnemonic for the instruction. This parameter can be null, if a null value is passed
+        /// then the instruction won't be logged. It assumes that the caller function wants to edit the
+        /// default log line for something more bespoke</param>
+        void LoadRegister(ref byte register, byte value, int cycles, ushort pcIncrease, [AllowNull]string mnemonic)
         {
-            //Just differenciate if we should print the format $ADDR = #VAL or if only #VAL
-            var instructionString = pcIncrease - 1 > 1
-                ? $"{mnemonic} ${Ram.Word(PC + 1):X4} = {value:X2}"
-                : $"{mnemonic} #${value:X2}";
+            if (!string.IsNullOrEmpty(mnemonic))
+            {
+                //Just differenciate if we should print the format $ADDR = #VAL or if only #VAL
+                var instructionString = pcIncrease - 1 > 1
+                    ? $"{mnemonic} ${Ram.Word(PC + 1):X4} = {value:X2}"
+                    : $"{mnemonic} #${value:X2}";
             
-            LogInstruction(pcIncrease - 1, instructionString);
+                LogInstruction(pcIncrease - 1, instructionString);
+            }
+            
             register = value;
 
             Bit.Val(ref P, Flags.Zero, register == 0);
@@ -778,12 +792,29 @@ namespace NESCore
             cyclesThisSec += cycles;
         }
         void LdaImmediate() => LoadRegister(ref A, Ram.Byte(PC + 1), 2, 2, "LDA");
-        void LdaZPage() => LoadRegister(ref A, Ram.ZPageParam(), 3, 2, "LDA");
+
+        void LdaZPage()
+        {
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"LDA $00 = {param:X2}");
+            LoadRegister(ref A, param, 3, 2, null);
+        }
+
         void LdaZPageX() => LoadRegister(ref A, Ram.ZPageXParam(), 4, 2, "LDA");
         void LdaAbsolute() => LoadRegister(ref A, Ram.AbsoluteParam(), 4, 3, "LDA");
         void LdaAbsoluteX() => LoadRegister(ref A, Ram.AbsoluteXParam(true), 4, 3, "LDA");
         void LdaAbsoluteY() => LoadRegister(ref A, Ram.AbsoluteYParam(true), 4, 3, "LDA");
-        void LdaIndirectX() => LoadRegister(ref A, Ram.IndirectXParam(), 6, 2, "LDA");
+
+        void LdaIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var zPageAddr = (byte)Ram.ZPageX(opcodeParam);
+            var paramAddr = Ram.IndirectX(opcodeParam);
+            var param = Ram.IndirectXParam();
+
+            LogInstruction(1, $"LDA (${opcodeParam:X2},X) @ {zPageAddr:X2} = {paramAddr:X4} = {param:X2}");
+            LoadRegister(ref A, param, 6, 2, null);  
+        } 
         void LdaIndirectY() => LoadRegister(ref A, Ram.IndirectYParam(true), 5, 2, "LDA");
         void LdxImmediate() => LoadRegister(ref X, Ram.Byte(PC + 1), 2, 2, "LDX");
         void LdxZPage() => LoadRegister(ref X, Ram.ZPageParam(), 3, 2, "LDX");

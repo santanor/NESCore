@@ -192,19 +192,18 @@ namespace NESCore
             return (ushort)((addr + Cpu.Y) & 0x00FF);
         }
 
+        /// <summary>
+        /// Basically the way it works, it gets the value of the parameter, adds the register X to it. That is an
+        /// address from which we get one byte, shift it left by 8 bits, read the next position and add t hat to the
+        /// shifted value. THAT is the indirectX address of it
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <returns></returns>
         public ushort IndirectX(byte addr)
         {
             addr = (byte)ZPageX(addr);
-            if (addr == 0xFF)
-            {
-                var result = new byte[2];
-                result[0] = Byte(addr);
-                result[1] = 0x00;
-
-                return result.ToWord();
-            }
-
-            return Word(addr);
+            //Read a byte from addr and a byte from addr+1. But in both cases wraparound so hence the 0xFF mask
+            return (ushort)(Byte(addr & 0xFF) | Byte((addr + 1) & 0xFF) << 8);
         }
 
         public ushort IndirectY(byte addr)

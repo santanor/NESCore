@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using NESCore.Mappers;
 using Serilog;
 
@@ -19,17 +20,24 @@ namespace NESCore
                 Ram = Ram
             };
             Ram.Cpu = Cpu;
-            
             Ppu = new PPU();
-
             Cpu.Ppu = Ppu;
-            
             Cpu.PowerUp();
+            ConfigureLogger();
+        }
 
+        private void ConfigureLogger()
+        {
+            const string logFileName = "Logs/logfile.log";
+            if (File.Exists(logFileName))
+            {
+                File.Delete(logFileName);
+            }
             Log.Logger = new LoggerConfiguration()
-                        .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
-                        .WriteTo.File("Logs/logfile.log", outputTemplate: "{Message:lj}{NewLine}")
-               .CreateLogger();
+                .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
+                .WriteTo.File(logFileName, outputTemplate: "{Message:lj}{NewLine}")
+                .CreateLogger();
+            
         }
 
         public void Run()
