@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Xml.Xsl;
@@ -1130,10 +1131,23 @@ namespace NESCore
 
         #region Store register
 
-        void StoreRegister(byte value, ushort addr, int cycles, ushort pcIncrease, string mnemonic)
+        /// <summary>
+        /// Stores the given register value in the specified address
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="addr"></param>
+        /// <param name="cycles"></param>
+        /// <param name="pcIncrease"></param>
+        /// <param name="mnemonic">Opcode mnemonic to log the instruction. If null is provided then this method
+        /// won't log the instruction. It assumes that the caller wants to create a bespoke log for the specific call</param>
+        void StoreRegister(byte value, ushort addr, int cycles, ushort pcIncrease, [AllowNull]string mnemonic)
         {
-            var addrString = addr > 0xFF ? addr.ToString("X4") : addr.ToString("X2");
-            LogInstruction(pcIncrease - 1, $"{mnemonic} ${addrString} = {Ram.Byte(addr):X2}");
+            if (!string.IsNullOrEmpty(mnemonic))
+            {
+                var addrString = addr > 0xFF ? addr.ToString("X4") : addr.ToString("X2");
+                LogInstruction(pcIncrease - 1, $"{mnemonic} ${addrString} = {Ram.Byte(addr):X2}"); 
+            }
+            
             Ram.WriteByte(addr, value);
             Ram.WriteByte(addr, value);
 
@@ -1146,7 +1160,18 @@ namespace NESCore
         void StaAbsolute() => StoreRegister(A, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STA");
         void StaAbsoluteX() => StoreRegister(A, Ram.AbsoluteX(Ram.Word(PC + 1)), 5, 3, "STA");
         void StaAbsoluteY() => StoreRegister(A, Ram.AbsoluteY(Ram.Word(PC + 1)), 5, 3, "STA");
-        void StaIndirectX() => StoreRegister(A, Ram.IndirectX(Ram.Byte(PC + 1)), 6, 2, "STA");
+
+        void StaIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var zpageAddr = Ram.ZPageX(opcodeParam);
+            var paramAddr = Ram.IndirectX(opcodeParam);
+            var param = Ram.IndirectXParam();
+            
+            LogInstruction(1, $"STA (${opcodeParam:X2},X) @ {zpageAddr:X2} = {paramAddr:X4} = {param:X2} ");
+                
+            StoreRegister(A, paramAddr, 6, 2, null);
+        }
         void StaIndirectY() => StoreRegister(A, Ram.IndirectY(Ram.Byte(PC + 1)), 6, 2, "STA");
         void StxZPage() => StoreRegister(X, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STX");
         void StxZPageY() => StoreRegister(X, Ram.ZPageY(Ram.Byte(PC + 1)), 4, 2, "STX");
