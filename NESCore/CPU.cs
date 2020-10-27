@@ -390,9 +390,21 @@ namespace NESCore
         #region ORA. Logical OR on the acumulator, set the zero and negative flags
 
 
-        void Ora(byte param, int cycles, int pcIncrease)
+        /// <summary>
+        /// Executes the ORA instruction (OR with Acumulator)
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="cycles"></param>
+        /// <param name="pcIncrease"></param>
+        /// <param name="logInstruction">if set to false, this method won't log the instruction, it assumes
+        /// that the caller would do it</param>
+        void Ora(byte param, int cycles, int pcIncrease, bool logInstruction = true)
         {
-            LogInstruction(pcIncrease - 1, $"ORA #${param:X2}");
+            if (logInstruction)
+            {
+                LogInstruction(pcIncrease - 1, $"ORA #${param:X2}");
+            }
+            
             A = (byte)(A | param);
 
             Bit.Val(ref P, Flags.Zero, A == 0);
@@ -403,12 +415,37 @@ namespace NESCore
         }
 
         void OraImmediate() => Ora(Ram.Byte(PC + 1), 2, 2);
-        void OraZPage() => Ora(Ram.ZPageParam(), 2, 2);
-        void OraZPageX() => Ora(Ram.ZPageXParam(), 4, 2);
+
+        void OraZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"ORA ${opcodeParam:X2} = {param:X2}");
+            Ora(param, 3, 2, false);
+        }
+        void OraZPageX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var zPageAddr = Ram.ZPageX(opcodeParam);
+            var zpageParam = Ram.ZPageParam();
+            LogInstruction(1, $"ORA (${opcodeParam:X2},X) @ {opcodeParam:X2} = {zPageAddr:X4} =  {zpageParam:X2}");
+            Ora(zpageParam, 4, 2, logInstruction: false);
+        }
+
         void OraAbsolute() => Ora(Ram.AbsoluteParam(), 4, 3);
         void OraAbsoluteX() => Ora(Ram.AbsoluteXParam(true), 4, 3);
         void OraAbsoluteY() => Ora(Ram.AbsoluteYParam(true), 4, 3);
-        void OraIndirectX() => Ora(Ram.IndirectXParam(), 6,2);
+        void OraIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var indirectAddr = Ram.IndirectX(opcodeParam);
+            var indirectParam = Ram.IndirectXParam();
+            
+            LogInstruction(numParams: 1, $"ORA (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
+            
+            Ora(indirectParam, 6, 2, false);
+        }
+
         void OraIndirectY() => Ora(Ram.IndirectYParam(true), 5, 2);
 
 
@@ -442,9 +479,13 @@ namespace NESCore
         } 
         private void AslZPage()
         {
-            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var opcodeParam = Ram.Byte(PC + 1);
+            var addr = Ram.ZPage(opcodeParam);
             var param = Ram.ZPageParam();
-            Asl(ref param, 5, 2);
+            
+            LogInstruction(1, $"ASL ${opcodeParam:X2} = {param:X2}");
+            
+            Asl(ref param, 5, 2, false);
 
             Ram.WriteByte(addr, param);
         }
@@ -487,9 +528,12 @@ namespace NESCore
 
         #region ADC Add with Carry
 
-        private void Adc(byte value, int cycles, ushort pcIncrease)
+        private void Adc(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
         {
-            LogInstruction(pcIncrease - 1, $"ADC #${value:X2}");
+            if (logInstruction)
+            {
+                LogInstruction(pcIncrease - 1, $"ADC #${value:X2}");
+            }
 
             AdcInternal(value);
             
@@ -515,21 +559,42 @@ namespace NESCore
         }
 
         private void AdcImmediate() => Adc(Ram.Byte(PC + 1), 2, 2);
-        private void AdcZPage() => Adc(Ram.ZPageParam(), 3, 2);
+
+        private void AdcZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"ADC ${opcodeParam:X2} = {param:X2}");
+            
+            Adc(Ram.ZPageParam(), 3, 2, false);
+        } 
         private void AdcZPageX() => Adc(Ram.ZPageXParam(), 4, 2);
         private void AdcAbsolute() => Adc(Ram.AbsoluteParam(), 4, 3);
         private void AdcAbsoluteX() => Adc(Ram.AbsoluteXParam(true), 4, 3);
         private void AdcAbsoluteY() => Adc(Ram.AbsoluteYParam(true), 4, 3);
-        private void AdcIndirectX() => Adc(Ram.IndirectXParam(), 6, 2);
+
+        private void AdcIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var indirectAddr = Ram.IndirectX(opcodeParam);
+            var indirectParam = Ram.IndirectXParam();
+            
+            LogInstruction(1, $"ADC (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
+            
+            Adc(indirectParam, 6, 2, false);
+        } 
         private void AdcIndirectY() => Adc(Ram.IndirectYParam(true), 5, 2);
         
         #endregion
 
         #region SBC Substract With Carry
 
-        void Sbc(byte value, int cycles, ushort pcIncrease)
+        void Sbc(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
         {
-            LogInstruction(pcIncrease - 1, $"SBC #${value:X2}");
+            if (logInstruction)
+            {
+                LogInstruction(pcIncrease - 1, $"SBC #${value:X2}");
+            }
 
             AdcInternal((byte) ~value);
             
@@ -538,21 +603,50 @@ namespace NESCore
         }
 
         void SbcImmediate() => Sbc(Ram.Byte(PC + 1), 2, 2);
-        void SbcZPage() => Sbc(Ram.ZPageParam(), 3, 2);
+
+        void SbcZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"SBC ${opcodeParam:X2} = {param:X2}");
+            Sbc(Ram.ZPageParam(), 3, 2, false);
+        } 
         void SbcZPageX() => Sbc(Ram.ZPageXParam(), 4, 2);
         void SbcAbsolute() => Sbc(Ram.AbsoluteParam(), 4, 3);
         void SbcAbsoluteX() => Sbc(Ram.AbsoluteXParam(true), 4, 3);
         void SbcAbsoluteY() => Sbc(Ram.AbsoluteYParam(true), 4, 3);
-        void SbcIndirectX() => Sbc(Ram.IndirectXParam(), 6, 2);
+
+        void SbcIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var indirectAddr = Ram.IndirectX(opcodeParam);
+            var indirectParam = Ram.IndirectXParam();
+            
+            LogInstruction(1, $"SBC (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
+            
+            Sbc(indirectParam, 6, 2, false);
+        } 
         void SbcIndirectY() => Sbc(Ram.IndirectYParam(true), 5, 2);
         
         #endregion
         
         #region AND Bitwise AND with accumulator
 
-        private void And(byte value, int cycles, ushort pcIncrease)
+        /// <summary>
+        /// ANDs the given value with the accumulator 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="cycles"></param>
+        /// <param name="pcIncrease"></param>
+        /// <param name="logInstruction">if set to false then this method won't log the instruction. It assumes that the
+        /// caller will take care of that </param>
+        private void And(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
         {
-            LogInstruction(pcIncrease - 1, $"AND #${value:X2}");
+            if (logInstruction)
+            {
+                LogInstruction(pcIncrease - 1, $"AND #${value:X2}");
+            }
+            
             A &= value;
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
@@ -562,12 +656,27 @@ namespace NESCore
         }
 
         private void AndImmediate() => And(Ram.Byte(PC + 1), 2, 2);
-        private void AndZPage() => And(Ram.ZPageParam(), 3, 2);
+
+        private void AndZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"AND ${opcodeParam:X2} = {param:X2}");
+            And(param, 3, 2, false);
+        }
         private void AndZPageX() => And(Ram.ZPageXParam(), 4, 2);
         private void AndAbsolute() => And(Ram.AbsoluteParam(), 4, 3);
         private void AndAbsoluteX() => And(Ram.AbsoluteXParam(true), 4, 3);
         private void AndAbsoluteY() => And(Ram.AbsoluteYParam(true), 4, 3);
-        private void AndIndirectX() => And(Ram.IndirectXParam(), 6, 2);
+
+        private void AndIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var indirectAddr = Ram.IndirectX(opcodeParam);
+            var indirectParam = Ram.IndirectXParam();
+            LogInstruction(1, $"AND (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
+            And(indirectParam, 6, 2, false);
+        } 
         private void AndIndirectY() => And(Ram.IndirectYParam(true), 5, 2);
         
         #endregion
@@ -624,7 +733,10 @@ namespace NESCore
 
         private void Cmp(byte register, byte value, int cycles, ushort pcIncrease, string regMnemonic)
         {
-            LogInstruction(pcIncrease - 1, $"{regMnemonic} #${value:X2}");
+            if (!string.IsNullOrEmpty(regMnemonic))
+            {
+                LogInstruction(pcIncrease - 1, $"{regMnemonic} #${value:X2}");
+            }
 
             var tmp = (byte)(register - value);
 
@@ -639,18 +751,52 @@ namespace NESCore
         }
 
         void CmpImmediate() => Cmp(A, Ram.Byte(PC + 1), 2, 2, "CMP");
-        void CmpZPage() => Cmp(A, Ram.ZPageParam(), 3, 2, "CMP");
+
+        void CmpZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"CMP ${opcodeParam:X2} = {param:X2}");
+            
+            Cmp(A, Ram.ZPageParam(), 3, 2, null);
+        }
         void CmpZPageX() => Cmp(A, Ram.ZPageXParam(), 4, 2, "CMP");
         void CmpAbsolute() => Cmp(A, Ram.AbsoluteParam(), 4, 3, "CMP");
         void CmpAbsoluteX() => Cmp(A, Ram.AbsoluteXParam(true), 4, 3, "CMP");
         void CmpAbsoluteY() => Cmp(A, Ram.AbsoluteYParam(true), 4, 3, "CMP");
-        void CmpIndirectX() => Cmp(A, Ram.IndirectXParam(), 6, 2, "CMP");
+
+        void CmpIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var indirectAddr = Ram.IndirectX(opcodeParam);
+            var indirectParam = Ram.IndirectXParam();
+            
+            LogInstruction(1, $"CMP (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
+            
+            Cmp(A, indirectParam, 6, 2, null);
+        }
+
         void CmpIndirectY() => Cmp(A, Ram.IndirectYParam(true), 5, 2, "CMP");
         void CpxImmediate() => Cmp(X, Ram.Byte(PC + 1), 2, 2, "CPX");
-        void CpxZPage() => Cmp(X, Ram.ZPageParam(), 3, 2, "CPX");
+
+        void CpxZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"CPX ${opcodeParam:X2} = {param:X2}");
+            Cmp(X, Ram.ZPageParam(), 3, 2, string.Empty);
+        }
+
         void CpxAbsolute() => Cmp(X, Ram.AbsoluteParam(), 4, 3, "CPX");
         void CpyImmediate() => Cmp(Y, Ram.Byte(PC + 1), 2, 2, "CPY");
-        void CpyZPage() => Cmp(Y, Ram.ZPageParam(), 3, 2, "CPY");
+        void CpyZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"CPY ${opcodeParam:X2} = {param:X2}");
+            Cmp(Y, Ram.ZPageParam(), 3, 2, null);
+        }
+
         void CpyAbsolute() => Cmp(Y, Ram.AbsoluteParam(), 4, 3, "CPY");
         
         #endregion
@@ -684,9 +830,12 @@ namespace NESCore
         
         #region EOR bitwise exclusive OR
 
-        void Eor(byte value, int cycles, ushort pcIncrease)
+        void Eor(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
         {
-            LogInstruction(pcIncrease - 1, $"EOR #${value:X2}");
+            if (logInstruction)
+            {
+                LogInstruction(pcIncrease - 1, $"EOR #${value:X2}");
+            }
 
             EorInternal(value);
 
@@ -703,12 +852,30 @@ namespace NESCore
         }
 
         void EorImmediate() => Eor(Ram.Byte(PC + 1), 2, 2);
-        void EorZPage() => Eor(Ram.ZPageParam(), 3, 2);
+
+        void EorZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"EOR ${opcodeParam:X2} = {param:X2}");
+            
+            Eor(Ram.ZPageParam(), 3, 2, false);
+        } 
         void EorZPageX() => Eor(Ram.ZPageXParam(), 4, 2);
         void EorAbsolute() => Eor(Ram.AbsoluteParam(), 4, 3);
         void EorAbsoluteX() => Eor(Ram.AbsoluteXParam(true), 4, 3);
         void EorAbsoluteY() => Eor(Ram.AbsoluteYParam(true), 4, 3);
-        void EorIndirectX() => Eor(Ram.IndirectXParam(), 6, 2);
+
+        void EorIndirectX()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var indirectAddr = Ram.IndirectX(opcodeParam);
+            var indirectParam = Ram.IndirectXParam();
+            
+            LogInstruction(1, $"EOR (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
+            
+            Eor(indirectParam, 6, 2, false); 
+        }
         void EorIndirectY() => Eor(Ram.IndirectYParam(true), 5, 2);
         
         #endregion
@@ -796,8 +963,9 @@ namespace NESCore
 
         void LdaZPage()
         {
+            var opcodeParam = Ram.Byte(PC + 1);
             var param = Ram.ZPageParam();
-            LogInstruction(1, $"LDA $00 = {param:X2}");
+            LogInstruction(1, $"LDA ${opcodeParam:X2} = {param:X2}");
             LoadRegister(ref A, param, 3, 2, null);
         }
 
@@ -818,12 +986,27 @@ namespace NESCore
         } 
         void LdaIndirectY() => LoadRegister(ref A, Ram.IndirectYParam(true), 5, 2, "LDA");
         void LdxImmediate() => LoadRegister(ref X, Ram.Byte(PC + 1), 2, 2, "LDX");
-        void LdxZPage() => LoadRegister(ref X, Ram.ZPageParam(), 3, 2, "LDX");
+
+        void LdxZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"LDX ${opcodeParam:X2} = {param:X2}");
+            
+            LoadRegister(ref X, Ram.ZPageParam(), 3, 2, string.Empty);
+        }
         void LdxZPageY() => LoadRegister(ref X, Ram.ZPageYParam(), 4, 2, "LDX");
         void LdxAbsolute() => LoadRegister(ref X, Ram.AbsoluteParam(), 4, 3, "LDX");
         void LdxAbsoluteY() => LoadRegister(ref X, Ram.AbsoluteYParam(true), 4, 3, "LDX");
         void LdyImmediate() => LoadRegister(ref Y, Ram.Byte(PC + 1), 2, 2, "LDY");
-        void LdyZPage() => LoadRegister(ref Y, Ram.ZPageParam(), 3, 2, "LDY");
+        void LdyZPage()
+        {
+            var opcodeParam = Ram.Byte(PC + 1);
+            var param = Ram.ZPageParam();
+            LogInstruction(1, $"LDY ${opcodeParam:X2} = {param:X2}");
+            LoadRegister(ref Y, Ram.ZPageParam(), 3, 2, string.Empty);
+        }
+
         void LdyZPageX() => LoadRegister(ref Y, Ram.ZPageXParam(), 4, 2, "LDY");
         void LdyAbsolute() => LoadRegister(ref Y, Ram.AbsoluteParam(), 4, 3, "LDY");
         void LdyAbsoluteX() => LoadRegister(ref Y, Ram.AbsoluteXParam(true), 4, 3, "LDY");
@@ -866,9 +1049,11 @@ namespace NESCore
 
         void LsrZPage()
         {
-            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var opcodeParam = Ram.Byte(PC + 1);
+            var addr = Ram.ZPage(opcodeParam);
             var data = Ram.ZPageParam();
-            data = Lsr(data, 5, 2);
+            LogInstruction(1, $"LSR ${opcodeParam:X2} = {data:X2}");
+            data = Lsr(data, 5, 2, false);
             Ram.WriteByte(addr, data);
         }
 
