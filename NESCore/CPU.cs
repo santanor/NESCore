@@ -685,8 +685,6 @@ namespace NESCore
 
         private void BIT(byte value, int cycles, ushort pcIncrease)
         {
-            LogInstruction(pcIncrease - 1, $"BIT ${Ram.Byte(PC + 1):X2} = {value:X2}");
-
             byte tmp = (byte)(A & value);
             Bit.Val(ref P, Flags.Zero, tmp == 0);
             Bit.Val(ref P, Flags.Overflow, Bit.Test(value, Flags.Overflow));
@@ -696,8 +694,23 @@ namespace NESCore
             PC += pcIncrease;
         }
 
-        private void BitZPage() => BIT(Ram.ZPageParam(), 3, 2);
-        private void BitAbsolute() => BIT(Ram.AbsoluteParam(), 4, 3);
+        private void BitZPage()
+        {
+            var paramAddr = Ram.ZPage(Ram.Byte(PC + 1));
+            var value = Ram.ZPageParam();
+            LogInstruction(1, $"BIT ${paramAddr:X2} = {value:X2}");
+            BIT(value, 3, 2);
+            
+        }
+
+        private void BitAbsolute()
+        {
+            var paramAddr = Ram.Absolute(Ram.Word(PC + 1));
+            var value = Ram.Byte(paramAddr);
+            LogInstruction(2, $"BIT ${paramAddr:X4} = {value:X2}");
+            BIT(value, 4, 3);
+        }
+
         #endregion
         
         #region Branch Instructions
@@ -805,9 +818,10 @@ namespace NESCore
 
         void DeltaMemory(ushort memAddr, int delta, int cycles, ushort pcIncrease, string mnemonic)
         {
-            LogInstruction(pcIncrease -1, $"{mnemonic} ${memAddr:X2} = {(memAddr + delta):X2}");
             var value = Ram.Byte(memAddr);
+            LogInstruction(pcIncrease -1, $"{mnemonic} ${memAddr:X2} = {value:X2}");
             value += (byte)delta;
+            
             Ram.WriteByte(memAddr, value);
 
             Bit.Val(ref P, Flags.Zero, value == 0);
@@ -1223,9 +1237,11 @@ namespace NESCore
 
         void RolZPage()
         {
-            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var opcodeParam = Ram.Byte(PC + 1);
+            var addr = Ram.ZPage(opcodeParam);
             var data = Ram.ZPageParam();
-            data = Rol(data, 5, 2);
+            LogInstruction(1, $"ROL ${opcodeParam:X2} = {data:X2}");
+            data = Rol(data, 5, 2, false);
             Ram.WriteByte(addr, data);
         }
 
@@ -1261,9 +1277,11 @@ namespace NESCore
 
         void RorZPage()
         {
-            var addr = Ram.ZPage(Ram.Byte(PC + 1));
+            var opcodeParam = Ram.Byte(PC + 1);
+            var addr = Ram.ZPage(opcodeParam);
             var data = Ram.ZPageParam();
-            data = Ror(data, 5, 2);
+            LogInstruction(1, $"ROR ${opcodeParam:X2} = {data:X2}");
+            data = Ror(data, 5, 2, false);
             Ram.WriteByte(addr, data);
         }
 
