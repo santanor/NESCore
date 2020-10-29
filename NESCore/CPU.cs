@@ -103,15 +103,15 @@ namespace NESCore
                 AsoIndirectX, //0x03
                 Nop, //0x04
                 OraZPage, //0x05
-                AslZPage, //0x06
+                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x06
                 AsoZPage, //0x07
                 Php, //0x08
                 OraImmediate, //0x09
-                AslAccumulator, //0x0A
+                () => A = Asl(AddressingModes.Accumulator), //0x0A
                 Anc, //0x0B
                 Nop, //0x0C
                 OraAbsolute, //0x0D
-                AslAbsolute, //0x0E
+                () => Ram.WriteByte(Ram.Word(PC + 1), Asl(AddressingModes.Absolute)), //0x0E
                 AsoAbsolute, //0x0F
                 Bpl, //0x10
                 OraIndirectY, //0x11
@@ -119,7 +119,7 @@ namespace NESCore
                 AsoIndirectY, //0x13
                 Nop, //0x14
                 OraZPageX, //0x15
-                AslZPageX, //0x16
+                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x16
                 AsoZPageX, //0x17
                 Clc, //0x18
                 OraAbsoluteY, //0x19
@@ -127,7 +127,7 @@ namespace NESCore
                 AsoAbsoluteY, //0x1B
                 Nop, //0x1C
                 OraAbsoluteX, //0x1D
-                AslAbsoluteX, //0x1E
+                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Asl(AddressingModes.AbsoluteX)), //0x1E
                 AsoAbsoluteX, //0x1F
                 Jsr, //0x20
                 AndIndirectX, //0x21
@@ -135,15 +135,15 @@ namespace NESCore
                 RlaIndirectX, //0x23
                 BitZPage, //0x24
                 AndZPage, //0x25
-                RolZPage, //0x26
+                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Rol(AddressingModes.ZeroPage)), //0x26
                 RlaZPage, //0x27
                 Plp, //0x28
                 AndImmediate, //0x29
-                RolAccumulator, //0x2A,
+                () => A = Rol(AddressingModes.Accumulator), //0x2A,
                 Anc, //0x2B
                 BitAbsolute, //0x2C
                 AndAbsolute, //0x2D
-                RolAbsolute, //0x2E
+                () => Ram.WriteByte(Ram.Word(PC + 1), Rol(AddressingModes.Absolute)), //0x2E
                 RlaAbsolute, //0x2F
                 Bmi, //0x30
                 AndIndirectY, //0x31
@@ -151,7 +151,7 @@ namespace NESCore
                 RlaIndirectY, //0x33
                 Nop, //0x34
                 AndZPageX, //0x35
-                RolZPageX, //0x36
+                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Rol(AddressingModes.ZeroPageX)), //0x36
                 RlaZPageX, //0x37
                 Sec, //0x38
                 AndAbsoluteY, //0x39
@@ -159,7 +159,7 @@ namespace NESCore
                 RlaAbsoluteY, //0x3B
                 Nop, //0x3C
                 AndAbsoluteX, //0x3D
-                RolAbsoluteX, //0x3E
+                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Rol(AddressingModes.AbsoluteX)), //0x3E
                 RlaAbsoluteX, //0x3F
                 Rti, //0x40
                 () => Eor(AddressingModes.IndirectX), //0x41
@@ -167,15 +167,15 @@ namespace NESCore
                 LseIndirectX, //0x43
                 Nop, //0x44
                 () => Eor(AddressingModes.ZeroPage), //0x45
-                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Lsr(AddressingModes.ZeroPage, 2, 5)), //0x46
+                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Lsr(AddressingModes.ZeroPage)), //0x46
                 LseZPage, //0x47
                 Pha, //0x48
                 () => Eor(AddressingModes.Immediate), //0x49
-                () => A = Lsr(AddressingModes.Accumulator, 1, 2), //0x4A
+                () => A = Lsr(AddressingModes.Accumulator), //0x4A
                 Alr, //0x4B
                 JmpAbsolute, //0x4C
                 () => Eor(AddressingModes.Absolute), //0x4D
-                () => Ram.WriteByte(Ram.Word(PC + 1), Lsr(AddressingModes.Absolute, 3, 6)), //0x4E
+                () => Ram.WriteByte(Ram.Word(PC + 1), Lsr(AddressingModes.Absolute)), //0x4E
                 LseAbsolute, //0x4F
                 Bvc, //0x50
                 () => Eor(AddressingModes.IndirectX), //0x51
@@ -183,7 +183,7 @@ namespace NESCore
                 LseIndirectY, //0x53
                 Nop, //0x54
                 () => Eor(AddressingModes.ZeroPageX), //0x55
-                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Lsr(AddressingModes.ZeroPageX, 2, 6)), //0x56
+                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Lsr(AddressingModes.ZeroPageX)), //0x56
                 LseZPageX, //0x57
                 Cli, //0x58
                 () => Eor(AddressingModes.AbsoluteY), //0x59
@@ -191,7 +191,7 @@ namespace NESCore
                 LseAbsoluteY, //0x5B
                 Nop, //0x5C
                 () => Eor(AddressingModes.AbsoluteX), //0x5D
-                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Lsr(AddressingModes.AbsoluteX, 3, 7)), //0x5E
+                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Lsr(AddressingModes.AbsoluteX)), //0x5E
                 LseAbsoluteX, //0x5F
                 Rts, //0x60
                 () => Adc(AddressingModes.IndirectX), //0x61
@@ -199,15 +199,15 @@ namespace NESCore
                 RraIndirectX, //0x63
                 Nop, //0x64
                 () => Adc(AddressingModes.ZeroPage), //0x65
-                RorZPage, //0x66
+                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Ror(AddressingModes.ZeroPage)), //0x66
                 RraZPage, //0x67
                 Pla, //0x68
                 () => Adc(AddressingModes.Immediate), //0x69
-                RorAccumulator, //0x6A
+                () => A = Ror(AddressingModes.Accumulator), //0x6A
                 Arr, //0x6B
                 JmpIndirect, //0x6C
                 () => Adc(AddressingModes.Absolute), //0x6D
-                RorAbsolute, //0x6E
+                () => Ram.WriteByte(Ram.Word(PC + 1), Ror(AddressingModes.Absolute)), //0x6E
                 RraAbsolute, //0x6F
                 Bvs, //0x70
                 () => Adc(AddressingModes.IndirectY), //0x71
@@ -215,7 +215,7 @@ namespace NESCore
                 RraIndirectY, //0x73
                 Nop, //0x74
                 () => Adc(AddressingModes.ZeroPageX), //0x75
-                RorZPageX, //0x76
+                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Ror(AddressingModes.ZeroPageX)), //0x76
                 RraZPageX, //0x77
                 Sei, //0x78
                 () => Adc(AddressingModes.AbsoluteY), //0x79
@@ -223,7 +223,7 @@ namespace NESCore
                 RraAbsoluteY, //0x7B
                 Nop, //0x7C
                 () => Adc(AddressingModes.AbsoluteX), //0x7D
-                RorAbsoluteX, //0x7E
+                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Ror(AddressingModes.AbsoluteX)), //0x7E
                 RraAbsoluteX, //0x7F
                 Nop, //0x80
                 StaIndirectX, //0x81
@@ -454,73 +454,28 @@ namespace NESCore
 
         void OraIndirectY() => Ora(Ram.IndirectYParam(true), 5, 2);
 
-
-
         #endregion
 
-        #region ASL Arithmetic Shift Left. shifts all bits left one position. 0 is shifted into bit 0 and the original bit 7 is shifted into the Carry.
-
-        private void Asl(ref byte param, int cycles, ushort pcIncrease, bool logInstruction = true)
+        private byte Asl(AddressingModes mode)
         {
-            if (logInstruction)
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
+            if (mode != AddressingModes.Accumulator)
             {
-                LogInstruction(pcIncrease -1, $"ASL #${param:X2}");
+                cycles += 2;
             }
+            LogInstruction(mode, "ASL");
             
-            Bit.Val(ref P, Flags.Carry, Bit.Test(param, Flags.Negative));
+            Bit.Val(ref P, Flags.Carry, Bit.Test(value, Flags.Negative));
 
-            var shifted = (byte)(param << 1);
+            var shifted = (byte)(value << 1);
             Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, Flags.Negative));
             Bit.Val(ref P, Flags.Zero, shifted == 0);
-            param = shifted;
-
+            
             PC += pcIncrease;
             cyclesThisSec += cycles;
-        }
-
-        private void AslAccumulator()
-        {
-            LogInstruction(0, "ASL A");
-            Asl(ref A, 2, 1, false);
-        } 
-        private void AslZPage()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var addr = Ram.ZPage(opcodeParam);
-            var param = Ram.ZPageParam();
             
-            LogInstruction(1, $"ASL ${opcodeParam:X2} = {param:X2}");
-            
-            Asl(ref param, 5, 2, false);
-
-            Ram.WriteByte(addr, param);
+            return shifted;
         }
-
-        private void AslZPageX()
-        {
-            var addr = Ram.ZPageX(Ram.Byte(PC + 1));
-            var param = Ram.ZPageXParam();
-            Asl(ref param, 6, 2);
-            Ram.WriteByte(addr, param);
-        }
-
-        private void AslAbsolute()
-        {
-            var addr = Ram.Absolute(Ram.Word(PC + 1));
-            var param = Ram.AbsoluteParam();
-            Asl(ref param, 6, 3);
-            Ram.WriteByte(addr, param);
-        }
-
-        private void AslAbsoluteX()
-        {
-            var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
-            var param = Ram.AbsoluteXParam();
-            Asl(ref param, 7, 3);
-            Ram.WriteByte(addr, param);
-        }
-
-        #endregion
 
         #region Halt. Kills the machine, bam, pum ded, gone gurl....
 
@@ -897,10 +852,14 @@ namespace NESCore
         
         #region LSR Logical Shift Right
 
-        byte Lsr(AddressingModes mode, ushort pcIncrease, ushort cycles)
+        byte Lsr(AddressingModes mode)
         {
             //Override pcIncrease and cycle value because LSR has diferent timings
-            var (value, _, _) = GetAddressingModeParameter(mode);
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
+            if (mode != AddressingModes.Accumulator)
+            {
+                cycles += 2;
+            }
             LogInstruction(mode, "LSR");
 
             PC += pcIncrease;
@@ -1000,25 +959,30 @@ namespace NESCore
         
         #region ROR/ROL Rotate region
 
-        byte Rol(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
+        byte Rol(AddressingModes mode)
         {
-            if (logInstruction)
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
+            if (mode != AddressingModes.Accumulator)
             {
-                LogInstruction(pcIncrease - 1, $"ROL ${value:X2}");
+                cycles += 2;
             }
+            LogInstruction(mode, "ROL");
             
             PC += pcIncrease;
             cyclesThisSec += cycles;
             return Rotate(value, RotateDirection.Left);
         }
 
-        byte Ror(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
+        byte Ror(AddressingModes mode)
         {
-            if (logInstruction)
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
+            if (mode != AddressingModes.Accumulator)
             {
-                LogInstruction(pcIncrease - 1, $"ROR ${value:X2}");
+                cycles += 2;
             }
             
+            LogInstruction(mode, "ROR");
+
             PC += pcIncrease;
             cyclesThisSec += cycles;
             return Rotate(value, RotateDirection.Right);
@@ -1053,86 +1017,6 @@ namespace NESCore
             Bit.Val(ref P, Flags.Negative, Bit.Test(shifted, Flags.Negative));
 
             return shifted;
-        }
-
-        void RolAccumulator()
-        {
-            LogInstruction(0, "ROL A");
-            A = Rol(A, 2, 1, false);
-        }
-
-        void RolZPage()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var addr = Ram.ZPage(opcodeParam);
-            var data = Ram.ZPageParam();
-            LogInstruction(1, $"ROL ${opcodeParam:X2} = {data:X2}");
-            data = Rol(data, 5, 2, false);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RolZPageX()
-        {
-            var addr = Ram.ZPageX(Ram.Byte(PC + 1));
-            var data = Ram.Byte(addr);
-            data = Rol(data, 6, 2);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RolAbsolute()
-        {
-            var addr = Ram.Absolute(Ram.Word(PC + 1));
-            var data = Ram.Byte(addr);
-            data = Rol(data, 6, 3);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RolAbsoluteX()
-        {
-            var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
-            var data = Ram.Byte(addr);
-            data = Rol(data, 7, 3);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RorAccumulator()
-        {
-            LogInstruction(0, "ROR A");
-            A = Ror(A, 2, 1, false);
-        }
-
-        void RorZPage()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var addr = Ram.ZPage(opcodeParam);
-            var data = Ram.ZPageParam();
-            LogInstruction(1, $"ROR ${opcodeParam:X2} = {data:X2}");
-            data = Ror(data, 5, 2, false);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RorZPageX()
-        {
-            var addr = Ram.ZPageX(Ram.Byte(PC + 1));
-            var data = Ram.Byte(addr);
-            data = Ror(data, 6, 2);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RorAbsolute()
-        {
-            var addr = Ram.Absolute(Ram.Word(PC + 1));
-            var data = Ram.Byte(addr);
-            data = Ror(data, 6, 3);
-            Ram.WriteByte(addr, data);
-        }
-
-        void RorAbsoluteX()
-        {
-            var addr = Ram.AbsoluteX(Ram.Word(PC + 1));
-            var data = Ram.Byte(addr);
-            data = Ror(data, 7, 3);
-            Ram.WriteByte(addr, data);
         }
         
         #endregion
