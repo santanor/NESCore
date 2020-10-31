@@ -208,20 +208,7 @@ namespace NESCore
 
         public ushort IndirectY(byte addr)
         {
-            ushort result;
-            if (addr == 0xFF)
-            {
-                var tempBytes = new byte[2];
-                tempBytes[0] = Byte(addr);
-                tempBytes[1] = 0xFF;
-
-                result = tempBytes.ToWord();
-            }
-            else
-            {
-                result = Word(addr);
-            }
-
+            var result =(ushort)(Byte(addr & 0xFF) | Byte((addr + 1) & 0xFF) << 8);
             return (ushort)(result + Cpu.Y);
         }
 
@@ -268,7 +255,7 @@ namespace NESCore
 
             if (checkPageCrossed)
             {
-                CheckPageCrossed(parameter, indY);
+                CheckPageCrossed(parameter, result);
             }
 
             return result;
