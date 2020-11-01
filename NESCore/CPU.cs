@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -8,7 +9,7 @@ using Serilog;
 namespace NESCore
 {
     public enum Flags {Carry, Zero, IRQ, Decimal, Break, Unused, Overflow, Negative};
-    public enum AddressingModes {Accumulator, Immediate, ZeroPage, ZeroPageX, ZeroPageY, Absolute, AbsoluteX, AbsoluteY, IndirectX, IndirectY}
+    public enum AddressingModes {Accumulator, Immediate, ZeroPage, ZeroPageX, ZeroPageY, Absolute, AbsoluteX, AbsoluteY, Indirect, IndirectX, IndirectY}
 
     public class CPU
     {
@@ -98,67 +99,67 @@ namespace NESCore
             opcodes = new Action[]
             {
                 Break, //0x00
-                OraIndirectX, //0x01
+                () => Ora(AddressingModes.IndirectX), //0x01
                 Halt, //0x02
                 AsoIndirectX, //0x03
                 Nop, //0x04
-                OraZPage, //0x05
+                () => Ora(AddressingModes.ZeroPage), //0x05
                 () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x06
                 AsoZPage, //0x07
                 Php, //0x08
-                OraImmediate, //0x09
+                () => Ora(AddressingModes.Immediate), //0x09
                 () => A = Asl(AddressingModes.Accumulator), //0x0A
                 Anc, //0x0B
                 Nop, //0x0C
-                OraAbsolute, //0x0D
+                () => Ora(AddressingModes.Absolute), //0x0D
                 () => Ram.WriteByte(Ram.Word(PC + 1), Asl(AddressingModes.Absolute)), //0x0E
                 AsoAbsolute, //0x0F
                 Bpl, //0x10
-                OraIndirectY, //0x11
+                () => Ora(AddressingModes.IndirectY), //0x11
                 Halt, //0x12
                 AsoIndirectY, //0x13
                 Nop, //0x14
-                OraZPageX, //0x15
+                () => Ora(AddressingModes.ZeroPageX), //0x15
                 () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x16
                 AsoZPageX, //0x17
                 Clc, //0x18
-                OraAbsoluteY, //0x19
+                () => Ora(AddressingModes.AbsoluteY), //0x19
                 Nop, //0x1A
                 AsoAbsoluteY, //0x1B
                 Nop, //0x1C
-                OraAbsoluteX, //0x1D
+                () => Ora(AddressingModes.AbsoluteX), //0x1D
                 () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Asl(AddressingModes.AbsoluteX)), //0x1E
                 AsoAbsoluteX, //0x1F
                 Jsr, //0x20
-                AndIndirectX, //0x21
+                () => And(AddressingModes.IndirectX), //0x21
                 Halt, //0x22
                 RlaIndirectX, //0x23
                 BitZPage, //0x24
-                AndZPage, //0x25
+                () => And(AddressingModes.ZeroPage), //0x25
                 () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Rol(AddressingModes.ZeroPage)), //0x26
                 RlaZPage, //0x27
                 Plp, //0x28
-                AndImmediate, //0x29
+                () => And(AddressingModes.Immediate), //0x29
                 () => A = Rol(AddressingModes.Accumulator), //0x2A,
                 Anc, //0x2B
                 BitAbsolute, //0x2C
-                AndAbsolute, //0x2D
+                () => And(AddressingModes.Absolute), //0x2D
                 () => Ram.WriteByte(Ram.Word(PC + 1), Rol(AddressingModes.Absolute)), //0x2E
                 RlaAbsolute, //0x2F
                 Bmi, //0x30
-                AndIndirectY, //0x31
+                () => And(AddressingModes.IndirectY), //0x31
                 Halt, //0x32
                 RlaIndirectY, //0x33
                 Nop, //0x34
-                AndZPageX, //0x35
+                () => And(AddressingModes.ZeroPageX), //0x35
                 () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Rol(AddressingModes.ZeroPageX)), //0x36
                 RlaZPageX, //0x37
                 Sec, //0x38
-                AndAbsoluteY, //0x39
+                () => And(AddressingModes.AbsoluteY), //0x39
                 Nop, //0x3A
                 RlaAbsoluteY, //0x3B
                 Nop, //0x3C
-                AndAbsoluteX, //0x3D
+                () => And(AddressingModes.AbsoluteX), //0x3D
                 () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Rol(AddressingModes.AbsoluteX)), //0x3E
                 RlaAbsoluteX, //0x3F
                 Rti, //0x40
@@ -178,7 +179,7 @@ namespace NESCore
                 () => Ram.WriteByte(Ram.Word(PC + 1), Lsr(AddressingModes.Absolute)), //0x4E
                 LseAbsolute, //0x4F
                 Bvc, //0x50
-                () => Eor(AddressingModes.IndirectX), //0x51
+                () => Eor(AddressingModes.IndirectY), //0x51
                 Halt, //0x52
                 LseIndirectY, //0x53
                 Nop, //0x54
@@ -226,35 +227,35 @@ namespace NESCore
                 () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Ror(AddressingModes.AbsoluteX)), //0x7E
                 RraAbsoluteX, //0x7F
                 Nop, //0x80
-                StaIndirectX, //0x81
+                () => StoreRegister(A, AddressingModes.IndirectX, "STA"), //0x81
                 Nop, //0x82
                 AxsIndirectX, //0x83
-                StyZPage, //0x84
-                StaZPage, //0x85
-                StxZPage, //0x86
+                () => StoreRegister(Y, AddressingModes.ZeroPage, "STY"), //0x84
+                () => StoreRegister(A, AddressingModes.ZeroPage, "STA"), //0x85
+                () => StoreRegister(X, AddressingModes.ZeroPage, "STX"), //0x86
                 AxsZPage, //0x87
                 Dey, //0x88
                 Nop, //0x89
                 Txa, //0x8A
                 Halt, //0x8B
-                StyAbsolute, //0x8C
-                StaAbsolute, //0x8D
-                StxAbsolute, //0x8E
+                () => StoreRegister(Y, AddressingModes.Absolute, "STY"), //0x8C
+                () => StoreRegister(A, AddressingModes.Absolute, "STA"), //0x8D
+                () => StoreRegister(X, AddressingModes.Absolute, "STX"), //0x8E
                 AxsAbsolute, //0x8F
                 Bcc, //0x90
-                StaIndirectY, //0x91
+                () => StoreRegister(A, AddressingModes.IndirectY, "STA"), //0x91
                 Halt, //0x92
                 Halt, //0x93
-                StyZPageX, //0x94
-                StaZPageX, //0x95
-                StxZPageY, //0x96
+                () => StoreRegister(Y, AddressingModes.ZeroPageX, "STY"), //0x94
+                () => StoreRegister(A, AddressingModes.ZeroPageX, "STA"), //0x95
+                () => StoreRegister(X, AddressingModes.ZeroPageY, "STX"), //0x96
                 AxsZPageY, //0x97
                 Tya, //0x98
-                StaAbsoluteY, //0x99
+                () => StoreRegister(A, AddressingModes.AbsoluteY, "STA"), //0x99
                 Txs, //0x9A
                 Halt, //0x9B
                 Halt, //0x9C
-                StaAbsoluteX, //0x9D
+                () => StoreRegister(A, AddressingModes.AbsoluteX, "STA"), //0x9D
                 Halt, //0x9E
                 Halt, //0x9F
                 () => LoadRegister(ref Y, AddressingModes.Immediate, "LDY"), //0xA0
@@ -388,73 +389,22 @@ namespace NESCore
             PC++;
         }
 
-        #region ORA. Logical OR on the acumulator, set the zero and negative flags
-
-
         /// <summary>
         /// Executes the ORA instruction (OR with Acumulator)
         /// </summary>
-        /// <param name="param"></param>
-        /// <param name="cycles"></param>
-        /// <param name="pcIncrease"></param>
-        /// <param name="logInstruction">if set to false, this method won't log the instruction, it assumes
-        /// that the caller would do it</param>
-        void Ora(byte param, int cycles, int pcIncrease, bool logInstruction = true)
+        void Ora(AddressingModes mode)
         {
-            if (logInstruction)
-            {
-                LogInstruction(pcIncrease - 1, $"ORA #${param:X2}");
-            }
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
+            LogInstruction(mode, "ORA");
             
-            A = (byte)(A | param);
+            A = (byte)(A | value);
 
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
 
             cyclesThisSec += cycles;
-            PC += (ushort)pcIncrease;
+            PC += pcIncrease;
         }
-
-        void OraImmediate() => Ora(Ram.Byte(PC + 1), 2, 2);
-
-        void OraZPage()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var param = Ram.ZPageParam();
-            LogInstruction(1, $"ORA ${opcodeParam:X2} = {param:X2}");
-            Ora(param, 3, 2, false);
-        }
-        void OraZPageX()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var zPageAddr = Ram.ZPageX(opcodeParam);
-            var zpageParam = Ram.ZPageParam();
-            LogInstruction(1, $"ORA (${opcodeParam:X2},X) @ {opcodeParam:X2} = {zPageAddr:X4} =  {zpageParam:X2}");
-            Ora(zpageParam, 4, 2, logInstruction: false);
-        }
-
-        void OraAbsolute()
-        {
-            var param = Ram.AbsoluteParam();
-            LogInstruction(2, $"ORA ${Ram.Word(PC + 1):X4} = {param:X2}");
-            Ora(param, 4, 3, false);
-        } 
-        void OraAbsoluteX() => Ora(Ram.AbsoluteXParam(true), 4, 3);
-        void OraAbsoluteY() => Ora(Ram.AbsoluteYParam(true), 4, 3);
-        void OraIndirectX()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var indirectAddr = Ram.IndirectX(opcodeParam);
-            var indirectParam = Ram.IndirectXParam();
-            
-            LogInstruction(numParams: 1, $"ORA (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
-            
-            Ora(indirectParam, 6, 2, false);
-        }
-
-        void OraIndirectY() => Ora(Ram.IndirectYParam(true), 5, 2);
-
-        #endregion
 
         private byte Asl(AddressingModes mode)
         {
@@ -530,22 +480,13 @@ namespace NESCore
             cyclesThisSec += cycles;
         }
 
-        #region AND Bitwise AND with accumulator
-
         /// <summary>
         /// ANDs the given value with the accumulator 
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="cycles"></param>
-        /// <param name="pcIncrease"></param>
-        /// <param name="logInstruction">if set to false then this method won't log the instruction. It assumes that the
-        /// caller will take care of that </param>
-        private void And(byte value, int cycles, ushort pcIncrease, bool logInstruction = true)
+        private void And(AddressingModes mode)
         {
-            if (logInstruction)
-            {
-                LogInstruction(pcIncrease - 1, $"AND #${value:X2}");
-            }
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
+            LogInstruction(mode, "AND");
             
             A &= value;
             Bit.Val(ref P, Flags.Zero, A == 0);
@@ -555,39 +496,6 @@ namespace NESCore
             PC += pcIncrease;
         }
 
-        private void AndImmediate() => And(Ram.Byte(PC + 1), 2, 2);
-
-        private void AndZPage()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var param = Ram.ZPageParam();
-            LogInstruction(1, $"AND ${opcodeParam:X2} = {param:X2}");
-            And(param, 3, 2, false);
-        }
-        private void AndZPageX() => And(Ram.ZPageXParam(), 4, 2);
-
-        private void AndAbsolute()
-        {
-            var param = Ram.AbsoluteParam();
-            LogInstruction(2, $"AND ${Ram.Word(PC + 1):X4} = {param:X2}");
-            And(Ram.AbsoluteParam(), 4, 3, false);
-        } 
-        
-        private void AndAbsoluteX() => And(Ram.AbsoluteXParam(true), 4, 3);
-        private void AndAbsoluteY() => And(Ram.AbsoluteYParam(true), 4, 3);
-
-        private void AndIndirectX()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var indirectAddr = Ram.IndirectX(opcodeParam);
-            var indirectParam = Ram.IndirectXParam();
-            LogInstruction(1, $"AND (${opcodeParam:X2},X) @ {opcodeParam:X2} = {indirectAddr:X4} = {indirectParam:X2}");
-            And(indirectParam, 6, 2, false);
-        } 
-        private void AndIndirectY() => And(Ram.IndirectYParam(true), 5, 2);
-        
-        #endregion
-        
         #region BIT test BITs
 
         private void BIT(byte value, int cycles, ushort pcIncrease)
@@ -728,14 +636,25 @@ namespace NESCore
 
         void Jmp(ushort addr, int cycles)
         {
-            LogInstruction(2, $"JMP ${addr:X2}");
-
             PC = addr;
             cyclesThisSec += cycles;
         }
 
-        void JmpAbsolute() => Jmp(Ram.Word(PC + 1), 3);
-        void JmpIndirect() => Jmp(Ram.IndirectParam(), 5);
+        void JmpAbsolute()
+        {
+            var addr = Ram.Word(PC + 1);
+            //($0200) = DB7E 
+            LogInstruction(2, $"JMP ${addr:X4}");
+            Jmp(addr, 3);
+        }
+
+        void JmpIndirect()
+        {
+            var addr = Ram.IndirectParam();
+            var opcodeParam = Ram.Word(PC + 1);
+            LogInstruction(2, $"JMP (${opcodeParam:X4}) = {addr:X4}");
+            Jmp(addr, 5);
+        }
 
         void Jsr()
         {
@@ -957,8 +876,6 @@ namespace NESCore
         }
         #endregion
 
-        #region Store register
-
         /// <summary>
         /// Stores the given register value in the specified address
         /// </summary>
@@ -968,47 +885,24 @@ namespace NESCore
         /// <param name="pcIncrease"></param>
         /// <param name="mnemonic">Opcode mnemonic to log the instruction. If null is provided then this method
         /// won't log the instruction. It assumes that the caller wants to create a bespoke log for the specific call</param>
-        void StoreRegister(byte value, ushort addr, int cycles, ushort pcIncrease, [AllowNull]string mnemonic)
+        void StoreRegister(byte value, AddressingModes mode,[AllowNull]string mnemonic)
         {
-            if (!string.IsNullOrEmpty(mnemonic))
-            {
-                var addrString = addr > 0xFF ? addr.ToString("X4") : addr.ToString("X2");
-                LogInstruction(pcIncrease - 1, $"{mnemonic} ${addrString} = {Ram.Byte(addr):X2}"); 
-            }
+            var (addr, pcIncrease, cycles) = GetAddressingModeAddress(mode);
+            LogInstruction(mode, mnemonic);
             
             Ram.WriteByte(addr, value);
-            Ram.WriteByte(addr, value);
 
+            switch (mode)
+            {
+                case AddressingModes.ZeroPage:
+                case AddressingModes.Absolute:
+                    cycles -= 2;
+                    break;
+            }
+            
             PC += pcIncrease;
             cyclesThisSec += cycles;
         }
-
-        void StaZPage() => StoreRegister(A, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STA");
-        void StaZPageX() => StoreRegister(A, Ram.ZPageX(Ram.Byte(PC + 1)), 4, 2, "STA");
-        void StaAbsolute() => StoreRegister(A, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STA");
-        void StaAbsoluteX() => StoreRegister(A, Ram.AbsoluteX(Ram.Word(PC + 1)), 5, 3, "STA");
-        void StaAbsoluteY() => StoreRegister(A, Ram.AbsoluteY(Ram.Word(PC + 1)), 5, 3, "STA");
-
-        void StaIndirectX()
-        {
-            var opcodeParam = Ram.Byte(PC + 1);
-            var zpageAddr = Ram.ZPageX(opcodeParam);
-            var paramAddr = Ram.IndirectX(opcodeParam);
-            var param = Ram.IndirectXParam();
-            
-            LogInstruction(1, $"STA (${opcodeParam:X2},X) @ {zpageAddr:X2} = {paramAddr:X4} = {param:X2} ");
-                
-            StoreRegister(A, paramAddr, 6, 2, null);
-        }
-        void StaIndirectY() => StoreRegister(A, Ram.IndirectY(Ram.Byte(PC + 1)), 6, 2, "STA");
-        void StxZPage() => StoreRegister(X, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STX");
-        void StxZPageY() => StoreRegister(X, Ram.ZPageY(Ram.Byte(PC + 1)), 4, 2, "STX");
-        void StxAbsolute() => StoreRegister(X, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STX");
-        void StyZPage() => StoreRegister(Y, Ram.ZPage(Ram.Byte(PC + 1)), 3, 2, "STY");
-        void StyZPageX() => StoreRegister(Y, Ram.ZPageX(Ram.Byte(PC + 1)), 4, 2, "STY");
-        void StyAbsolute() => StoreRegister(Y, Ram.Absolute(Ram.Word(PC + 1)), 4, 3, "STY");
-
-        #endregion
 
         #region Stack instructions
 
@@ -1101,7 +995,7 @@ namespace NESCore
         /// </summary>
         void Anc()
         {
-            AndImmediate();
+            And(AddressingModes.Immediate);
             Bit.Val(ref P, Flags.Carry, Bit.Test(A, Flags.Negative));
         }
         #endregion
@@ -1401,6 +1295,12 @@ namespace NESCore
                     return (Ram.Word(PC + 1), 3, 6);
                 case AddressingModes.AbsoluteX:
                     return (Ram.AbsoluteX(Ram.Word(PC + 1)), 3, 7);
+                case AddressingModes.Indirect:
+                    return (Ram.IndirectParam(),0, 5);
+                case AddressingModes.IndirectX:
+                    return (Ram.IndirectX(Ram.Byte(PC + 1)), 2, 6);
+                case AddressingModes.IndirectY:
+                    return (Ram.IndirectY(Ram.Byte(PC + 1)), 2, 6);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
@@ -1467,7 +1367,7 @@ namespace NESCore
         private void LogInstruction(int numParams, string mnemonic)
         {
             var sb = new StringBuilder();
-            sb.Append($"{PC:X2}  {currentOpcode:X2} ");
+            sb.Append($"{PC:X4}  {currentOpcode:X2} ");
 
             for (var i = 1; i <= numParams; i++) {
                 sb.Append($"{Ram.Byte(PC + i):X2} ");
