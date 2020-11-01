@@ -206,9 +206,17 @@ namespace NESCore
             return (ushort)(Byte(addr & 0xFF) | Byte((addr + 1) & 0xFF) << 8);
         }
 
-        public ushort IndirectY(byte addr)
+        public ushort IndirectY(byte addr, bool checkPageCrossed = false)
         {
             var result =(ushort)(Byte(addr & 0xFF) | Byte((addr + 1) & 0xFF) << 8);
+            
+            if (checkPageCrossed)
+            {
+                if ((result & 0xff00) != ((result + Cpu.Y) & 0xff00)) {
+                    Cpu.cyclesThisSec++;
+                }
+                
+            }
             return (ushort)(result + Cpu.Y);
         }
 
@@ -250,13 +258,8 @@ namespace NESCore
         public byte IndirectYParam(bool checkPageCrossed = false)
         {
             var parameter = Byte(Cpu.PC + 1);
-            var indY = IndirectY(parameter);
+            var indY = IndirectY(parameter, checkPageCrossed);
             var result = Byte(indY);
-
-            if (checkPageCrossed)
-            {
-                CheckPageCrossed(parameter, result);
-            }
 
             return result;
         }

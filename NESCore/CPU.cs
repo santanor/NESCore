@@ -1441,8 +1441,9 @@ namespace NESCore
                 case AddressingModes.IndirectY:
                     numParams = 1;
                     var opcodeParam = Ram.Byte(PC + 1);
+                    var initialAddr = Ram.Byte(opcodeParam & 0xFF) | Ram.Byte((opcodeParam + 1) & 0xFF) << 8;
                     instruction.AppendFormat("(${0:X2}),Y = {1:X4} @ {2:X4} = {3:X2}", 
-                        opcodeParam,  Ram.IndirectY(opcodeParam), Ram.IndirectY(opcodeParam), Ram.IndirectYParam());
+                        opcodeParam, initialAddr, Ram.IndirectY(opcodeParam), Ram.IndirectYParam());
                     break;
                 case AddressingModes.Absolute:
                     numParams = 2;
