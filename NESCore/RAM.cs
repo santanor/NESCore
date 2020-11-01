@@ -153,8 +153,14 @@ namespace NESCore
         /// Absolute X
         /// Returns whatever is entered as a parameter plus register X
         /// </summary>
-        public ushort AbsoluteX(ushort addr)
+        public ushort AbsoluteX(ushort addr, bool checkIfPageCrossed = false)
         {
+            if (checkIfPageCrossed)
+            {
+                if ((addr & 0xff00) != ((addr + Cpu.X) & 0xff00)) {
+                    Cpu.cyclesThisSec++;
+                }
+            }
             return (ushort)(addr + Cpu.X);
         }
 
@@ -228,13 +234,8 @@ namespace NESCore
         public byte AbsoluteXParam(bool checkPageCrossed = false)
         {
             var parameter = Word(Cpu.PC + 1);
-            var absX = AbsoluteX(parameter);
+            var absX = AbsoluteX(parameter, checkPageCrossed);
             var result = Byte(absX);
-
-            if (checkPageCrossed)
-            {
-                CheckPageCrossed(parameter, absX);
-            }
 
             return result;
         }

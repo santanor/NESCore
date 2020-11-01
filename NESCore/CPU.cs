@@ -120,7 +120,7 @@ namespace NESCore
                 AsoIndirectY, //0x13
                 Nop, //0x14
                 () => Ora(AddressingModes.ZeroPageX), //0x15
-                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x16
+                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPageX)), //0x16
                 AsoZPageX, //0x17
                 Clc, //0x18
                 () => Ora(AddressingModes.AbsoluteY), //0x19
@@ -347,7 +347,7 @@ namespace NESCore
                 () => DeltaMemory(AddressingModes.ZeroPageX, 1, "INC"), //0xF6
                 InsZPageX, //0xF7
                 Sed, //0xF8
-                () => Adc(AddressingModes.AbsoluteY), //0xF9
+                () => Sbc(AddressingModes.AbsoluteY), //0xF9
                 Nop, //0xFA
                 InsAbsoluteY, //0xFB
                 Nop, //0xFC
@@ -413,6 +413,12 @@ namespace NESCore
             {
                 cycles += 2;
             }
+
+            if (mode == AddressingModes.AbsoluteX)
+            {
+                cycles++;
+            }
+            
             LogInstruction(mode, "ASL");
             
             Bit.Val(ref P, Flags.Carry, Bit.Test(value, Flags.Negative));
@@ -643,7 +649,6 @@ namespace NESCore
         void JmpAbsolute()
         {
             var addr = Ram.Word(PC + 1);
-            //($0200) = DB7E 
             LogInstruction(2, $"JMP ${addr:X4}");
             Jmp(addr, 3);
         }
@@ -694,6 +699,12 @@ namespace NESCore
             {
                 cycles += 2;
             }
+
+            if (mode == AddressingModes.AbsoluteX)
+            {
+                cycles++;
+            }
+            
             LogInstruction(mode, "LSR");
 
             PC += pcIncrease;
@@ -720,31 +731,41 @@ namespace NESCore
 
         void Nop()
         {
-            LogInstruction(0, "NOP");
             switch (Ram.Byte(PC)){
-                case 0x1A: case 0x3A: case 0x5A: case 0x7A: case 0xDA: case 0xEA: case 0xFA:
+                case 0xEA:
+                    LogInstruction(0,"NOP");
+                    PC++;
+                    cyclesThisSec += 2;
+                    break;
+                case 0x1A: case 0x3A: case 0x5A: case 0x7A: case 0xDA: case 0xFA:
+                    LogInstruction(0,"NOP", true);
                     PC++;
                     cyclesThisSec += 2;
                     break;
 
                 case 0x80: case 0x82: case 0x89: case 0xC2: case 0xE2:
+                    LogInstruction(AddressingModes.Immediate, "NOP", true);
                     PC += 2;
                     cyclesThisSec += 2;
                     break;
                 case 0x0C:
+                    LogInstruction(AddressingModes.Absolute, "NOP", true);
                     PC += 3;
                     cyclesThisSec += 4;
                     break;
                 case 0x1C: case 0x3C: case 0x5C: case 0x7C: case 0xDC: case 0xFC:
+                    LogInstruction(AddressingModes.AbsoluteX, "NOP", true);
                     PC += 3;
                     Ram.AbsoluteXParam(true);
                     cyclesThisSec += 4;
                     break;
                 case 0x04: case 0x44: case 0x64:
+                    LogInstruction(AddressingModes.ZeroPage, "NOP", true);
                     PC += 2;
                     cyclesThisSec += 3;
                     break;
                 case 0x14: case 0x34: case 0x54:  case 0x74: case 0xD4: case 0xF4:
+                    LogInstruction(AddressingModes.ZeroPageX, "NOP", true);
                     PC += 2;
                     cyclesThisSec += 4;
                     break;
@@ -800,6 +821,12 @@ namespace NESCore
             {
                 cycles += 2;
             }
+            
+            if (mode == AddressingModes.AbsoluteX)
+            {
+                cycles++;
+            }
+            
             LogInstruction(mode, "ROL");
             
             PC += pcIncrease;
@@ -813,6 +840,11 @@ namespace NESCore
             if (mode != AddressingModes.Accumulator)
             {
                 cycles += 2;
+            }
+
+            if (mode == AddressingModes.AbsoluteX)
+            {
+                cycles++;
             }
             
             LogInstruction(mode, "ROR");
@@ -894,8 +926,8 @@ namespace NESCore
 
             switch (mode)
             {
-                case AddressingModes.ZeroPage:
-                case AddressingModes.Absolute:
+                case AddressingModes.ZeroPage: case AddressingModes.ZeroPageX: case AddressingModes.Absolute:
+                case AddressingModes.AbsoluteX:
                     cycles -= 2;
                     break;
             }
@@ -1291,6 +1323,8 @@ namespace NESCore
                     return (Ram.ZPage(Ram.Byte(PC + 1)), 2, 5);
                 case AddressingModes.ZeroPageX:
                     return (Ram.ZPageX(Ram.Byte(PC + 1)), 2, 6);
+                case AddressingModes.ZeroPageY:
+                    return (Ram.ZPageY(Ram.Byte(PC + 1)), 2, 4);
                 case AddressingModes.Absolute:
                     return (Ram.Word(PC + 1), 3, 6);
                 case AddressingModes.AbsoluteX:
@@ -1301,12 +1335,14 @@ namespace NESCore
                     return (Ram.IndirectX(Ram.Byte(PC + 1)), 2, 6);
                 case AddressingModes.IndirectY:
                     return (Ram.IndirectY(Ram.Byte(PC + 1)), 2, 6);
+                case AddressingModes.AbsoluteY:
+                    return (Ram.AbsoluteY(Ram.Word(PC + 1)), 3, 5);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
 
-            private void LogInstruction(AddressingModes mode, string mnemonic)
+            private void LogInstruction(AddressingModes mode, string mnemonic, bool invalid = false)
         {
             var numParams = 0;
             var instruction = new StringBuilder(mnemonic).Append(" ");
@@ -1325,11 +1361,11 @@ namespace NESCore
                     break;
                 case AddressingModes.ZeroPageX:
                     numParams = 1;
-                    instruction.AppendFormat("${0:X2} = {1:X2}",Ram.Byte(PC + 1), Ram.ZPageParam());
+                    instruction.AppendFormat("${0:X2},X @ {1:X2} = {2:X2}",Ram.Byte(PC + 1), Ram.ZPageX(Ram.Byte(PC + 1)), Ram.ZPageXParam());
                     break;
                 case AddressingModes.ZeroPageY:
                     numParams = 1;
-                    instruction.AppendFormat("${0:X2} = {1:X2}",Ram.Byte(PC + 1), Ram.ZPageParam());
+                    instruction.AppendFormat("${0:X2},Y @ {1:X2} = {2:X2}",Ram.Byte(PC + 1),Ram.ZPageY(Ram.Byte(PC + 1)), Ram.ZPageYParam());
                     break;
                 case AddressingModes.IndirectX:
                     numParams = 1;
@@ -1351,20 +1387,22 @@ namespace NESCore
                     break;
                 case AddressingModes.AbsoluteX: 
                     numParams = 2;
-                    instruction.AppendFormat("${0:X4} = {1:X2}", Ram.Word(PC + 1), Ram.AbsoluteXParam());
+                    instruction.AppendFormat("${0:X4},X @ {1:X4} = {2:X2}", Ram.Word(PC + 1), Ram.AbsoluteX(Ram.Word(PC + 1)), Ram.AbsoluteXParam());
                     break;
                 case AddressingModes.AbsoluteY:
                     numParams = 2;
-                    instruction.AppendFormat("${0:X4} = {1:X2}", Ram.Word(PC + 1), Ram.AbsoluteYParam());
+                    var absYparam = Ram.Word(PC + 1);
+                    var absYInitialAddr = (absYparam + Y) & 0xFFFF;
+                    instruction.AppendFormat("${0:X4},Y @ {1:X4} = {2:X2}", Ram.Word(PC + 1),absYInitialAddr, Ram.AbsoluteYParam());
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
             
-            LogInstruction(numParams, instruction.ToString());
+            LogInstruction(numParams, instruction.ToString(), invalid);
         }
         
-        private void LogInstruction(int numParams, string mnemonic)
+        private void LogInstruction(int numParams, string mnemonic, bool invalid = false)
         {
             var sb = new StringBuilder();
             sb.Append($"{PC:X4}  {currentOpcode:X2} ");
@@ -1373,9 +1411,13 @@ namespace NESCore
                 sb.Append($"{Ram.Byte(PC + i):X2} ");
             }
 
-            //The mnemonic should start at position 16. 
-            var padding = Math.Max(16 - sb.Length, 0);
+            //The mnemonic should start at position 16 or at 15 if invalid. 
+            var padding = Math.Max((invalid ? 15 : 16) - sb.Length, 0);
             sb.Append(string.Empty.PadRight(padding));
+            if (invalid)
+            {
+                sb.Append("*");
+            }
             sb.Append(mnemonic);
 
             padding = 48 - sb.Length;
