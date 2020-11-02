@@ -114,7 +114,7 @@ namespace NESCore
                 () => Ora(AddressingModes.Absolute), //0x0D
                 () => Ram.WriteByte(Ram.Word(PC + 1), Asl(AddressingModes.Absolute)), //0x0E
                 AsoAbsolute, //0x0F
-                Bpl, //0x10
+                () => TryBranch(Flags.Negative, false, "BPL"), //0x10
                 () => Ora(AddressingModes.IndirectY), //0x11
                 Halt, //0x12
                 AsoIndirectY, //0x13
@@ -146,7 +146,7 @@ namespace NESCore
                 () => And(AddressingModes.Absolute), //0x2D
                 () => Ram.WriteByte(Ram.Word(PC + 1), Rol(AddressingModes.Absolute)), //0x2E
                 RlaAbsolute, //0x2F
-                Bmi, //0x30
+                () => TryBranch(Flags.Negative, true, "BMI"), //0x30
                 () => And(AddressingModes.IndirectY), //0x31
                 Halt, //0x32
                 RlaIndirectY, //0x33
@@ -178,7 +178,7 @@ namespace NESCore
                 () => Eor(AddressingModes.Absolute), //0x4D
                 () => Ram.WriteByte(Ram.Word(PC + 1), Lsr(AddressingModes.Absolute)), //0x4E
                 LseAbsolute, //0x4F
-                Bvc, //0x50
+                () => TryBranch(Flags.Overflow, false, "BVC"), //0x50
                 () => Eor(AddressingModes.IndirectY), //0x51
                 Halt, //0x52
                 LseIndirectY, //0x53
@@ -210,7 +210,7 @@ namespace NESCore
                 () => Adc(AddressingModes.Absolute), //0x6D
                 () => Ram.WriteByte(Ram.Word(PC + 1), Ror(AddressingModes.Absolute)), //0x6E
                 RraAbsolute, //0x6F
-                Bvs, //0x70
+                () => TryBranch(Flags.Overflow, true, "BVS"), //0x70
                 () => Adc(AddressingModes.IndirectY), //0x71
                 Halt, //0x72
                 RraIndirectY, //0x73
@@ -234,15 +234,15 @@ namespace NESCore
                 () => StoreRegister(A, AddressingModes.ZeroPage, "STA"), //0x85
                 () => StoreRegister(X, AddressingModes.ZeroPage, "STX"), //0x86
                 AxsZPage, //0x87
-                Dey, //0x88
+                () => DeltaRegister(ref Y, -1, "DEY"), //0x88
                 Nop, //0x89
-                Txa, //0x8A
+                () => TransferRegister(X, ref A, "TXA"), //0x8A
                 Halt, //0x8B
                 () => StoreRegister(Y, AddressingModes.Absolute, "STY"), //0x8C
                 () => StoreRegister(A, AddressingModes.Absolute, "STA"), //0x8D
                 () => StoreRegister(X, AddressingModes.Absolute, "STX"), //0x8E
                 AxsAbsolute, //0x8F
-                Bcc, //0x90
+                () => TryBranch(Flags.Carry, false, "BCC"), //0x90
                 () => StoreRegister(A, AddressingModes.IndirectY, "STA"), //0x91
                 Halt, //0x92
                 Halt, //0x93
@@ -250,7 +250,7 @@ namespace NESCore
                 () => StoreRegister(A, AddressingModes.ZeroPageX, "STA"), //0x95
                 () => StoreRegister(X, AddressingModes.ZeroPageY, "STX"), //0x96
                 AxsZPageY, //0x97
-                Tya, //0x98
+                () => TransferRegister(Y, ref A, "TYA"), //0x98
                 () => StoreRegister(A, AddressingModes.AbsoluteY, "STA"), //0x99
                 Txs, //0x9A
                 Halt, //0x9B
@@ -266,15 +266,15 @@ namespace NESCore
                 () => LoadRegister(ref A, AddressingModes.ZeroPage, "LDA"), //0xA5
                 () => LoadRegister(ref X, AddressingModes.ZeroPage, "LDX"), //0xA6
                 LaxZPage, //0xA7
-                Tay, //0xA8
+                () => TransferRegister(A, ref Y, "TAY"), //0xA8
                 () => LoadRegister(ref A, AddressingModes.Immediate, "LDA"), //0xA9
-                Tax, //0xAA
+                () => TransferRegister(A, ref X, "TAX"), //0xAA
                 Halt, //0xAB
                 () => LoadRegister(ref Y, AddressingModes.Absolute, "LDY"), //0xAC
                 () => LoadRegister(ref A, AddressingModes.Absolute, "LDA"), //0xAD
                 () => LoadRegister(ref X, AddressingModes.Absolute, "LDX"), //0xAE
                 LaxAbsolute, //0xAF
-                Bcs, //0xB0
+                () => TryBranch(Flags.Carry, true, "BCS"), //0xB0
                 () => LoadRegister(ref A, AddressingModes.IndirectY, "LDA"), //0xB1
                 Halt, //0xB2
                 LaxIndirectY, //0xB3
@@ -298,15 +298,15 @@ namespace NESCore
                 () => Cmp(A, AddressingModes.ZeroPage, "CMP"), //0xC5
                 () => DeltaMemory(AddressingModes.ZeroPage, -1, "DEC"), //0xC6
                 DcmZPage, //0xC7
-                Iny, //0xC8
+                () => DeltaRegister(ref Y, 1, "INY"), //0xC8
                 () => Cmp(A, AddressingModes.Immediate, "CMP"), //0xC9
-                Dex, //0xCA
+                () => DeltaRegister(ref X, -1, "DEX"), //0xCA DEX
                 Halt, //0xCB
                 () => Cmp(Y, AddressingModes.Absolute, "CPY"), //0xCC
                 () => Cmp(A, AddressingModes.Absolute, "CMP"), //0xCD
                 () => DeltaMemory(AddressingModes.Absolute, -1, "DEC"), //0xCE
                 DcmAbsolute, //0xCF
-                Bne, //0xD0
+                () => TryBranch(Flags.Zero, false, "BNE"), //0xD0
                 () => Cmp(A, AddressingModes.IndirectY, "CMP"), //0xD1
                 Halt, //0xD2
                 DcmIndirectY, //0xD3
@@ -330,7 +330,7 @@ namespace NESCore
                 () => Sbc(AddressingModes.ZeroPage), //0xE5
                 () => DeltaMemory(AddressingModes.ZeroPage, 1, "INC"), //0xE6
                 InsZPage, //0xE7
-                Inx, //0xE8
+                () => DeltaRegister(ref X, 1, "INX"), //0xE8
                 () => Sbc(AddressingModes.Immediate), //0xE9
                 Nop, //0xEA
                 () => Sbc(AddressingModes.IndirectY), //0xEB
@@ -338,7 +338,7 @@ namespace NESCore
                 () => Sbc(AddressingModes.Absolute), //0xED
                 () => DeltaMemory(AddressingModes.Absolute, 1, "INC"), //0xEE
                 InsAbsolute, //0xEF
-                Beq, //0xF0
+                () => TryBranch(Flags.Zero, true, "BEQ"), //0xF0
                 () => Sbc(AddressingModes.IndirectY), //0xF1
                 Halt, //0xF2
                 InsIndirectY, //0xF3
@@ -433,17 +433,11 @@ namespace NESCore
             return shifted;
         }
 
-        #region Halt. Kills the machine, bam, pum ded, gone gurl....
-
         void Halt()
         {
             LogInstruction(0, "KILL");
             Stop();
         }
-
-        #endregion
-
-        #region ADC Add with Carry
 
         private void Adc(AddressingModes mode)
         {
@@ -472,8 +466,6 @@ namespace NESCore
             Bit.Val(ref P, Flags.Overflow, isOverflown > 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
         }
-        
-        #endregion
 
         void Sbc(AddressingModes mode)
         {
@@ -501,8 +493,6 @@ namespace NESCore
             cyclesThisSec += cycles;
             PC += pcIncrease;
         }
-
-        #region BIT test BITs
 
         private void BIT(byte value, int cycles, ushort pcIncrease)
         {
@@ -532,36 +522,21 @@ namespace NESCore
             BIT(value, 4, 3);
         }
 
-        #endregion
-        
-        #region Branch Instructions
-
         private void TryBranch(Flags flag, bool reqFlagValue, string mnemonic)
         {
             var value = Ram.Byte(PC + 1);
-            LogInstruction(1, $"{mnemonic} ${PC + 2 + value:X2}");
-            cyclesThisSec += 2;//This is always constant
+            LogInstruction(1, $"{mnemonic} ${(PC + value + 2):X4}");
+            cyclesThisSec += 2; //This is always constant
             PC += 2;
-            
+
             if (Bit.Test(P, flag) == reqFlagValue)
             {
                 Ram.CheckPageCrossed((ushort) (PC + value), PC);
-                PC += value; 
-                
+                PC += value;
+
                 cyclesThisSec++;
             }
         }
-
-        private void Bpl() => TryBranch(Flags.Negative, false, "BPL");
-        private void Bmi() => TryBranch(Flags.Negative, true, "BMI");
-        private void Bvc() => TryBranch(Flags.Overflow, false, "BVC");
-        private void Bvs() => TryBranch(Flags.Overflow, true, "BVS");
-        private void Bcc() => TryBranch(Flags.Carry, false, "BCC");
-        private void Bcs() => TryBranch(Flags.Carry, true, "BCS");
-        private void Bne() => TryBranch(Flags.Zero, false, "BNE");
-        private void Beq() => TryBranch(Flags.Zero, true, "BEQ");
-        
-        #endregion
 
         private void Cmp(byte register, AddressingModes mode, string mnemonic)
         {
@@ -801,15 +776,6 @@ namespace NESCore
             cyclesThisSec += 2;
         }
 
-        void Tax() => TransferRegister(A, ref X, "TAX");
-        void Txa() => TransferRegister(X, ref A, "TXA");
-        void Dex() => DeltaRegister(ref X, -1, "DEX");
-        void Inx() => DeltaRegister(ref X, 1, "INX");
-        void Tay() => TransferRegister(A, ref Y, "TAY");
-        void Tya() => TransferRegister(Y, ref A, "TYA");
-        void Dey() => DeltaRegister(ref Y, -1, "DEY");
-        void Iny() => DeltaRegister(ref Y, 1, "INY");
-        
         #endregion
         
         #region ROR/ROL Rotate region
