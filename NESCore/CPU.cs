@@ -229,11 +229,11 @@ namespace NESCore
                 Nop, //0x80
                 () => StoreRegister(A, AddressingModes.IndirectX, "STA"), //0x81
                 Nop, //0x82
-                AxsIndirectX, //0x83
+                () => Axs(AddressingModes.IndirectX), //0x83
                 () => StoreRegister(Y, AddressingModes.ZeroPage, "STY"), //0x84
                 () => StoreRegister(A, AddressingModes.ZeroPage, "STA"), //0x85
                 () => StoreRegister(X, AddressingModes.ZeroPage, "STX"), //0x86
-                AxsZPage, //0x87
+                () => Axs(AddressingModes.ZeroPage), //0x87
                 () => DeltaRegister(ref Y, -1, "DEY"), //0x88
                 Nop, //0x89
                 () => TransferRegister(X, ref A, "TXA"), //0x8A
@@ -241,7 +241,7 @@ namespace NESCore
                 () => StoreRegister(Y, AddressingModes.Absolute, "STY"), //0x8C
                 () => StoreRegister(A, AddressingModes.Absolute, "STA"), //0x8D
                 () => StoreRegister(X, AddressingModes.Absolute, "STX"), //0x8E
-                AxsAbsolute, //0x8F
+                () => Axs(AddressingModes.Absolute), //0x8F
                 () => TryBranch(Flags.Carry, false, "BCC"), //0x90
                 () => StoreRegister(A, AddressingModes.IndirectY, "STA"), //0x91
                 Halt, //0x92
@@ -249,7 +249,7 @@ namespace NESCore
                 () => StoreRegister(Y, AddressingModes.ZeroPageX, "STY"), //0x94
                 () => StoreRegister(A, AddressingModes.ZeroPageX, "STA"), //0x95
                 () => StoreRegister(X, AddressingModes.ZeroPageY, "STX"), //0x96
-                AxsZPageY, //0x97
+                () => Axs(AddressingModes.ZeroPageY), //0x97
                 () => TransferRegister(Y, ref A, "TYA"), //0x98
                 () => StoreRegister(A, AddressingModes.AbsoluteY, "STA"), //0x99
                 Txs, //0x9A
@@ -261,11 +261,11 @@ namespace NESCore
                 () => LoadRegister(ref Y, AddressingModes.Immediate, "LDY"), //0xA0
                 () => LoadRegister(ref A, AddressingModes.IndirectX, "LDA"), //0xA1
                 () => LoadRegister(ref X, AddressingModes.Immediate, "LDX"), //0xA2
-                LaxIndirectX, //0xA3
+                () => Lax(AddressingModes.IndirectX), //0xA3
                 () => LoadRegister(ref Y, AddressingModes.ZeroPage, "LDY"), //0xA4
                 () => LoadRegister(ref A, AddressingModes.ZeroPage, "LDA"), //0xA5
                 () => LoadRegister(ref X, AddressingModes.ZeroPage, "LDX"), //0xA6
-                LaxZPage, //0xA7
+                () => Lax(AddressingModes.ZeroPage), //0xA7
                 () => TransferRegister(A, ref Y, "TAY"), //0xA8
                 () => LoadRegister(ref A, AddressingModes.Immediate, "LDA"), //0xA9
                 () => TransferRegister(A, ref X, "TAX"), //0xAA
@@ -273,15 +273,15 @@ namespace NESCore
                 () => LoadRegister(ref Y, AddressingModes.Absolute, "LDY"), //0xAC
                 () => LoadRegister(ref A, AddressingModes.Absolute, "LDA"), //0xAD
                 () => LoadRegister(ref X, AddressingModes.Absolute, "LDX"), //0xAE
-                LaxAbsolute, //0xAF
+                () => Lax(AddressingModes.Absolute), //0xAF
                 () => TryBranch(Flags.Carry, true, "BCS"), //0xB0
                 () => LoadRegister(ref A, AddressingModes.IndirectY, "LDA"), //0xB1
                 Halt, //0xB2
-                LaxIndirectY, //0xB3
+                () => Lax(AddressingModes.IndirectY), //0xB3
                 () => LoadRegister(ref Y, AddressingModes.ZeroPageX, "LDY"), //0xB4
                 () => LoadRegister(ref A, AddressingModes.ZeroPageX, "LDA"), //0xB5
                 () => LoadRegister(ref X, AddressingModes.ZeroPageY, "LDX"), //0xB6
-                LaxZPageY, //0xB7
+                () => Lax(AddressingModes.ZeroPageY), //0xB7
                 Clv, //0xB8
                 () => LoadRegister(ref A, AddressingModes.AbsoluteY, "LDA"), //0xB9
                 Tsx, //0xBA
@@ -289,15 +289,15 @@ namespace NESCore
                 () => LoadRegister(ref Y, AddressingModes.AbsoluteX, "LDY"), //0xBC
                 () => LoadRegister(ref A, AddressingModes.AbsoluteX, "LDA"), //0xBD
                 () => LoadRegister(ref X, AddressingModes.AbsoluteY, "LDX"), //0xBE
-                LaxAbsoluteY, //0xBF
+                () => Lax(AddressingModes.AbsoluteY), //0xBF
                 () => Cmp(Y, AddressingModes.Immediate, "CPY"), //0xC0
                 () => Cmp(A, AddressingModes.IndirectX, "CMP"), //0xC1
                 Nop, //0xC2
-                DcmIndirectX, //0xC3
+                () => Dcm(AddressingModes.IndirectX), //0xC3
                 () => Cmp(Y, AddressingModes.ZeroPage, "CPY"), //0xC4
                 () => Cmp(A, AddressingModes.ZeroPage, "CMP"), //0xC5
                 () => DeltaMemory(AddressingModes.ZeroPage, -1, "DEC"), //0xC6
-                DcmZPage, //0xC7
+                () => Dcm(AddressingModes.ZeroPage), //0xC7
                 () => DeltaRegister(ref Y, 1, "INY"), //0xC8
                 () => Cmp(A, AddressingModes.Immediate, "CMP"), //0xC9
                 () => DeltaRegister(ref X, -1, "DEX"), //0xCA DEX
@@ -305,55 +305,55 @@ namespace NESCore
                 () => Cmp(Y, AddressingModes.Absolute, "CPY"), //0xCC
                 () => Cmp(A, AddressingModes.Absolute, "CMP"), //0xCD
                 () => DeltaMemory(AddressingModes.Absolute, -1, "DEC"), //0xCE
-                DcmAbsolute, //0xCF
+                () => Dcm(AddressingModes.Absolute), //0xCF
                 () => TryBranch(Flags.Zero, false, "BNE"), //0xD0
                 () => Cmp(A, AddressingModes.IndirectY, "CMP"), //0xD1
                 Halt, //0xD2
-                DcmIndirectY, //0xD3
+                () => Dcm(AddressingModes.IndirectY), //0xD3
                 Nop, //0xD4
                 () => Cmp(A, AddressingModes.ZeroPageX, "CMP"), //0xD5
                 () => DeltaMemory(AddressingModes.ZeroPageX, -1, "DEC"), //0xD6
-                DcmZPageX, //0xD7
+                () => Dcm(AddressingModes.ZeroPageX), //0xD7
                 Cld, //0xD8
                 () => Cmp(A, AddressingModes.AbsoluteY, "CMP"), //0xD9
                 Nop, //0xDA
-                DcmAbsoluteY, //0xDB
+                () => Dcm(AddressingModes.AbsoluteY), //0xDB
                 Nop, //0xDC
                 () => Cmp(A, AddressingModes.AbsoluteX, "CMP"), //0xDD
                 () => DeltaMemory(AddressingModes.AbsoluteX, -1, "DEC"), //0xDE
-                DcmAbsoluteX, //0xDF
+                () => Dcm(AddressingModes.AbsoluteX), //0xDF
                 () => Cmp(X, AddressingModes.Immediate, "CPX"), //0xE0
                 () => Sbc(AddressingModes.IndirectX), //0xE1
                 Nop, //0xE2
-                InsIndirectX, //0xE3
+                () => Ins(AddressingModes.IndirectX), //0xE3
                 () => Cmp(X, AddressingModes.ZeroPage, "CPX"), //0xE4
                 () => Sbc(AddressingModes.ZeroPage), //0xE5
                 () => DeltaMemory(AddressingModes.ZeroPage, 1, "INC"), //0xE6
-                InsZPage, //0xE7
+                () => Ins(AddressingModes.ZeroPage), //0xE7
                 () => DeltaRegister(ref X, 1, "INX"), //0xE8
                 () => Sbc(AddressingModes.Immediate), //0xE9
                 Nop, //0xEA
-                () => Sbc(AddressingModes.IndirectY), //0xEB
+                () => Sbc(AddressingModes.Immediate, true), //0xEB
                 () => Cmp(X, AddressingModes.Absolute, "CPX"), //0xEC
                 () => Sbc(AddressingModes.Absolute), //0xED
                 () => DeltaMemory(AddressingModes.Absolute, 1, "INC"), //0xEE
-                InsAbsolute, //0xEF
+                () => Ins(AddressingModes.Absolute), //0xEF
                 () => TryBranch(Flags.Zero, true, "BEQ"), //0xF0
                 () => Sbc(AddressingModes.IndirectY), //0xF1
                 Halt, //0xF2
-                InsIndirectY, //0xF3
+                () => Ins(AddressingModes.IndirectY), //0xF3
                 Nop, //0xF4
                 () => Sbc(AddressingModes.ZeroPageX), //0xF5
                 () => DeltaMemory(AddressingModes.ZeroPageX, 1, "INC"), //0xF6
-                InsZPageX, //0xF7
+                () => Ins(AddressingModes.ZeroPageX), //0xF7
                 Sed, //0xF8
                 () => Sbc(AddressingModes.AbsoluteY), //0xF9
                 Nop, //0xFA
-                InsAbsoluteY, //0xFB
+                () => Ins(AddressingModes.AbsoluteY), //0xFB
                 Nop, //0xFC
                 () => Sbc(AddressingModes.AbsoluteX), //0xFD
                 () => DeltaMemory(AddressingModes.AbsoluteX, 1, "INC"), //0xFE
-                InsAbsoluteX, //0xFF
+                () => Ins(AddressingModes.AbsoluteX), //0xFF
             };
 
         }
@@ -467,10 +467,10 @@ namespace NESCore
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
         }
 
-        void Sbc(AddressingModes mode)
+        void Sbc(AddressingModes mode, bool invalid = false)
         {
             var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
-            LogInstruction(mode, "SBC");
+            LogInstruction(mode, "SBC", invalid);
 
             AdcInternal((byte) ~value);
             
@@ -524,7 +524,8 @@ namespace NESCore
 
         private void TryBranch(Flags flag, bool reqFlagValue, string mnemonic)
         {
-            var value = Ram.Byte(PC + 1);
+            var value = (sbyte)Ram.Byte(PC + 1);
+            
             LogInstruction(1, $"{mnemonic} ${(PC + value + 2):X4}");
             cyclesThisSec += 2; //This is always constant
             PC += 2;
@@ -532,7 +533,7 @@ namespace NESCore
             if (Bit.Test(P, flag) == reqFlagValue)
             {
                 Ram.CheckPageCrossed((ushort) (PC + value), PC);
-                PC += value;
+                PC = (ushort)(PC + value);
 
                 cyclesThisSec++;
             }
@@ -1139,12 +1140,18 @@ namespace NESCore
         }
         
         #endregion
-        
-        #region AXS
 
-        void Axs(ushort addr, int cycles, ushort pcIncrease)
+        void Axs(AddressingModes mode)
         {
-            LogInstruction(1, $"SAX ${addr:X2}");
+            var (addr, pcIncrease, cycles) = GetAddressingModeAddress(mode);
+            LogInstruction(mode, "SAX", true);
+            
+            switch (mode)
+            {
+                case AddressingModes.ZeroPage: case AddressingModes.Absolute:
+                    cycles -= 2;
+                    break;
+            }
 
             var value = (byte) (A & X);
             Ram.WriteByte(addr, value);
@@ -1152,31 +1159,10 @@ namespace NESCore
             PC += pcIncrease;
             cyclesThisSec += cycles;
         }
-        
-        void AxsIndirectX() {
-            Axs(Ram.IndirectX(Ram.Byte(PC + 1)), 6, 2);
-        }
-
-        void AxsZPage() {
-            Axs(Ram.ZPage(Ram.Byte(PC + 1)), 3, 2);
-        }
-
-        void AxsZPageY() {
-            Axs(Ram.ZPageY(Ram.Byte(PC + 1)), 4, 2);
-        }
-
-        void AxsAbsolute() {
-            Axs(Ram.Absolute(Ram.Word(PC + 1)), 4, 3);
-        }
-
-        
-        #endregion
-        
-        #region LAX
-        
-        void Lax(byte value, int cycles, ushort pcIncrease) 
+        void Lax(AddressingModes mode)
         {
-            LogInstruction(pcIncrease - 1, $"LAX ${value:X2}");
+            LogInstruction(mode, "LAX", true);
+            var (value, pcIncrease, cycles) = GetAddressingModeParameter(mode);
             X = value;
             A = value;
 
@@ -1187,20 +1173,19 @@ namespace NESCore
             cyclesThisSec += cycles;
         }
 
-        void LaxAbsolute()  => Lax(Ram.AbsoluteParam(), 4, 3);
-        void LaxAbsoluteY() => Lax(Ram.AbsoluteYParam(), 4, 3);
-        void LaxZPage() => Lax(Ram.ZPageParam(), 3, 2);
-        void LaxZPageY() => Lax(Ram.ZPageYParam(), 4, 2);
-        void LaxIndirectX() => Lax(Ram.IndirectXParam(), 6, 2);
-        void LaxIndirectY() => Lax(Ram.IndirectYParam(), 5, 2);
-
-        #endregion
-        
-        #region DCM
-        
-        void Dcm(ushort addr, int cycles, ushort pcIncrease) {
-            LogInstruction(pcIncrease - 1, $"DCP ${addr:X2}");
-
+        void Dcm(AddressingModes mode)
+        {
+            var (addr, pcIncrease, cycles) = GetAddressingModeAddress(mode);
+            LogInstruction(mode, "DCP", true);
+            
+            switch (mode)
+            {
+                case AddressingModes.IndirectX: case AddressingModes.IndirectY:
+                case AddressingModes.AbsoluteY:
+                    cycles += 2;
+                    break;
+            }
+            
             var value = Ram.Byte(addr);
             value--;
             Ram.WriteByte(addr, value);
@@ -1217,21 +1202,18 @@ namespace NESCore
             cyclesThisSec += cycles;
         }
 
-        void DcmAbsolute() => Dcm(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
-        void DcmAbsoluteX() => Dcm(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
-        void DcmAbsoluteY() => Dcm(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
-        void DcmZPage() => Dcm(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
-        void DcmZPageX() => Dcm(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
-        void DcmIndirectX() => Dcm(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
-        void DcmIndirectY() => Dcm(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
-        
-        
-        #endregion
-        
-        #region INS
-        
-        void Ins(ushort addr, int cycles, ushort pcIncrease) {
-            LogInstruction(pcIncrease - 1, $"INS ${addr:X2}");
+        void Ins(AddressingModes mode)
+        {
+            var (addr, pcIncrease, cycles) = GetAddressingModeAddress(mode);
+            LogInstruction(mode, "ISB", true);
+            
+            switch (mode)
+            {
+                case AddressingModes.IndirectX: case AddressingModes.IndirectY:
+                    case AddressingModes.AbsoluteY:
+                    cycles += 2;
+                    break;
+            }
 
             var value = Ram.Byte(addr);
             value++;
@@ -1241,16 +1223,6 @@ namespace NESCore
             PC += pcIncrease;
             cyclesThisSec += cycles;
         }
-
-        void InsAbsolute() => Ins(Ram.Absolute(Ram.Word(PC + 1)), 6, 3);
-        void InsAbsoluteX() => Ins(Ram.AbsoluteX(Ram.Word(PC + 1)), 7, 3);
-        void InsAbsoluteY() => Ins(Ram.AbsoluteY(Ram.Word(PC + 1)), 7, 3);
-        void InsZPage() => Ins(Ram.ZPage(Ram.Byte(PC + 1)), 5, 2);
-        void InsZPageX() => Ins(Ram.ZPageX(Ram.Byte(PC + 1)), 6, 2);
-        void InsIndirectX() => Ins(Ram.IndirectX(Ram.Byte(PC + 1)), 8, 2);
-        void InsIndirectY() => Ins(Ram.IndirectY(Ram.Byte(PC + 1)), 8, 2);
-        
-        #endregion
 
         private (byte, ushort, ushort) GetAddressingModeParameter(AddressingModes addressingModes)
         {
