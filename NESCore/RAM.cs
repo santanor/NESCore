@@ -153,8 +153,14 @@ namespace NESCore
         /// Absolute X
         /// Returns whatever is entered as a parameter plus register X
         /// </summary>
-        public ushort AbsoluteX(ushort addr)
+        public ushort AbsoluteX(ushort addr, bool checkIfPageCrossed = false)
         {
+            if (checkIfPageCrossed)
+            {
+                if ((addr & 0xff00) != ((addr + Cpu.X) & 0xff00)) {
+                    Cpu.cyclesThisSec++;
+                }
+            }
             return (ushort)(addr + Cpu.X);
         }
 
@@ -206,22 +212,17 @@ namespace NESCore
             return (ushort)(Byte(addr & 0xFF) | Byte((addr + 1) & 0xFF) << 8);
         }
 
-        public ushort IndirectY(byte addr)
+        public ushort IndirectY(byte addr, bool checkPageCrossed = false)
         {
-            ushort result;
-            if (addr == 0xFF)
+            var result =(ushort)(Byte(addr & 0xFF) | Byte((addr + 1) & 0xFF) << 8);
+            
+            if (checkPageCrossed)
             {
-                var tempBytes = new byte[2];
-                tempBytes[0] = Byte(addr);
-                tempBytes[1] = 0xFF;
-
-                result = tempBytes.ToWord();
+                if ((result & 0xff00) != ((result + Cpu.Y) & 0xff00)) {
+                    Cpu.cyclesThisSec++;
+                }
+                
             }
-            else
-            {
-                result = Word(addr);
-            }
-
             return (ushort)(result + Cpu.Y);
         }
 
@@ -233,13 +234,8 @@ namespace NESCore
         public byte AbsoluteXParam(bool checkPageCrossed = false)
         {
             var parameter = Word(Cpu.PC + 1);
-            var absX = AbsoluteX(parameter);
+            var absX = AbsoluteX(parameter, checkPageCrossed);
             var result = Byte(absX);
-
-            if (checkPageCrossed)
-            {
-                CheckPageCrossed(parameter, absX);
-            }
 
             return result;
         }
@@ -263,13 +259,8 @@ namespace NESCore
         public byte IndirectYParam(bool checkPageCrossed = false)
         {
             var parameter = Byte(Cpu.PC + 1);
-            var indY = IndirectY(parameter);
+            var indY = IndirectY(parameter, checkPageCrossed);
             var result = Byte(indY);
-
-            if (checkPageCrossed)
-            {
-                CheckPageCrossed(parameter, indY);
-            }
 
             return result;
         }
