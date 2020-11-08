@@ -48,7 +48,6 @@ namespace NESCore
             {
                 var cpuCycles = Cpu.Instruction();
                 Ppu.RunCycles(cpuCycles*3);
-                
             }
         }
 

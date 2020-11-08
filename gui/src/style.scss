@@ -1,0 +1,86 @@
+
+@font-face {
+    font-family: system;
+    font-style: normal;
+    src: local("Menlo-Regular");
+}
+body{
+    font-family: "system", serif;
+    background-color: rgb(30, 30, 30);
+}
+
+.white{
+    color:white; 
+}
+
+.page{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.container{
+    display: flex;
+}
+
+.container-column{
+    display: flex;
+    flex-direction: column;
+}
+
+.scroll{
+    overflow: scroll;
+    flex-grow: 1;
+}
+
+.title{
+    letter-spacing: 2px;
+    font-size: x-large;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.small{
+    font-size: small;
+}
+
+.medium{
+    font-size: medium;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.large {
+    font-size: large;
+}
+
+.super {
+    font-size: x-large;
+}
+
+.margin-auto{
+    margin: auto
+}
+
+.center {
+    align-self: center;
+}
+
+.justify-center{
+    justify-content: center;
+}
+
+.text-area{
+    width: 99%;
+    height: 99%;
+    background-color: transparent;
+    border: 0;
+    resize: none;
+    outline: none;
+}

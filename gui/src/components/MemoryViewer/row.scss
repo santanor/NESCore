@@ -1,0 +1,26 @@
+.content {
+    animation-duration: 0.7s;
+    animation-name: bump;
+  }
+  
+  @keyframes bump {
+    from {
+      font-size: medium;;
+      font-weight: normal;
+    }
+  
+    25% {
+        font-size: large;
+        font-weight: bold;
+    }
+
+    50% {
+        font-size: large;
+        font-weight: bold;
+    }
+
+    to {
+      font-size: medium;
+      font-weight: normal;;
+    }
+  }
