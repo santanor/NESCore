@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NESCore", "NESCore\NESCore.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NESTest", "NESTest\NESTest.csproj", "{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NESGui", "NESGui\NESGui.csproj", "{DCCD790D-8AD0-4285-8EF7-AA132B18452A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80F45CEB-5EC6-4200-ACD0-937EBFA2E193}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCCD790D-8AD0-4285-8EF7-AA132B18452A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCCD790D-8AD0-4285-8EF7-AA132B18452A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCCD790D-8AD0-4285-8EF7-AA132B18452A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCCD790D-8AD0-4285-8EF7-AA132B18452A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
