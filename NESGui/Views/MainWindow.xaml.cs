@@ -10,6 +10,7 @@ namespace NESGui.Views
     public class MainWindow : Window
     {
         private NametableWindow nametableWindowWindow;
+        private PatterntableWindow patterntableWindow;
         private NativeMenu menu;
         
         public MainWindow()
@@ -17,11 +18,7 @@ namespace NESGui.Views
             InitializeComponent();
             DataContext = new MainWindowViewModel();
             nametableWindowWindow = new NametableWindow();
-            
-            //menu = ((NativeMenu.GetMenu(this).Items[0] as NativeMenuItem).Menu.Items[2] as NativeMenuItem).Menu;
-
-            //var mainMenu = this.FindControl<Menu>("MainMenu");
-            //mainMenu.AttachedToVisualTree += MenuAttached;
+            patterntableWindow = new PatterntableWindow();
         }
         
         public void MenuAttached(object sender, VisualTreeAttachmentEventArgs e)
@@ -45,6 +42,11 @@ namespace NESGui.Views
         public void OpenNametableWindow(object sender, EventArgs args)
         {
             nametableWindowWindow.Show();
+        }
+
+        public void OpenPatterntableWindow(object sender, EventArgs args)
+        {
+            patterntableWindow.Show();
         }
     }
 }

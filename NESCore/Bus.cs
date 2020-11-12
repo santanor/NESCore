@@ -1,15 +1,11 @@
-using System;
-
 namespace NESCore
 {
-    public abstract class MemoryBase
+    public class Bus
     {
-        protected byte[] bank;
-
-        protected MemoryBase(int size)
-        {
-            bank = new byte[size];
-        }
+        public CPU Cpu;
+        public PPU Ppu;
+        public RAM Ram;
+        public Cartridge Rom;
         
         
         /// <summary>
@@ -19,13 +15,16 @@ namespace NESCore
         /// <returns></returns>
         public byte Byte(ushort address)
         {
-            return bank[address];
+            //RAM Range
+            if (address <= 0x1FFF)
+            {
+                return Ram.Byte(address & 0x07FF);
+            }
+
+            return 0x00;
         }
 
-        public byte Byte(int address)
-        {
-            return Byte((ushort)address);
-        }
+        public byte Byte(int address) => Byte((ushort) address);
 
         /// <summary>
         /// Reads two bytes from the starting position and returns it as a memory address.
@@ -33,18 +32,17 @@ namespace NESCore
         /// </summary>
         public ushort Word(ushort address)
         {
-            var result = new byte[2];
-            result[0] = Byte(address);
-            result[1] = Byte((ushort)(address + 1));
+            //RAM Range
+            if (address <= 0x1FFF)
+            {
+                return Ram.Word(address & 0x07FF);
+            }
 
-            return result.ToWord();
+            return 0x00;
         }
 
-        public ushort Word(int address)
-        {
-            return Word((ushort)address);
-        }
-
+        public ushort Word(int address) => Word((ushort) address);
+        
         /// <summary>
         /// Writes a byte to the specified memory location
         /// </summary>
@@ -52,7 +50,10 @@ namespace NESCore
         /// <param name="value"></param>
         public void WriteByte(ushort addr, byte value)
         {
-            bank[addr] = value;
+            if (addr <= 0x1FFF)
+            {
+                Ram.WriteByte((ushort)(addr & 0x07FF), value);
+            }
         }
 
         /// <summary>
@@ -63,11 +64,10 @@ namespace NESCore
         /// <param name="value"></param>
         public void WriteWord(ushort addr, ushort value)
         {
-            var bytes = value.ToBytes();
-            for (var i = 0; i < bytes.Length; i++)
+            if (addr <= 0x1FFF)
             {
-                bank[addr + i] = bytes[i];
+                Ram.WriteWord((ushort)(addr & 0x07FF), value);
             }
         }
-    } 
+    }
 }

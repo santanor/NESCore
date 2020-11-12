@@ -28,7 +28,7 @@
                 <NativeMenuItem.Menu>
                     <NativeMenu>
                         <NativeMenuItem Header="Nametable Viewer" Clicked="OpenNametableWindow"/>
-                        <NativeMenuItem Header="Patterntable Viewer"/>
+                        <NativeMenuItem Header="Patterntable Viewer" Clicked="OpenPatterntableWindow"/>
                     </NativeMenu>
                 </NativeMenuItem.Menu>
             </NativeMenuItem>

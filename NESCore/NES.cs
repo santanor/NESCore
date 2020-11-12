@@ -9,23 +9,18 @@ namespace NESCore
     public class NES
     {
         public delegate void FrameEvent(Bitmap bmp);
-
-        public readonly RAM Ram;
-        public readonly CPU Cpu;
-        public readonly PPU Ppu;
+        
+        public readonly Bus Bus;
         private bool running = true;
 
         public NES()
         {
-            Ram = new RAM();
-            Cpu = new CPU
-            {
-                Ram = Ram
-            };
-            Ram.Cpu = Cpu;
-            Ppu = new PPU();
-            Cpu.Ppu = Ppu;
-            Cpu.PowerUp();
+            Bus = new Bus();
+            Bus.Cpu = new CPU(Bus);
+            Bus.Ppu = new PPU();
+            Bus.Ram = new RAM();
+
+            Bus.Cpu.PowerUp();
             ConfigureLogger();
         }
 
@@ -40,7 +35,6 @@ namespace NESCore
                 .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
                 .WriteTo.File(logFileName, outputTemplate: "{Message:lj}{NewLine}")
                 .CreateLogger();
-            
         }
 
         public void Run()
@@ -49,9 +43,14 @@ namespace NESCore
 
             while (running)
             {
-                var cpuCycles = Cpu.Instruction();
-                Ppu.RunCycles(cpuCycles*3);
+                Step();
             }
+        }
+
+        public void Step()
+        {
+            var cpuCycles = Bus.Cpu.Instruction();
+            Bus.Ppu.RunCycles(cpuCycles*3);
         }
 
         public void Stop()

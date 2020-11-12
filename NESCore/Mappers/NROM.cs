@@ -5,7 +5,7 @@ namespace NESCore.Mappers
     /// <summary>
     /// Mapper 0
     /// </summary>
-    public class NROM
+    public class NROM : IMapper
     {
         private NES nes;
         public const ushort FirstRomPage = 0x8000;
@@ -20,7 +20,7 @@ namespace NESCore.Mappers
         {
             for (ushort i = 0; i < ROM.PrgPageSize; i++)
             {
-                nes.Ram.WriteByte((ushort)(FirstRomPage + i), rom.prgROM[i]);
+                nes.Bus.WriteByte((ushort)(FirstRomPage + i), rom.prgROM[i]);
             }
 
             // if there's only one page then start at 0 to mirror it, otherwise continue
@@ -29,11 +29,15 @@ namespace NESCore.Mappers
 
             for (ushort i = 0; i < ROM.PrgPageSize; i++)
             {
-                nes.Ram.WriteByte((ushort)(SecondRomPage + i), rom.prgROM[mirrorStartingPoint + i]);
+                nes.Bus.WriteByte((ushort)(SecondRomPage + i), rom.prgROM[mirrorStartingPoint + i]);
             }
 
             //TODO COPY THE VRAM STUFF
         }
 
+        public void Read(ushort addr)
+        {
+            
+        }
     }
 }

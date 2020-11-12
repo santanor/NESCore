@@ -64,12 +64,16 @@ namespace NESCore
         /// </summary>
         public int Speed;
 
-        public RAM Ram;
-        public PPU Ppu;
+        public Bus Bus;
 
         private bool running;
 
         private Action[] opcodes;
+
+        public CPU(Bus bus)
+        {
+            Bus = bus;
+        }
 
         public void PowerUp()
         {
@@ -78,11 +82,11 @@ namespace NESCore
             Y = 0x00;
             P = 0x24;
             SP = 0xFD;
-            Ram.WriteByte(0x4017, 0x00);
+            Bus.WriteByte(0x4017, 0x00);
 
             for (ushort i = 0x4000; i <= 0x4013; i++)
             {
-                Ram.WriteByte(i, 0x00);
+                Bus.WriteByte(i, 0x00);
             }
 
             running = true;
@@ -101,7 +105,7 @@ namespace NESCore
                 () => Aso(AddressingModes.IndirectX), //0x03
                 Nop, //0x04
                 () => Ora(AddressingModes.ZeroPage), //0x05
-                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x06
+                () => Bus.WriteByte(ZPage(Bus.Byte(PC + 1)), Asl(AddressingModes.ZeroPage)), //0x06
                 () => Aso(AddressingModes.ZeroPage), //0x07
                 Php, //0x08
                 () => Ora(AddressingModes.Immediate), //0x09
@@ -109,7 +113,7 @@ namespace NESCore
                 Anc, //0x0B
                 Nop, //0x0C
                 () => Ora(AddressingModes.Absolute), //0x0D
-                () => Ram.WriteByte(Ram.Word(PC + 1), Asl(AddressingModes.Absolute)), //0x0E
+                () => Bus.WriteByte(Bus.Word(PC + 1), Asl(AddressingModes.Absolute)), //0x0E
                 () => Aso(AddressingModes.Absolute), //0x0F
                 () => TryBranch(Flags.Negative, false, "BPL"), //0x10
                 () => Ora(AddressingModes.IndirectY), //0x11
@@ -117,7 +121,7 @@ namespace NESCore
                 () => Aso(AddressingModes.IndirectY), //0x13
                 Nop, //0x14
                 () => Ora(AddressingModes.ZeroPageX), //0x15
-                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Asl(AddressingModes.ZeroPageX)), //0x16
+                () => Bus.WriteByte(ZPageX(Bus.Byte(PC + 1)), Asl(AddressingModes.ZeroPageX)), //0x16
                 () => Aso(AddressingModes.ZeroPageX), //0x17
                 Clc, //0x18
                 () => Ora(AddressingModes.AbsoluteY), //0x19
@@ -125,7 +129,7 @@ namespace NESCore
                 () => Aso(AddressingModes.AbsoluteY), //0x1B
                 Nop, //0x1C
                 () => Ora(AddressingModes.AbsoluteX), //0x1D
-                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Asl(AddressingModes.AbsoluteX)), //0x1E
+                () => Bus.WriteByte(AbsoluteX(Bus.Word(PC + 1)), Asl(AddressingModes.AbsoluteX)), //0x1E
                 () => Aso(AddressingModes.AbsoluteX), //0x1F
                 Jsr, //0x20
                 () => And(AddressingModes.IndirectX), //0x21
@@ -133,7 +137,7 @@ namespace NESCore
                 () => Rla(AddressingModes.IndirectX), //0x23
                 BitZPage, //0x24
                 () => And(AddressingModes.ZeroPage), //0x25
-                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Rol(AddressingModes.ZeroPage)), //0x26
+                () => Bus.WriteByte(ZPage(Bus.Byte(PC + 1)), Rol(AddressingModes.ZeroPage)), //0x26
                 () => Rla(AddressingModes.ZeroPage), //0x27
                 Plp, //0x28
                 () => And(AddressingModes.Immediate), //0x29
@@ -141,7 +145,7 @@ namespace NESCore
                 Anc, //0x2B
                 BitAbsolute, //0x2C
                 () => And(AddressingModes.Absolute), //0x2D
-                () => Ram.WriteByte(Ram.Word(PC + 1), Rol(AddressingModes.Absolute)), //0x2E
+                () => Bus.WriteByte(Bus.Word(PC + 1), Rol(AddressingModes.Absolute)), //0x2E
                 () => Rla(AddressingModes.Absolute), //0x2F
                 () => TryBranch(Flags.Negative, true, "BMI"), //0x30
                 () => And(AddressingModes.IndirectY), //0x31
@@ -149,7 +153,7 @@ namespace NESCore
                 () => Rla(AddressingModes.IndirectY), //0x33
                 Nop, //0x34
                 () => And(AddressingModes.ZeroPageX), //0x35
-                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Rol(AddressingModes.ZeroPageX)), //0x36
+                () => Bus.WriteByte(ZPageX(Bus.Byte(PC + 1)), Rol(AddressingModes.ZeroPageX)), //0x36
                 () => Rla(AddressingModes.ZeroPageX), //0x37
                 Sec, //0x38
                 () => And(AddressingModes.AbsoluteY), //0x39
@@ -157,7 +161,7 @@ namespace NESCore
                 () => Rla(AddressingModes.AbsoluteY), //0x3B
                 Nop, //0x3C
                 () => And(AddressingModes.AbsoluteX), //0x3D
-                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Rol(AddressingModes.AbsoluteX)), //0x3E
+                () => Bus.WriteByte(AbsoluteX(Bus.Word(PC + 1)), Rol(AddressingModes.AbsoluteX)), //0x3E
                 () => Rla(AddressingModes.AbsoluteX), //0x3F
                 Rti, //0x40
                 () => Eor(AddressingModes.IndirectX), //0x41
@@ -165,7 +169,7 @@ namespace NESCore
                 () => Lse(AddressingModes.IndirectX), //0x43
                 Nop, //0x44
                 () => Eor(AddressingModes.ZeroPage), //0x45
-                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Lsr(AddressingModes.ZeroPage)), //0x46
+                () => Bus.WriteByte(ZPage(Bus.Byte(PC + 1)), Lsr(AddressingModes.ZeroPage)), //0x46
                 () => Lse(AddressingModes.ZeroPage), //0x47
                 Pha, //0x48
                 () => Eor(AddressingModes.Immediate), //0x49
@@ -173,7 +177,7 @@ namespace NESCore
                 Alr, //0x4B
                 JmpAbsolute, //0x4C
                 () => Eor(AddressingModes.Absolute), //0x4D
-                () => Ram.WriteByte(Ram.Word(PC + 1), Lsr(AddressingModes.Absolute)), //0x4E
+                () => Bus.WriteByte(Bus.Word(PC + 1), Lsr(AddressingModes.Absolute)), //0x4E
                 () => Lse(AddressingModes.Absolute), //0x4F
                 () => TryBranch(Flags.Overflow, false, "BVC"), //0x50
                 () => Eor(AddressingModes.IndirectY), //0x51
@@ -181,7 +185,7 @@ namespace NESCore
                 () => Lse(AddressingModes.IndirectY), //0x53
                 Nop, //0x54
                 () => Eor(AddressingModes.ZeroPageX), //0x55
-                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Lsr(AddressingModes.ZeroPageX)), //0x56
+                () => Bus.WriteByte(ZPageX(Bus.Byte(PC + 1)), Lsr(AddressingModes.ZeroPageX)), //0x56
                 () => Lse(AddressingModes.ZeroPageX), //0x57
                 Cli, //0x58
                 () => Eor(AddressingModes.AbsoluteY), //0x59
@@ -189,7 +193,7 @@ namespace NESCore
                 () => Lse(AddressingModes.AbsoluteY), //0x5B
                 Nop, //0x5C
                 () => Eor(AddressingModes.AbsoluteX), //0x5D
-                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Lsr(AddressingModes.AbsoluteX)), //0x5E
+                () => Bus.WriteByte(AbsoluteX(Bus.Word(PC + 1)), Lsr(AddressingModes.AbsoluteX)), //0x5E
                 () => Lse(AddressingModes.AbsoluteX), //0x5F
                 Rts, //0x60
                 () => Adc(AddressingModes.IndirectX), //0x61
@@ -197,7 +201,7 @@ namespace NESCore
                 () => Rra(AddressingModes.IndirectX), //0x63
                 Nop, //0x64
                 () => Adc(AddressingModes.ZeroPage), //0x65
-                () => Ram.WriteByte(Ram.ZPage(Ram.Byte(PC + 1)), Ror(AddressingModes.ZeroPage)), //0x66
+                () => Bus.WriteByte(ZPage(Bus.Byte(PC + 1)), Ror(AddressingModes.ZeroPage)), //0x66
                 () => Rra(AddressingModes.ZeroPage), //0x67
                 Pla, //0x68
                 () => Adc(AddressingModes.Immediate), //0x69
@@ -205,7 +209,7 @@ namespace NESCore
                 Arr, //0x6B
                 JmpIndirect, //0x6C
                 () => Adc(AddressingModes.Absolute), //0x6D
-                () => Ram.WriteByte(Ram.Word(PC + 1), Ror(AddressingModes.Absolute)), //0x6E
+                () => Bus.WriteByte(Bus.Word(PC + 1), Ror(AddressingModes.Absolute)), //0x6E
                 () => Rra(AddressingModes.Absolute), //0x6F
                 () => TryBranch(Flags.Overflow, true, "BVS"), //0x70
                 () => Adc(AddressingModes.IndirectY), //0x71
@@ -213,7 +217,7 @@ namespace NESCore
                 () => Rra(AddressingModes.IndirectY), //0x73
                 Nop, //0x74
                 () => Adc(AddressingModes.ZeroPageX), //0x75
-                () => Ram.WriteByte(Ram.ZPageX(Ram.Byte(PC + 1)), Ror(AddressingModes.ZeroPageX)), //0x76
+                () => Bus.WriteByte(ZPageX(Bus.Byte(PC + 1)), Ror(AddressingModes.ZeroPageX)), //0x76
                 () => Rra(AddressingModes.ZeroPageX), //0x77
                 Sei, //0x78
                 () => Adc(AddressingModes.AbsoluteY), //0x79
@@ -221,7 +225,7 @@ namespace NESCore
                 () => Rra(AddressingModes.AbsoluteY), //0x7B
                 Nop, //0x7C
                 () => Adc(AddressingModes.AbsoluteX), //0x7D
-                () => Ram.WriteByte(Ram.AbsoluteX(Ram.Word(PC + 1)), Ror(AddressingModes.AbsoluteX)), //0x7E
+                () => Bus.WriteByte(AbsoluteX(Bus.Word(PC + 1)), Ror(AddressingModes.AbsoluteX)), //0x7E
                 () => Rra(AddressingModes.AbsoluteX), //0x7F
                 Nop, //0x80
                 () => StoreRegister(A, AddressingModes.IndirectX, "STA"), //0x81
@@ -363,7 +367,7 @@ namespace NESCore
         public int Instruction()
         {
             var cyclesBefore = cyclesThisSec;
-            currentOpcode = Ram.Byte(PC);
+            currentOpcode = Bus.Byte(PC);
             opcodes[currentOpcode].Invoke();
             PC += OpcodeMetadata.Size[currentOpcode];
             cyclesThisSec += OpcodeMetadata.Timings[currentOpcode];
@@ -375,7 +379,7 @@ namespace NESCore
         /// </summary>
         private void Invalid()
         {
-            Log.Error($"Unkown OPcode: {Ram.Byte(PC):X2}");
+            Log.Error($"Unkown OPcode: {Bus.Byte(PC):X2}");
         }
 
         private void Break()
@@ -476,29 +480,29 @@ namespace NESCore
 
         private void BitZPage()
         {
-            var paramAddr = Ram.ZPage(Ram.Byte(PC + 1));
-            var value = Ram.ZPageParam();
+            var paramAddr = ZPage(Bus.Byte(PC + 1));
+            var value = ZPageParam();
             LogInstruction(1, $"BIT ${paramAddr:X2} = {value:X2}");
             BIT(value);
         }
 
         private void BitAbsolute()
         {
-            var paramAddr = Ram.Absolute(Ram.Word(PC + 1));
-            var value = Ram.Byte(paramAddr);
+            var paramAddr = Absolute(Bus.Word(PC + 1));
+            var value = Bus.Byte(paramAddr);
             LogInstruction(2, $"BIT ${paramAddr:X4} = {value:X2}");
             BIT(value);
         }
 
         private void TryBranch(Flags flag, bool reqFlagValue, string mnemonic)
         {
-            var value = (sbyte)Ram.Byte(PC + 1);
+            var value = (sbyte)Bus.Byte(PC + 1);
             
             LogInstruction(1, $"{mnemonic} ${(PC + value + 2):X4}");
 
             if (Bit.Test(P, flag) == reqFlagValue)
             {
-                Ram.CheckPageCrossed((ushort) (PC + OpcodeMetadata.Timings[currentOpcode] + value), 
+                CheckPageCrossed((ushort) (PC + OpcodeMetadata.Timings[currentOpcode] + value), 
                     (ushort)(PC + OpcodeMetadata.Timings[currentOpcode]));
                 PC = (ushort)(PC + value);
                 cyclesThisSec++;
@@ -522,11 +526,11 @@ namespace NESCore
         void DeltaMemory(AddressingModes mode, int delta, string mnemonic)
         {
             var addr = GetAddressingModeAddress(mode);
-            var value = Ram.Byte(addr);
+            var value = Bus.Byte(addr);
             LogInstruction(mode, mnemonic);
             value += (byte)delta;
             
-            Ram.WriteByte(addr, value);
+            Bus.WriteByte(addr, value);
 
             Bit.Val(ref P, Flags.Zero, value == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(value, Flags.Negative));
@@ -569,15 +573,15 @@ namespace NESCore
 
         void JmpAbsolute()
         {
-            var addr = Ram.Word(PC + 1);
+            var addr = Bus.Word(PC + 1);
             LogInstruction(2, $"JMP ${addr:X4}");
             Jmp(addr);
         }
 
         void JmpIndirect()
         {
-            var addr = Ram.IndirectParam();
-            var opcodeParam = Ram.Word(PC + 1);
+            var addr = IndirectParam();
+            var opcodeParam = Bus.Word(PC + 1);
             LogInstruction(2, $"JMP (${opcodeParam:X4}) = {addr:X4}");
             Jmp(addr);
         }
@@ -585,10 +589,10 @@ namespace NESCore
         void Jsr()
         {
             var cachedPc = (ushort) (PC + 0x02);
-            var addr = Ram.Absolute(Ram.Word(PC + 1));
+            var addr = Absolute(Bus.Word(PC + 1));
             LogInstruction(2, $"JSR ${addr:X2}");
             
-            Ram.PushWord(cachedPc); // Stores the address of the next opcode minus one
+            PushWord(cachedPc); // Stores the address of the next opcode minus one
             PC = addr;
         }
 
@@ -625,7 +629,7 @@ namespace NESCore
 
         void Nop()
         {
-            switch (Ram.Byte(PC)){
+            switch (Bus.Byte(PC)){
                 case 0xEA:
                     LogInstruction(0,"NOP");
                     break;
@@ -641,7 +645,7 @@ namespace NESCore
                     break;
                 case 0x1C: case 0x3C: case 0x5C: case 0x7C: case 0xDC: case 0xFC:
                     LogInstruction(AddressingModes.AbsoluteX, "NOP", true);
-                    Ram.AbsoluteXParam(true);
+                    AbsoluteXParam(true);
                     break;
                 case 0x04: case 0x44: case 0x64:
                     LogInstruction(AddressingModes.ZeroPage, "NOP", true);
@@ -722,15 +726,15 @@ namespace NESCore
         void Rti()
         {
             LogInstruction(0, "RTI");
-            P = Ram.PopByte();
+            P = PopByte();
             Bit.Set(ref P, Flags.Unused);//It has to be one. Always
-            PC = Ram.PopWord(); //Unlike RTS. RTI pulls the correct PC address. No need to increment
+            PC = PopWord(); //Unlike RTS. RTI pulls the correct PC address. No need to increment
         }
 
         void Rts()
         {
             LogInstruction(0, "RTS");
-            PC = Ram.PopWord();
+            PC = PopWord();
         }
 
         /// <summary>
@@ -746,7 +750,7 @@ namespace NESCore
         {
             var addr = GetAddressingModeAddress(mode);
             LogInstruction(mode, mnemonic);
-            Ram.WriteByte(addr, value);
+            Bus.WriteByte(addr, value);
         }
 
         void Txs() => TransferRegister(X, ref SP, "TXS", false);
@@ -755,13 +759,13 @@ namespace NESCore
         void Pha()
         {
             LogInstruction(0, "PHA");
-            Ram.PushByte(A);
+            PushByte(A);
         }
 
         void Pla()
         {
             LogInstruction(0, "PLA");
-            A = Ram.PopByte();
+            A = PopByte();
             Bit.Val(ref P, Flags.Zero, A == 0);
             Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
         }
@@ -769,13 +773,13 @@ namespace NESCore
         void Php()
         {
             LogInstruction(0, "PHP");
-            Ram.PushByte((byte) (P | 0x10));
+            PushByte((byte) (P | 0x10));
         }
 
         void Plp()
         {
             LogInstruction(0, "PLP");
-            P = Ram.PopByte();
+            P = PopByte();
 
             //Bit 5 of P is unused, so clear it. It should always be 1.
             Bit.Set(ref P, 5);
@@ -788,11 +792,11 @@ namespace NESCore
             LogInstruction(mode, "SLO", true);
 
             //ASL
-            var value = Ram.Byte(addr);
+            var value = Bus.Byte(addr);
             Bit.Val(ref P, Flags.Carry, Bit.Test(value, Flags.Negative));
 
             var shifted = (byte) (value << 1);
-            Ram.WriteByte(addr, shifted);
+            Bus.WriteByte(addr, shifted);
 
             //Now the ORA
             A = (byte) (A | shifted);
@@ -818,7 +822,7 @@ namespace NESCore
             var addr = GetAddressingModeAddress(mode);
             LogInstruction(mode, "RLA", true);
 
-            var value = Ram.Byte(addr);
+            var value = Bus.Byte(addr);
 
             var cachedFlagC = Bit.Test(P, Flags.Carry);
             var cached7 = Bit.Test(value, Flags.Negative);
@@ -827,7 +831,7 @@ namespace NESCore
             var shifted = (byte) (value << 1);
 
             Bit.Val(ref shifted, 0, cachedFlagC);
-            Ram.WriteByte(addr, shifted);
+            Bus.WriteByte(addr, shifted);
 
             A &= shifted;
             Bit.Val(ref P, Flags.Zero, A == 0);
@@ -839,9 +843,9 @@ namespace NESCore
             var addr = GetAddressingModeAddress(mode);
             LogInstruction(mode, "SRE", true);
 
-            var data = Ram.Byte(addr);
+            var data = Bus.Byte(addr);
             data = LsrInternal(data);
-            Ram.WriteByte(addr, data);
+            Bus.WriteByte(addr, data);
 
             EorInternal(data);
         }
@@ -852,7 +856,7 @@ namespace NESCore
         /// </summary>
         void Alr()
         {
-            var value = Ram.Byte(PC + 1);
+            var value = Bus.Byte(PC + 1);
             LogInstruction(1, $"ALR #{value:X2}");
             value &= A;
             Bit.Val(ref P, Flags.Zero, A == 0);
@@ -866,16 +870,16 @@ namespace NESCore
             var addr = GetAddressingModeAddress(mode);
             LogInstruction(mode, "RRA", true);
 
-            var value = Ram.Byte(addr);
+            var value = Bus.Byte(addr);
             value =  Rotate(value, RotateDirection.Right);
-            Ram.WriteByte(addr, value);
+            Bus.WriteByte(addr, value);
             
             AdcInternal(value);
         }
 
         void Arr()
         {
-            var value = Ram.Byte(PC + 1);
+            var value = Bus.Byte(PC + 1);
             LogInstruction(1, $"AAR #{value:X2}");
             
             value &= A;
@@ -891,7 +895,7 @@ namespace NESCore
             LogInstruction(mode, "SAX", true);
 
             var value = (byte) (A & X);
-            Ram.WriteByte(addr, value);
+            Bus.WriteByte(addr, value);
         }
         void Lax(AddressingModes mode)
         {
@@ -909,9 +913,9 @@ namespace NESCore
             var addr = GetAddressingModeAddress(mode);
             LogInstruction(mode, "DCP", true);
 
-            var value = Ram.Byte(addr);
+            var value = Bus.Byte(addr);
             value--;
-            Ram.WriteByte(addr, value);
+            Bus.WriteByte(addr, value);
             
             var temp_result = (byte) (A - value);
 
@@ -927,10 +931,204 @@ namespace NESCore
             var addr = GetAddressingModeAddress(mode);
             LogInstruction(mode, "ISB", true);
 
-            var value = Ram.Byte(addr);
+            var value = Bus.Byte(addr);
             value++;
-            Ram.WriteByte(addr, value);
+            Bus.WriteByte(addr, value);
             AdcInternal((byte)~value);
+        }
+        
+        
+        /// <summary>
+        /// Push a byte on top of the stack
+        /// </summary>
+        /// <param name="value"></param>
+        public void PushByte(byte value)
+        {
+            var bankPointer = (ushort)(SP + 0x100);
+            Bus.WriteByte(bankPointer, value);
+            SP -= 1;
+        }
+
+        /// <summary>
+        /// Push a word on top of the stack, internally the word is flipped to reflect
+        /// the correct endian-ess
+        /// </summary>
+        /// <param name="value"></param>
+        public void PushWord(ushort value)
+        {
+            var bankPointer = (ushort)(SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
+            Bus.WriteWord(bankPointer, value);
+            SP -= 2;
+        }
+
+        /// <summary>
+        /// Pulls the top-most byte from the stack
+        /// </summary>
+        /// <returns></returns>
+        public byte PopByte()
+        {
+            var value = Bus.Byte((ushort)(SP + 1 + 0x100));
+            SP += 1;
+            return value;
+        }
+
+        /// <summary>
+        /// Pops the 2 top-most bytes from the stack and returns them as a word
+        /// </summary>
+        /// <returns></returns>
+
+        public ushort PopWord()
+        {
+            var value = Bus.Word((ushort)(SP + 1 + 0x100));
+            SP += 2;
+            return value;
+        }
+
+        /// <summary>
+        /// Mockup method, simply returns what its given. It's here for consistency
+        /// </summary>
+        public ushort Absolute(ushort addr)
+        {
+            return addr;
+        }
+
+        /// <summary>
+        /// Absolute X
+        /// Returns whatever is entered as a parameter plus register X
+        /// </summary>
+        public ushort AbsoluteX(ushort addr, bool checkIfPageCrossed = false)
+        {
+            if (checkIfPageCrossed)
+            {
+                if ((addr & 0xff00) != ((addr + X) & 0xff00)) {
+                    cyclesThisSec++;
+                }
+            }
+            return (ushort)(addr + X);
+        }
+
+        /// <summary>
+        /// Absolute Y
+        /// Returns whatever is entered as a parameter plus register Y
+        /// </summary>
+        public ushort AbsoluteY(ushort addr)
+        {
+            return (ushort)(addr + Y);
+        }
+
+        public ushort ZPage(ushort addr)
+        {
+            return (ushort)(addr & 0x00FF);
+        }
+
+        /// <summary>
+        /// Zero Page X
+        /// Gets the content of the parameter, adds X to it and that points
+        /// to an address in the zero page where the parameter can be found
+        /// </summary>
+        public ushort ZPageX(byte addr)
+        {
+            return (ushort)((addr + X) & 0x00FF);
+        }
+
+        /// <summary>
+        /// Zero Page Y
+        /// Gets the content of the parameter, adds X to it and that points
+        /// to an address in the zero page where the parameter can be found
+        /// </summary>
+        public ushort ZPageY(byte addr)
+        {
+            return (ushort)((addr + Y) & 0x00FF);
+        }
+
+        /// <summary>
+        /// Basically the way it works, it gets the value of the parameter, adds the register X to it. That is an
+        /// address from which we get one byte, shift it left by 8 bits, read the next position and add t hat to the
+        /// shifted value. THAT is the indirectX address of it
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <returns></returns>
+        public ushort IndirectX(byte addr)
+        {
+            addr = (byte)ZPageX(addr);
+            //Read a byte from addr and a byte from addr+1. But in both cases wraparound so hence the 0xFF mask
+            return (ushort)(Bus.Byte(addr & 0xFF) | Bus.Byte((addr + 1) & 0xFF) << 8);
+        }
+
+        public ushort IndirectY(byte addr, bool checkPageCrossed = false)
+        {
+            var result =(ushort)(Bus.Byte(addr & 0xFF) | Bus.Byte((addr + 1) & 0xFF) << 8);
+            
+            if (checkPageCrossed)
+            {
+                if ((result & 0xff00) != ((result + Y) & 0xff00)) {
+                    cyclesThisSec++;
+                }
+                
+            }
+            return (ushort)(result + Y);
+        }
+
+        public byte ZPageXParam() => Bus.Byte(ZPageX(Bus.Byte(PC + 1)));
+        public byte ZPageYParam() => Bus.Byte(ZPageY(Bus.Byte(PC + 1)));
+        public byte ZPageParam() => Bus.Byte(Bus.Byte(PC + 1) & 0x00FF);
+        public byte AbsoluteParam() => Bus.Byte(Absolute(Bus.Word(PC + 1)));
+
+        public byte AbsoluteXParam(bool checkPageCrossed = false)
+        {
+            var absX = AbsoluteX(Bus.Word(PC + 1), checkPageCrossed);
+            var result = Bus.Byte(absX);
+            return result;
+        }
+
+        public byte AbsoluteYParam(bool checkPageCrossed = false)
+        {
+            var parameter = Bus.Word(PC + 1);
+            var absY = AbsoluteY(parameter);
+            var result = Bus.Byte(absY);
+
+            if (checkPageCrossed)
+            {
+                CheckPageCrossed(parameter, absY);
+            }
+
+            return result;
+        }
+
+        public byte IndirectXParam() => Bus.Byte(IndirectX(Bus.Byte(PC + 1)));
+
+        public byte IndirectYParam(bool checkPageCrossed = false)
+        {
+            var parameter = Bus.Byte(PC + 1);
+            var indY = IndirectY(parameter, checkPageCrossed);
+            var result = Bus.Byte(indY);
+
+            return result;
+        }
+
+        public ushort IndirectParam()
+        {
+            var addr = Bus.Word(PC + 1);
+            ushort targetAddr = 0x0000;
+            // This is a 6502 bug when instead of reading from $C0FF/$C100 it reads from $C0FF/$C000
+            if ((addr & 0xFF) == 0xFF) {
+                // Buggy code
+                targetAddr = (ushort) ((Bus.Byte(addr & 0xFF00) << 8) + Bus.Byte(addr));
+            } else {
+                // Normal code
+                targetAddr = Bus.Word(addr);
+            }
+
+            return targetAddr;
+        }
+
+
+        public void CheckPageCrossed(ushort addr1, ushort addr2)
+        {
+            if ((addr1 & 0xFF00) != (addr2 & 0xFF00))
+            {
+                cyclesThisSec++;
+            }
         }
 
         private byte GetAddressingModeParameter(AddressingModes addressingModes)
@@ -940,23 +1138,23 @@ namespace NESCore
                 case AddressingModes.Accumulator:
                     return A;
                 case AddressingModes.Immediate:
-                    return Ram.Byte(PC + 1);
+                    return Bus.Byte(PC + 1);
                 case AddressingModes.ZeroPage:
-                    return Ram.ZPageParam();
+                    return ZPageParam();
                 case AddressingModes.ZeroPageX:
-                    return Ram.ZPageXParam();
+                    return ZPageXParam();
                 case AddressingModes.ZeroPageY:
-                    return Ram.ZPageYParam();
+                    return ZPageYParam();
                 case AddressingModes.Absolute:
-                    return Ram.AbsoluteParam();
+                    return AbsoluteParam();
                 case AddressingModes.AbsoluteX:
-                    return Ram.AbsoluteXParam(true);
+                    return AbsoluteXParam(true);
                 case AddressingModes.AbsoluteY:
-                    return Ram.AbsoluteYParam(true);
+                    return AbsoluteYParam(true);
                 case AddressingModes.IndirectX:
-                    return Ram.IndirectXParam();
+                    return IndirectXParam();
                 case AddressingModes.IndirectY:
-                    return Ram.IndirectYParam(true);
+                    return IndirectYParam(true);
                 default:
                     LogInstruction(0, $"Invalid addressing mode ({nameof(addressingModes)})");
                     return 0x00;
@@ -968,23 +1166,23 @@ namespace NESCore
             switch (mode)
             {
                 case AddressingModes.ZeroPage:
-                    return Ram.ZPage(Ram.Byte(PC + 1));
+                    return ZPage(Bus.Byte(PC + 1));
                 case AddressingModes.ZeroPageX:
-                    return Ram.ZPageX(Ram.Byte(PC + 1));
+                    return ZPageX(Bus.Byte(PC + 1));
                 case AddressingModes.ZeroPageY:
-                    return Ram.ZPageY(Ram.Byte(PC + 1));
+                    return ZPageY(Bus.Byte(PC + 1));
                 case AddressingModes.Absolute:
-                    return Ram.Word(PC + 1);
+                    return Bus.Word(PC + 1);
                 case AddressingModes.AbsoluteX:
-                    return Ram.AbsoluteX(Ram.Word(PC + 1));
+                    return AbsoluteX(Bus.Word(PC + 1));
                 case AddressingModes.Indirect:
-                    return Ram.IndirectParam();
+                    return IndirectParam();
                 case AddressingModes.IndirectX:
-                    return Ram.IndirectX(Ram.Byte(PC + 1));
+                    return IndirectX(Bus.Byte(PC + 1));
                 case AddressingModes.IndirectY:
-                    return Ram.IndirectY(Ram.Byte(PC + 1));
+                    return IndirectY(Bus.Byte(PC + 1));
                 case AddressingModes.AbsoluteY:
-                    return Ram.AbsoluteY(Ram.Word(PC + 1));
+                    return AbsoluteY(Bus.Word(PC + 1));
                 default:
                     LogInstruction(0, $"Invalid addressing mode ({nameof(mode)})");
                     return 0x00;
@@ -1002,47 +1200,47 @@ namespace NESCore
                     break;
                 case AddressingModes.Immediate:
                     numParams = 1;
-                    instruction.AppendFormat("#${0:X2}", Ram.Byte(PC + 1));
+                    instruction.AppendFormat("#${0:X2}", Bus.Byte(PC + 1));
                     break;
                 case AddressingModes.ZeroPage:
                     numParams = 1;
-                    instruction.AppendFormat("${0:X2} = {1:X2}",Ram.Byte(PC + 1), Ram.ZPageParam());
+                    instruction.AppendFormat("${0:X2} = {1:X2}",Bus.Byte(PC + 1), ZPageParam());
                     break;
                 case AddressingModes.ZeroPageX:
                     numParams = 1;
-                    instruction.AppendFormat("${0:X2},X @ {1:X2} = {2:X2}",Ram.Byte(PC + 1), Ram.ZPageX(Ram.Byte(PC + 1)), Ram.ZPageXParam());
+                    instruction.AppendFormat("${0:X2},X @ {1:X2} = {2:X2}",Bus.Byte(PC + 1), ZPageX(Bus.Byte(PC + 1)), ZPageXParam());
                     break;
                 case AddressingModes.ZeroPageY:
                     numParams = 1;
-                    instruction.AppendFormat("${0:X2},Y @ {1:X2} = {2:X2}",Ram.Byte(PC + 1),Ram.ZPageY(Ram.Byte(PC + 1)), Ram.ZPageYParam());
+                    instruction.AppendFormat("${0:X2},Y @ {1:X2} = {2:X2}",Bus.Byte(PC + 1),ZPageY(Bus.Byte(PC + 1)), ZPageYParam());
                     break;
                 case AddressingModes.IndirectX:
                     numParams = 1;
-                    var indXParam = Ram.Byte(PC + 1);
+                    var indXParam = Bus.Byte(PC + 1);
                     var indXVal = (indXParam + X) & 0xFF;
                     instruction.AppendFormat("(${0:X2},X) @ {1:X2} = {2:X4} = {3:X2}", 
-                        indXParam, indXVal, Ram.IndirectX(indXParam), Ram.IndirectXParam());
+                        indXParam, indXVal, IndirectX(indXParam), IndirectXParam());
                     break;
                 case AddressingModes.IndirectY:
                     numParams = 1;
-                    var opcodeParam = Ram.Byte(PC + 1);
-                    var initialAddr = Ram.Byte(opcodeParam & 0xFF) | Ram.Byte((opcodeParam + 1) & 0xFF) << 8;
+                    var opcodeParam = Bus.Byte(PC + 1);
+                    var initialAddr = Bus.Byte(opcodeParam & 0xFF) | Bus.Byte((opcodeParam + 1) & 0xFF) << 8;
                     instruction.AppendFormat("(${0:X2}),Y = {1:X4} @ {2:X4} = {3:X2}", 
-                        opcodeParam, initialAddr, Ram.IndirectY(opcodeParam), Ram.IndirectYParam());
+                        opcodeParam, initialAddr, IndirectY(opcodeParam), IndirectYParam());
                     break;
                 case AddressingModes.Absolute:
                     numParams = 2;
-                    instruction.AppendFormat("${0:X4} = {1:X2}", Ram.Word(PC + 1), Ram.AbsoluteParam());
+                    instruction.AppendFormat("${0:X4} = {1:X2}", Bus.Word(PC + 1), AbsoluteParam());
                     break;
                 case AddressingModes.AbsoluteX: 
                     numParams = 2;
-                    instruction.AppendFormat("${0:X4},X @ {1:X4} = {2:X2}", Ram.Word(PC + 1), Ram.AbsoluteX(Ram.Word(PC + 1)), Ram.AbsoluteXParam());
+                    instruction.AppendFormat("${0:X4},X @ {1:X4} = {2:X2}", Bus.Word(PC + 1), AbsoluteX(Bus.Word(PC + 1)), AbsoluteXParam());
                     break;
                 case AddressingModes.AbsoluteY:
                     numParams = 2;
-                    var absYparam = Ram.Word(PC + 1);
+                    var absYparam = Bus.Word(PC + 1);
                     var absYInitialAddr = (absYparam + Y) & 0xFFFF;
-                    instruction.AppendFormat("${0:X4},Y @ {1:X4} = {2:X2}", Ram.Word(PC + 1),absYInitialAddr, Ram.AbsoluteYParam());
+                    instruction.AppendFormat("${0:X4},Y @ {1:X4} = {2:X2}", Bus.Word(PC + 1),absYInitialAddr, AbsoluteYParam());
                     break;
                 default:
                     Invalid();
@@ -1058,7 +1256,7 @@ namespace NESCore
             sb.Append($"{PC:X4}  {currentOpcode:X2} ");
 
             for (var i = 1; i <= numParams; i++) {
-                sb.Append($"{Ram.Byte(PC + i):X2} ");
+                sb.Append($"{Bus.Byte(PC + i):X2} ");
             }
 
             //The mnemonic should start at position 16 or at 15 if invalid. 
@@ -1074,8 +1272,8 @@ namespace NESCore
             sb.Append(string.Empty.PadRight(padding));
             sb.Append($"A:{A:X2} X:{X:X2} Y:{Y:X2} P:{P:X2} SP:{SP:X2}");
 
-            sb.Append(" PPU:").Append(Ppu.CyclesThisFrame.ToString().PadLeft(3));
-            sb.Append(",").Append(Ppu.FrameCount.ToString().PadLeft(3)).Append($" CYC:{cyclesThisSec}");
+            sb.Append(" PPU:").Append(Bus.Ppu.CyclesThisFrame.ToString().PadLeft(3));
+            sb.Append(",").Append(Bus.Ppu.FrameCount.ToString().PadLeft(3)).Append($" CYC:{cyclesThisSec}");
 
             Log.Information(sb.ToString());
         }

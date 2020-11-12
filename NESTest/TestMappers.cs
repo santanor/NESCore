@@ -21,15 +21,15 @@ namespace Tests
         [Test]
         public void TestNROM()
         {
-            Assert.NotZero(nes.Ram.Byte(NROM.FirstRomPage));
+            Assert.NotZero(nes.Bus.Byte(NROM.FirstRomPage));
 
-            Assert.NotZero(nes.Ram.Byte(NROM.SecondRomPage));
+            Assert.NotZero(nes.Bus.Byte(NROM.SecondRomPage));
 
             //Check that the mirror is implemented correctly (The test ROM has a mirror)
             for (ushort i = 0; i < ROM.PrgPageSize; i++)
             {
-                var firstPageByte = nes.Ram.Byte((ushort)(NROM.FirstRomPage + i));
-                var secondPageByte = nes.Ram.Byte((ushort)(NROM.FirstRomPage + i));
+                var firstPageByte = nes.Bus.Byte((ushort)(NROM.FirstRomPage + i));
+                var secondPageByte = nes.Bus.Byte((ushort)(NROM.FirstRomPage + i));
                 Assert.AreEqual(firstPageByte, secondPageByte);
             }
         }

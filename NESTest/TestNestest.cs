@@ -14,6 +14,7 @@ namespace Tests
     {
         private ROM rom;
         private NES nes;
+        private const int instructionsToRun = 8990;
 
         [SetUp]
         public void Setup()
@@ -26,26 +27,21 @@ namespace Tests
 
             nes = new NES();
             nes.LoadROM(rom);
-            nes.Cpu.PC = 0xC000;
-            
+            nes.Bus.Cpu.PC = 0xC000;
         }
 
 
         [Test]
-        public async Task Nestest()
+        public void Nestest()
         {
-            var cancellationToken = new CancellationToken();
-            var _ = Task.Run(nes.Run, cancellationToken);
-            await Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
+            for(var i = 0; i <= instructionsToRun; i++)
+            {
+                nes.Step();
+                //A bit over the top to compare it every step, but oh well.....
+            }
             
-            nes.Stop();
-            
-            //Now read the value on byte 002h
-            // 000h - tests completed successfully
-
-            Assert.Zero(nes.Ram.Byte(0x02));
-            Assert.Zero(nes.Ram.Byte(0x03));
+            Assert.Zero(nes.Bus.Byte(0x02));
+            Assert.Zero(nes.Bus.Byte(0x03));
         }
-
     }
 }
