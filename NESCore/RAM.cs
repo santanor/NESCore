@@ -15,77 +15,14 @@ namespace NESCore
     /// $4018-$401F    $0008  APU and I/O functionality that is normally disabled. See CPU Test Mode.
     /// $4020-$FFFF    $BFE0  Cartridge space: PRG ROM, PRG RAM, and mapper registers
     /// </summary>
-    public class RAM
+    public class RAM : MemoryBase
     {
         public const int RAM_SIZE = 65536;
-
-        private byte[] bank;
-
         public CPU Cpu;
 
-        public RAM(int size)
+        public RAM() : base(RAM_SIZE)
         {
-            bank = new byte[size];
         }
-
-        /// <summary>
-        /// Reads a byte from the specified memory location
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        public byte Byte(ushort address)
-        {
-            return bank[address];
-        }
-
-        public byte Byte(int address)
-        {
-            return Byte((ushort)address);
-        }
-
-        /// <summary>
-        /// Reads two bytes from the starting position and returns it as a memory address.
-        /// It will do the calculation for you, that's how nice this bad boy is
-        /// </summary>
-        public ushort Word(ushort address)
-        {
-            var result = new byte[2];
-            result[0] = Byte(address);
-            result[1] = Byte((ushort)(address + 1));
-
-            return result.ToWord();
-        }
-
-        public ushort Word(int address)
-        {
-            return Word((ushort)address);
-        }
-
-        /// <summary>
-        /// Writes a byte to the specified memory location
-        /// </summary>
-        /// <param name="addr"></param>
-        /// <param name="value"></param>
-        public void WriteByte(ushort addr, byte value)
-        {
-            bank[addr] = value;
-        }
-
-        /// <summary>
-        /// Writes a word to the specified memory location, the word
-        /// is internally converted and flipped to be inserted into the memory bank
-        /// </summary>
-        /// <param name="addr"></param>
-        /// <param name="value"></param>
-        public void WriteWord(ushort addr, ushort value)
-        {
-            var bytes = value.ToBytes();
-            for (var i = 0; i < bytes.Length; i++)
-            {
-                bank[addr + i] = bytes[i];
-            }
-        }
-
 
         /// <summary>
         /// Push a byte on top of the stack
@@ -131,14 +68,6 @@ namespace NESCore
             var value = Word((ushort)(Cpu.SP + 1 + 0x100));
             Cpu.SP += 2;
             return value;
-        }
-
-        /// <summary>
-        /// Clears the contents of the bank, setting them to 0
-        /// </summary>
-        public void Zero()
-        {
-            Array.Fill<byte>(bank, 0);
         }
 
         /// <summary>

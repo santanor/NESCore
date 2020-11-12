@@ -20,6 +20,7 @@ namespace NESGui
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToDebug()
+                .UseAvaloniaNative()
                 .UseManagedSystemDialogs()
                 .UseReactiveUI();
     }

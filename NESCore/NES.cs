@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.IO;
 using NESCore.Mappers;
 using Serilog;
@@ -7,6 +8,8 @@ namespace NESCore
 {
     public class NES
     {
+        public delegate void FrameEvent(Bitmap bmp);
+
         public readonly RAM Ram;
         public readonly CPU Cpu;
         public readonly PPU Ppu;
@@ -14,7 +17,7 @@ namespace NESCore
 
         public NES()
         {
-            Ram = new RAM(RAM.RAM_SIZE);
+            Ram = new RAM();
             Cpu = new CPU
             {
                 Ram = Ram

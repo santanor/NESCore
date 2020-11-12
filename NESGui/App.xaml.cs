@@ -25,5 +25,10 @@ namespace NESGui
 
             base.OnFrameworkInitializationCompleted();
         }
+
+        public void OpenNametableWindow()
+        {
+            
+        }
     }
 }

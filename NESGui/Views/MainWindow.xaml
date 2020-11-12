@@ -1,4 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
+        Width="256" Height="240"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:NESGui.ViewModels;assembly=NESGui"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,34 +7,33 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NESGui.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="NESGui">
+        Title="NESCore">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
     <NativeMenu.Menu>
         <NativeMenu>
             <NativeMenuItem Header="File">
                 <NativeMenuItem.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Open" Command="{Binding OpenCommand}"/>
+                        <NativeMenuItem Header="Open"/>
                         <NativeMenuItemSeperator/>
-                        <NativeMenuItem Header="Quit NESCore" Command="{Binding CloseCommand}" Gesture="CMD+Q"/>
+                        <NativeMenuItem Header="Quit NESCore" Clicked="OnCloseClicked" Gesture="CMD+Q"/>
                     </NativeMenu>
                 </NativeMenuItem.Menu>
             </NativeMenuItem>
             <NativeMenuItem Header="Debugger">
                 <NativeMenuItem.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Nametable Viewer"/>
+                        <NativeMenuItem Header="Nametable Viewer" Clicked="OpenNametableWindow"/>
                         <NativeMenuItem Header="Patterntable Viewer"/>
                     </NativeMenu>
                 </NativeMenuItem.Menu>
             </NativeMenuItem>
         </NativeMenu>
     </NativeMenu.Menu>
+
     
 </Window>
