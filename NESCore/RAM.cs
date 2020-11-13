@@ -17,7 +17,7 @@ namespace NESCore
     /// </summary>
     public class RAM : MemoryBase
     {
-        public const int RAM_SIZE = 0x07FF;
+        public const int RAM_SIZE = 0x0800;
         public CPU Cpu;
 
         public RAM() : base(RAM_SIZE)

@@ -79,40 +79,6 @@ namespace NESCore
         /// Character ROM
         /// </summary>
         public byte[] chrROM;
-
-        /// <summary>
-        /// Reads a .nes ROM file, loads its contents into a ROM object for it to be used in the emulator
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static (bool, ROM) FromFile(string path)
-        {
-            var rom = new ROM();
-            if (!File.Exists(path))
-            {
-                return (false, rom);
-            }
-
-            var reader = File.OpenRead(path);
-
-            rom.nesTitle = reader.Nextbytes(4);
-            rom.numPRGPages = (byte)reader.ReadByte();
-            rom.numCHRPages = (byte)reader.ReadByte();
-            rom.flags6 = (byte)reader.ReadByte();
-            rom.flags7 = (byte)reader.ReadByte();
-            rom.endOfHeader = reader.Nextbytes(8);
-
-            //Check the third bit to check if the ROM has a trainer
-            if (Bit.Test(rom.flags6, 3))
-            {
-                //if the trainer is there, then it's 512 bytes long. Always.
-                rom.trainer = reader.Nextbytes(TrainerSize);
-            }
-
-            rom.prgROM = reader.Nextbytes((int)rom.numPRGPages * PrgPageSize);
-            rom.chrROM = reader.Nextbytes((int)rom.numCHRPages * ChrPageSize);
-
-            return (true, rom);
-        }
+        
     }
 }

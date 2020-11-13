@@ -5,7 +5,7 @@ namespace NESCore
         public CPU Cpu;
         public PPU Ppu;
         public RAM Ram;
-        public Cartridge Rom;
+        public Cartridge Cartridge;
         
         
         /// <summary>
@@ -19,6 +19,9 @@ namespace NESCore
             if (address <= 0x1FFF)
             {
                 return Ram.Byte(address & 0x07FF);
+            }else if (address >= 0x4020)
+            {
+                return Cartridge.Byte(address);
             }
 
             return 0x00;
@@ -36,6 +39,10 @@ namespace NESCore
             if (address <= 0x1FFF)
             {
                 return Ram.Word(address & 0x07FF);
+            }
+            else if (address >= 0x4020)
+            {
+                return Cartridge.Word(address);
             }
 
             return 0x00;

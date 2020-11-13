@@ -12,21 +12,18 @@ namespace Tests
     /// </summary>
     public class TestNestest
     {
-        private ROM rom;
+        private Cartridge c;
         private NES nes;
         private const int instructionsToRun = 8990;
 
         [SetUp]
         public void Setup()
         {
-            var (success, romResult) = ROM.FromFile("./TestData/nestest/nestest.nes");;
-            Assert.True(success);
-            Assert.IsNotNull(romResult);
-
-            rom = romResult;
+            c = Cartridge.FromFile("./TestData/nestest/nestest.nes");
+            Assert.IsNotNull(c);
 
             nes = new NES();
-            nes.LoadROM(rom);
+            nes.Bus.Cartridge = c;
             nes.Bus.Cpu.PC = 0xC000;
         }
 
@@ -37,7 +34,6 @@ namespace Tests
             for(var i = 0; i <= instructionsToRun; i++)
             {
                 nes.Step();
-                //A bit over the top to compare it every step, but oh well.....
             }
             
             Assert.Zero(nes.Bus.Byte(0x02));

@@ -7,37 +7,23 @@ namespace NESCore.Mappers
     /// </summary>
     public class NROM : IMapper
     {
-        private NES nes;
         public const ushort FirstRomPage = 0x8000;
         public const ushort SecondRomPage = 0xC000;
+        private ROM rom;
 
-        public NROM(NES nes)
+        public NROM(ROM rom)
         {
-            this.nes = nes;
+            this.rom = rom;
         }
 
-        public void Apply(ROM rom)
+        public ushort Map(ushort addr)
         {
-            for (ushort i = 0; i < ROM.PrgPageSize; i++)
+            if (addr >= 0x8000 && addr <= 0xFFFF)
             {
-                nes.Bus.WriteByte((ushort)(FirstRomPage + i), rom.prgROM[i]);
+                return (ushort) (addr & (rom.numPRGPages > 1 ? 0x7FFF : 0x3FFF));
             }
 
-            // if there's only one page then start at 0 to mirror it, otherwise continue
-            // with the copy
-            var mirrorStartingPoint = rom.numPRGPages == 1 ? 0 : ROM.PrgPageSize;
-
-            for (ushort i = 0; i < ROM.PrgPageSize; i++)
-            {
-                nes.Bus.WriteByte((ushort)(SecondRomPage + i), rom.prgROM[mirrorStartingPoint + i]);
-            }
-
-            //TODO COPY THE VRAM STUFF
-        }
-
-        public void Read(ushort addr)
-        {
-            
+            return 0x0000;
         }
     }
 }

@@ -15,51 +15,47 @@ namespace Tests
     /// </summary>
     public class TestRom
     {
-        private ROM rom;
+        private Cartridge cartridge;
 
         [SetUp]
         public void Setup()
         {
-            var (success, romResult) = GetTestROM();
-            Assert.True(success);
-            Assert.IsNotNull(romResult);
+            var c = GetTestCartridge();
+            Assert.IsNotNull(c);
 
-            rom = romResult;
+            cartridge = c;
         }
 
-        public static (bool, ROM) GetTestROM()
+        public static Cartridge GetTestCartridge()
         {
-            return ROM.FromFile("./TestData/nestest/nestest.nes");
+            return Cartridge.FromFile("./TestData/nestest/nestest.nes");
         }
 
         [Test]
         public void Nestest()
         {
 
-            Assert.AreEqual(rom.nesTitle.Length, 4);
+            Assert.AreEqual(cartridge.Rom.nesTitle.Length, 4);
 
             //Only check the ASCII for \n given that the fourth one can be interpreted
             //differently
-            Assert.AreEqual(Encoding.ASCII.GetString(rom.nesTitle.Take(3).ToArray()), "NES");
+            Assert.AreEqual(Encoding.ASCII.GetString(cartridge.Rom.nesTitle.Take(3).ToArray()), "NES");
 
-            Assert.AreEqual(rom.numCHRPages, 1);
-            Assert.AreEqual(rom.numPRGPages, 1);
+            Assert.AreEqual(cartridge.Rom.numCHRPages, 1);
+            Assert.AreEqual(cartridge.Rom.numPRGPages, 1);
 
-            Assert.IsNull(rom.trainer);
-            Assert.AreEqual(rom.mapper, 0);
+            Assert.IsNull(cartridge.Rom.trainer);
+            Assert.AreEqual(cartridge.Rom.mapper, 0);
 
-            Assert.AreEqual(rom.prgROM.Length, ROM.PrgPageSize);
-            Assert.AreEqual(rom.chrROM.Length, ROM.ChrPageSize);
+            Assert.AreEqual(cartridge.Rom.prgROM.Length, ROM.PrgPageSize);
+            Assert.AreEqual(cartridge.Rom.chrROM.Length, ROM.ChrPageSize);
         }
 
         [Test]
         public void InvalidFile()
         {
-            var (success, romResult) = ROM.FromFile("invalidCrap.nes");
-            Assert.IsFalse(success);
-            Assert.NotNull(romResult);
-
-            Assert.IsNull(romResult.nesTitle);
+            var c = Cartridge.FromFile("invalidCrap.nes");
+            Assert.IsNull(c);
         }
 
     }

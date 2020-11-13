@@ -12,10 +12,10 @@ namespace Tests
         public void Setup()
         {
             nes = new NES();
-            var (success, rom) = TestRom.GetTestROM();
-            Assert.True(success);
+            var c = TestRom.GetTestCartridge();
+            Assert.IsNotNull(c);
 
-            nes.LoadROM(rom);
+            nes.Bus.Cartridge = c;
         }
 
         [Test]
