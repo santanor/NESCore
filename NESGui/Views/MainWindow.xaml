@@ -4,6 +4,7 @@
         xmlns:vm="clr-namespace:NESGui.ViewModels;assembly=NESGui"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:NESGui.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NESGui.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
@@ -35,5 +36,6 @@
         </NativeMenu>
     </NativeMenu.Menu>
 
+    <controls:RenderToTargetBitmap Name="RenderToTargetBitmap"></controls:RenderToTargetBitmap>
     
 </Window>

@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Markup.Xaml;
+using NESGui.Controls;
 using NESGui.ViewModels;
 
 namespace NESGui.Views
@@ -12,15 +13,25 @@ namespace NESGui.Views
         private NametableWindow nametableWindowWindow;
         private PatterntableWindow patterntableWindow;
         private NativeMenu menu;
+        private RenderToTargetBitmap renderer;
         
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel();
+            renderer = this.FindControl<RenderToTargetBitmap>("RenderToTargetBitmap");
+            var vm = new MainWindowViewModel();
+            vm.nes.OnNewFrame += OnNewFrame;
+            DataContext = vm;
+            
             nametableWindowWindow = new NametableWindow();
             patterntableWindow = new PatterntableWindow();
         }
-        
+
+        private void OnNewFrame(ref byte[] frame)
+        {
+            renderer.UpdateBmp(frame);
+        }
+
         public void MenuAttached(object sender, VisualTreeAttachmentEventArgs e)
         {
             if (NativeMenu.GetIsNativeMenuExported(this) && sender is Menu mainMenu)

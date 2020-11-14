@@ -8,6 +8,6 @@ namespace NESGui.ViewModels
 {
     public class ViewModelBase : ReactiveObject
     {
-        protected NES nes;
+        public NES nes;
     }
 }

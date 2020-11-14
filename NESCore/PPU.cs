@@ -1,9 +1,31 @@
+using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+
 namespace NESCore
 {
     public class PPU
     {
+        public delegate void FrameEvent(ref byte[] frame);
+
+        public FrameEvent OnNewFrame;
+        
+        private byte[] backBufer;
+        private Bitmap lastFrame;
+        private Random random = new Random();
+
+        private const int width = 256;
+        private const int height = 240;
+        
         public int FrameCount { get; private set; }
         public int CyclesThisFrame { get; private set; }
+        public int ScanlineThisFrame { get; private set; }
+
+        public PPU()
+        {
+            //256x240 resolution and 4 bytes per pixel to represent the color
+            backBufer = new byte[width * height * 3];
+        }
 
         public void RunCycles(int cpuCycles)
         {
@@ -16,13 +38,36 @@ namespace NESCore
 
         private void Cycle()
         {
+            //Noise for now
+            
+            SetPixel(ScanlineThisFrame, CyclesThisFrame, 
+                (byte) random.Next(128, 255),
+                (byte) random.Next(128, 255),
+                (byte) random.Next(128, 255));
+            
             CyclesThisFrame++;
-            if (CyclesThisFrame == 341)
+            if (CyclesThisFrame >= 341)
             {
                 CyclesThisFrame = 0;
-                FrameCount++;
+                ScanlineThisFrame++;
+                if (ScanlineThisFrame >= 261)
+                {
+                    ScanlineThisFrame = -1;
+                    FrameCount++;
+                    OnNewFrame?.Invoke(ref backBufer);
+                }
             }
+        }
 
+        private void SetPixel(int row, int col, byte r, byte g, byte b)
+        {
+            //Make sure we're painting in the screen
+            if (row >= 0 && row <= height && col >= 0 && col <= width)
+            {
+                backBufer[col + (row * width)] = r;
+                backBufer[col + (row * width) +1] = g;
+                backBufer[col + (row * width) + 2] = b;
+            }
         }
     }
 }

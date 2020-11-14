@@ -8,7 +8,7 @@ namespace NESCore
 {
     public class NES
     {
-        public delegate void FrameEvent(Bitmap bmp);
+        public PPU.FrameEvent OnNewFrame;
         
         public readonly Bus Bus;
         private bool running = true;
@@ -22,6 +22,8 @@ namespace NESCore
 
             Bus.Cpu.PowerUp();
             ConfigureLogger();
+
+            Bus.Ppu.OnNewFrame += (ref byte[] frame) => OnNewFrame?.Invoke(ref frame);
         }
 
         private void ConfigureLogger()
@@ -32,7 +34,7 @@ namespace NESCore
                 File.Delete(logFileName);
             }
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
+                //.WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
                 .WriteTo.File(logFileName, outputTemplate: "{Message:lj}{NewLine}")
                 .CreateLogger();
         }
@@ -56,6 +58,17 @@ namespace NESCore
         public void Stop()
         {
             running = false;
+        }
+
+        public bool LoadCartridge(string fileName)
+        {
+            var c = Cartridge.FromFile(fileName);
+            if (c == null)
+            {
+                return false;
+            }
+            Bus.Cartridge = c;
+            return true;
         }
     }
 }
