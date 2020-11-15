@@ -16,10 +16,10 @@ namespace NESCore
 
         private const int width = 256;
         private const int height = 240;
-        
-        public int FrameCount { get; private set; }
-        public int CyclesThisFrame { get; private set; }
-        public int ScanlineThisFrame { get; private set; }
+
+        public int FrameCount;
+        public int CyclesThisFrame;
+        public int ScanlineThisFrame;
 
         public PPU()
         {
@@ -33,17 +33,12 @@ namespace NESCore
             {
                 Cycle();
             }
-            
         }
 
         private void Cycle()
         {
             //Noise for now
-            
-            SetPixel(ScanlineThisFrame, CyclesThisFrame, 
-                (byte) random.Next(0, 255),
-                (byte) random.Next(0, 255),
-                (byte) random.Next(0, 255));
+            SetPixel(ScanlineThisFrame, CyclesThisFrame, (byte) random.Next(0,255),(byte) random.Next(0,255),(byte)random.Next(0,255));
             
             CyclesThisFrame++;
             if (CyclesThisFrame >= 341)
@@ -64,7 +59,7 @@ namespace NESCore
             //Make sure we're painting in the screen
             if (row >= 0 && row < height && col >= 0 && col < width)
             {
-                backBufer[width * row + col] = Color.FromArgb(r, g, b).ToArgb();;
+                backBufer[width * row + col] = (255 << 24) + (r << 16) + (g << 8) + b;
             }
         }
     }

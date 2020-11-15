@@ -11,12 +11,14 @@ namespace NESCore
         public PPU.FrameEvent OnNewFrame;
         
         public readonly Bus Bus;
-        private bool running = true;
+        public bool Running;
+        private int lastSecond;
+        private int uptimeSeconds;
 
-        public NES()
+        public NES(int speedInHz = 1789773)
         {
             Bus = new Bus();
-            Bus.Cpu = new CPU(Bus);
+            Bus.Cpu = new CPU(Bus, speedInHz);
             Bus.Ppu = new PPU();
             Bus.Ram = new RAM();
 
@@ -34,16 +36,22 @@ namespace NESCore
                 File.Delete(logFileName);
             }
             Log.Logger = new LoggerConfiguration()
-                //.WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
+                .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
                 .WriteTo.File(logFileName, outputTemplate: "{Message:lj}{NewLine}")
                 .CreateLogger();
         }
 
         public void Run()
         {
-            running = true;
+            //Already running
+            if (Running)
+            {
+                return;
+            }
+            
+            Running = true;
 
-            while (running)
+            while (Running)
             {
                 Step();
             }
@@ -51,13 +59,27 @@ namespace NESCore
 
         public void Step()
         {
+            if(Bus.Cpu.cyclesThisSec % 10000 == 1)
+            {
+                var s = DateTime.Now.Second;
+                if (s != lastSecond)
+                {
+                    lastSecond = s;
+                    uptimeSeconds++;
+                    Log.Information($"Second: {uptimeSeconds} FPS: {Bus.Ppu.FrameCount}");
+                    //Console.WriteLine($"Second: {uptimeSeconds} FPS: {Bus.Ppu.FrameCount}");
+                    Bus.Ppu.FrameCount = 0;
+                    Bus.Cpu.cyclesThisSec = 0;
+                }
+            }
+
             var cpuCycles = Bus.Cpu.Instruction();
             Bus.Ppu.RunCycles(cpuCycles*3);
         }
 
         public void Stop()
         {
-            running = false;
+            Running = false;
         }
 
         public bool LoadCartridge(string fileName)

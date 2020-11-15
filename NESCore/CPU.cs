@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Threading;
 using Serilog;
 
 namespace NESCore
@@ -62,7 +63,9 @@ namespace NESCore
         /// <summary>
         /// Speed of the CPU in Hz. Used to slow down the emulation to match the NES's clock speed
         /// </summary>
-        public int Speed;
+        private int speed;
+
+        private int nanoPerCycle;
 
         public Bus Bus;
 
@@ -70,9 +73,16 @@ namespace NESCore
 
         private Action[] opcodes;
 
-        public CPU(Bus bus)
+        public CPU(Bus bus, int speedInHz)
         {
             Bus = bus;
+            SetSpeed(speedInHz);
+        }
+
+        public void SetSpeed(int speed)
+        {
+            speed = speed;
+            nanoPerCycle = (int) ((1.0 / speed) * 1000000);
         }
 
         public void PowerUp()
@@ -1252,6 +1262,7 @@ namespace NESCore
         
         private void LogInstruction(int numParams, string mnemonic, bool invalid = false)
         {
+            return;
             var sb = new StringBuilder();
             sb.Append($"{PC:X4}  {currentOpcode:X2} ");
 
