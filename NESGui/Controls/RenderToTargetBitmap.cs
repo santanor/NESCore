@@ -18,12 +18,12 @@ namespace NESGui.Controls
     {
         private WriteableBitmap bmp;
         
-        public int widthh;
+        public int width;
         private int height;
 
         protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
         {
-            bmp = new WriteableBitmap(new PixelSize(256, 240), new Vector(96, 96), PixelFormat.Rgba8888);
+            bmp = new WriteableBitmap(new PixelSize(256, 240), new Vector(96, 96), PixelFormat.Bgra8888);
             base.OnAttachedToLogicalTree(e);
         }
 
@@ -43,11 +43,11 @@ namespace NESGui.Controls
             Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Render);
         }
 
-        public void UpdateBmp(in byte[] bitmap)
+        public void UpdateBmp(in int[] bitmap)
         {
             using (var fb = bmp.Lock())
             {
-                Marshal.Copy(bitmap,0, fb.Address, fb.Size.Width * fb.Size.Height);
+                Marshal.Copy(bitmap,0, fb.Address, 256 * 240);
             }
         }
     }

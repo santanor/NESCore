@@ -6,11 +6,11 @@ namespace NESCore
 {
     public class PPU
     {
-        public delegate void FrameEvent(ref byte[] frame);
+        public delegate void FrameEvent(ref int[] frame);
 
         public FrameEvent OnNewFrame;
         
-        private byte[] backBufer;
+        private int[] backBufer;
         private Bitmap lastFrame;
         private Random random = new Random();
 
@@ -24,7 +24,7 @@ namespace NESCore
         public PPU()
         {
             //256x240 resolution and 4 bytes per pixel to represent the color
-            backBufer = new byte[width * height * 3];
+            backBufer = new int[width * height];
         }
 
         public void RunCycles(int cpuCycles)
@@ -41,9 +41,9 @@ namespace NESCore
             //Noise for now
             
             SetPixel(ScanlineThisFrame, CyclesThisFrame, 
-                (byte) random.Next(128, 255),
-                (byte) random.Next(128, 255),
-                (byte) random.Next(128, 255));
+                (byte) random.Next(0, 255),
+                (byte) random.Next(0, 255),
+                (byte) random.Next(0, 255));
             
             CyclesThisFrame++;
             if (CyclesThisFrame >= 341)
@@ -62,11 +62,9 @@ namespace NESCore
         private void SetPixel(int row, int col, byte r, byte g, byte b)
         {
             //Make sure we're painting in the screen
-            if (row >= 0 && row <= height && col >= 0 && col <= width)
+            if (row >= 0 && row < height && col >= 0 && col < width)
             {
-                backBufer[col + (row * width)] = r;
-                backBufer[col + (row * width) +1] = g;
-                backBufer[col + (row * width) + 2] = b;
+                backBufer[width * row + col] = Color.FromArgb(r, g, b).ToArgb();;
             }
         }
     }

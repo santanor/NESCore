@@ -23,7 +23,7 @@ namespace NESCore
             Bus.Cpu.PowerUp();
             ConfigureLogger();
 
-            Bus.Ppu.OnNewFrame += (ref byte[] frame) => OnNewFrame?.Invoke(ref frame);
+            Bus.Ppu.OnNewFrame += (ref int[] frame) => OnNewFrame?.Invoke(ref frame);
         }
 
         private void ConfigureLogger()

@@ -27,7 +27,7 @@ namespace NESGui.Views
             patterntableWindow = new PatterntableWindow();
         }
 
-        private void OnNewFrame(ref byte[] frame)
+        private void OnNewFrame(ref int[] frame)
         {
             renderer.UpdateBmp(frame);
         }
