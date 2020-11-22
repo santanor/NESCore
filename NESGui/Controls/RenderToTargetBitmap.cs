@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,8 +10,10 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Media.Immutable;
 using Avalonia.Threading;
+using Avalonia.Visuals.Media.Imaging;
 using PixelFormat = Avalonia.Platform.PixelFormat;
 using Point = System.Drawing.Point;
+using Size = Avalonia.Size;
 
 namespace NESGui.Controls
 {
@@ -18,12 +21,12 @@ namespace NESGui.Controls
     {
         private WriteableBitmap bmp;
         
-        public int width;
-        private int height;
+        public int width = 1920;
+        public int height = 1080;
 
         protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
         {
-            bmp = new WriteableBitmap(new PixelSize(256, 240), new Vector(96, 96), PixelFormat.Bgra8888);
+            bmp = new WriteableBitmap(new PixelSize(width, height), new Vector(72, 72), PixelFormat.Bgra8888);
             base.OnAttachedToLogicalTree(e);
         }
 
@@ -39,16 +42,38 @@ namespace NESGui.Controls
         {
             base.Render(context);
             
-            context.DrawImage(bmp, 1, new Rect(0, 0, 256, 240), new Rect(0, 0, 256, 240));
+            context.DrawImage(bmp, 1, new Rect(0, 0, width, height), new Rect(0, 0, width, height));
             Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Render);
+        }
+
+        public void UpdateSize(Size size)
+        {
+            UpdateSize(size.Width, size.Height);
+        }
+        public void UpdateSize(double w, double h)
+        {
+            UpdateSize((int)w, (int)h);
+        }
+        public void UpdateSize(int w, int h)
+        {
+            if (w <= 0 || h <= 0)
+            {
+                return;
+            }
+            width = w;
+            height = h;
+            bmp = new WriteableBitmap(new PixelSize(width, height), new Vector(72, 72), PixelFormat.Bgra8888);
         }
 
         public void UpdateBmp(in int[] bitmap)
         {
-            using (var fb = bmp.Lock())
+            if (bmp == null )
             {
-                Marshal.Copy(bitmap,0, fb.Address, 256 * 240);
+                return;
             }
+            using var fb = bmp.Lock();
+            var bytesToCopy = Math.Min((256 * 240), bmp.PixelSize.Width * bmp.PixelSize.Height);
+            Marshal.Copy(bitmap,0, fb.Address, bytesToCopy);
         }
     }
 }
