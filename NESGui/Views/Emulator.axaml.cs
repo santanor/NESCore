@@ -1,19 +1,26 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media.Imaging;
 
 namespace NESGui.Views
 {
-    public class NametableWindow : Window
+    public class Emulator : Window
     {
-        public NametableWindow()
+        public Emulator()
         {
             InitializeComponent();
+#if DEBUG
+            this.AttachDevTools();
+#endif
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+            
+            //Force the load
+            var n = NES.Instance;
         }
     }
 }

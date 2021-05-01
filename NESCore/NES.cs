@@ -9,9 +9,8 @@ namespace NESCore
 {
     public class NES
     {
-        public PPU.FrameEvent OnNewFrame;
-        
         public readonly Bus Bus;
+        public int[] Frame => Bus.Ppu.lastFrame;
         public bool Running;
         private int uptimeSeconds;
         private int nanoPerCycle;
@@ -27,8 +26,6 @@ namespace NESCore
             ConfigureLogger();
 
             nanoPerCycle = (int) ((1.0 / speedInHz) * 1000000000);
-
-            Bus.Ppu.OnNewFrame += (ref int[] frame) => OnNewFrame?.Invoke(ref frame);
         }
 
         private void ConfigureLogger()

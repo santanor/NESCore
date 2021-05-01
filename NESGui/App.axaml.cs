@@ -17,18 +17,13 @@ namespace NESGui
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow
+                desktop.MainWindow = new Emulator()
                 {
                     DataContext = new MainWindowViewModel(),
                 };
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        public void OpenNametableWindow()
-        {
-            
         }
     }
 }

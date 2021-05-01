@@ -6,12 +6,8 @@ namespace NESCore
 {
     public class PPU
     {
-        public delegate void FrameEvent(ref int[] frame);
-
-        public FrameEvent OnNewFrame;
-        
         private int[] backBufer;
-        private Bitmap lastFrame;
+        public int[] lastFrame { get; set; }
         private Random random = new Random();
 
         private const int width = 256;
@@ -49,7 +45,7 @@ namespace NESCore
                 {
                     ScanlineThisFrame = -1;
                     FrameCount++;
-                    OnNewFrame?.Invoke(ref backBufer);
+                    lastFrame = backBufer;
                 }
             }
         }
