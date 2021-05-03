@@ -7,12 +7,16 @@ using Serilog;
 
 namespace NESCore
 {
-    public class NES
+    public unsafe class NES
     {
         public readonly Bus Bus;
-        public int[] Frame => Bus.Ppu.lastFrame;
         public bool Running;
         private int uptimeSeconds;
+        
+        /// <summary>
+        /// Estimated Nanoseconds per CPU cycle, used to artificially match the NES speed.
+        /// <remarks>If the speed in Hertz is 0, this value will be -1. This will be used to indicate "Go fast AF"</remarks>
+        /// </summary>
         private int nanoPerCycle;
 
         public NES(int speedInHz = 1789773)
@@ -25,6 +29,11 @@ namespace NESCore
             Bus.Cpu.PowerUp();
             ConfigureLogger();
 
+            // A Wildcard to indicate "Go as fast as you can"
+            if (speedInHz == 0)
+            {
+                nanoPerCycle = -1;
+            }
             nanoPerCycle = (int) ((1.0 / speedInHz) * 1000000000);
         }
 
@@ -75,7 +84,7 @@ namespace NESCore
             {
                 return;
             }
-            
+
             //A second has passed so start over
             if (cpuTimer > 1000)
             {
@@ -85,6 +94,12 @@ namespace NESCore
                 Bus.Cpu.cyclesThisSec = 0;
                 lastSecond = DateTime.Now;
                 uptimeSeconds++;
+            }
+
+            //Go fast AF
+            if (nanoPerCycle == -1)
+            {
+                return;
             }
 
             //In milliseconds

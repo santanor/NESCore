@@ -15,13 +15,22 @@ using SkiaSharp;
 
 namespace NESGui.Controls
 {
-    public class RenderToTargetBitmap : Control
+    public unsafe class RenderToTargetBitmap : Control
     {
         private WriteableBitmap? bmp;
+        private void* backBufferPointer;
+        private void* lockedFrameBuffer;
+        private long copySize;
 
         private int height => (int) Height;
         private int width => (int) Width;
-        
+
+        protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToLogicalTree(e);
+            backBufferPointer = (void*) new IntPtr((void*)NES.Instance.Emulator.Bus.Ppu.buffer.backBufferPtr);
+        }
+
         protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
         {
             bmp?.Dispose();
@@ -32,8 +41,8 @@ namespace NESGui.Controls
         private void FillPixels()
         {
             using var fb = bmp!.Lock();
-            var copySize = fb.Size.Width * fb.Size.Height;
-            Marshal.Copy(NES.Instance.Frame, 0, fb.Address, copySize);
+            copySize = fb.Size.Width * fb.Size.Height * 4;
+            Buffer.MemoryCopy(backBufferPointer, (void*)fb.Address, copySize, copySize);
         }
         
         public override void Render(DrawingContext context)

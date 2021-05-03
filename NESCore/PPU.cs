@@ -4,10 +4,14 @@ using System.Drawing.Imaging;
 
 namespace NESCore
 {
-    public class PPU
+    public unsafe struct PPUBufferData
     {
-        private int[] backBufer;
-        public int[] lastFrame { get; set; }
+        public fixed int backBuffer[256 * 240];
+        public IntPtr backBufferPtr;
+    }
+    public unsafe class PPU
+    {
+        public PPUBufferData buffer = new PPUBufferData();
         private Random random = new Random();
 
         private const int width = 256;
@@ -20,7 +24,10 @@ namespace NESCore
         public PPU()
         {
             //256x240 resolution and 4 bytes per pixel to represent the color
-            backBufer = new int[width * height];
+            fixed (PPUBufferData* d = &buffer)
+            {
+                d->backBufferPtr = new IntPtr(d->backBuffer);
+            }
         }
 
         public void RunCycles(int cpuCycles)
@@ -45,7 +52,6 @@ namespace NESCore
                 {
                     ScanlineThisFrame = -1;
                     FrameCount++;
-                    lastFrame = backBufer;
                 }
             }
         }
@@ -55,7 +61,7 @@ namespace NESCore
             //Make sure we're painting in the screen
             if (row >= 0 && row < height && col >= 0 && col < width)
             {
-                backBufer[width * row + col] = (255 << 24) + (r << 16) + (g << 8) + b;
+                buffer.backBuffer[width * row + col] = (255 << 24) + (r << 16) + (g << 8) + b;
             }
         }
     }

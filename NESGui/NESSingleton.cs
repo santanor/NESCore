@@ -6,8 +6,7 @@ namespace NESGui
     {
         private static readonly NES instance = new NES();
 
-        private NESCore.NES Emulator;
-        public int[] Frame => Emulator.Frame;
+        public NESCore.NES Emulator;
 
         private Task emulatorTask;
 
