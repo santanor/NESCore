@@ -7,11 +7,17 @@ namespace NESCore
     public unsafe struct PPUBufferData
     {
         public fixed int backBuffer[256 * 240];
-        public IntPtr backBufferPtr;
+        public IntPtr backBufferPtr { get; set; }
     }
     public unsafe class PPU
     {
-        public PPUBufferData buffer = new PPUBufferData();
+        private PPUBufferData buffer = new PPUBufferData();
+        public PPUBufferData Buffer
+        {
+            get => buffer;
+            set => buffer = value;
+        }
+        
         private Random random = new Random();
 
         private const int width = 256;

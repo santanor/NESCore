@@ -3,7 +3,7 @@ namespace NESCore
     public class Bus
     {
         public CPU Cpu;
-        public PPU Ppu;
+        public PPU Ppu { get; set; }
         public RAM Ram;
         public Cartridge Cartridge;
         

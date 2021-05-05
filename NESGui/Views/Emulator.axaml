@@ -8,14 +8,35 @@
         Width="256"
         Height="240"
         x:Class="NESGui.Views.Emulator"
-        Icon="/Assets/avalonia-logo.ico"
         Title="NESulator">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <controls:RenderToTargetBitmap  Width="256" Height="240" />
     
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="File">
+                <NativeMenuItem.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Open"/>
+                        <NativeMenuItemSeperator/>
+                        <NativeMenuItem Header="Quit NESCore" Clicked="OnCloseClicked" Gesture="CMD+Q"/>
+                    </NativeMenu>
+                </NativeMenuItem.Menu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="Debugger">
+                <NativeMenuItem.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Nametable Viewer" Clicked="OpenNametableWindow"/>
+                        <NativeMenuItem Header="Patterntable Viewer" Clicked="OpenPatterntableWindow"/>
+                    </NativeMenu>
+                </NativeMenuItem.Menu>
+            </NativeMenuItem>
+        </NativeMenu>
+    </NativeMenu.Menu>
+        
+    
+    <controls:EmulatorRenderer  Width="256" Height="240"/>
 
 </Window>

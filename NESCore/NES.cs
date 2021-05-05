@@ -9,7 +9,7 @@ namespace NESCore
 {
     public unsafe class NES
     {
-        public readonly Bus Bus;
+        public Bus Bus { get; set; }
         public bool Running;
         private int uptimeSeconds;
         

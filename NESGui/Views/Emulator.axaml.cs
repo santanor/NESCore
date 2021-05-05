@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -20,7 +21,24 @@ namespace NESGui.Views
             AvaloniaXamlLoader.Load(this);
             
             //Force the load
-            var n = NES.Instance;
+            var n = NESSingleton.Instance;
+        }
+
+        private void OnCloseClicked(object? sender, EventArgs e)
+        {
+            NESSingleton.Instance.Emulator.Stop();
+            Close();
+        }
+
+        private void OpenNametableWindow(object? sender, EventArgs e)
+        {
+            
+        }
+
+        private void OpenPatterntableWindow(object? sender, EventArgs e)
+        {
+            var patterntableViewer = new PatterntableViewer();
+            patterntableViewer.Show();
         }
     }
 }
