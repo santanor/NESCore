@@ -4,18 +4,26 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\" />
-        <AvaloniaResource Include="Assets\**" />
+        <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="0.10.0" />
-        <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
+        <PackageReference Include="Avalonia" Version="0.10.0"/>
+        <PackageReference Include="Avalonia.Desktop" Version="0.10.0"/>
+        <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0"/>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0"/>
+        <PackageReference Include="SkiaSharp" Version="2.88.0-preview.155"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.0-preview.155"/>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\NESCore\NESCore.csproj" />
+        <ProjectReference Include="..\NESCore\NESCore.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Views\NametableViewer.axaml.cs">
+            <DependentUpon>NametableViewer.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 </Project>

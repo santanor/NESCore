@@ -11,32 +11,32 @@
         Title="NESulator">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
-    
+
     <NativeMenu.Menu>
         <NativeMenu>
             <NativeMenuItem Header="File">
                 <NativeMenuItem.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Open"/>
-                        <NativeMenuItemSeperator/>
-                        <NativeMenuItem Header="Quit NESCore" Clicked="OnCloseClicked" Gesture="CMD+Q"/>
+                        <NativeMenuItem Header="Open" />
+                        <NativeMenuItemSeperator />
+                        <NativeMenuItem Header="Quit NESCore" Clicked="OnCloseClicked" Gesture="CMD+Q" />
                     </NativeMenu>
                 </NativeMenuItem.Menu>
             </NativeMenuItem>
             <NativeMenuItem Header="Debugger">
                 <NativeMenuItem.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Nametable Viewer" Clicked="OpenNametableWindow"/>
-                        <NativeMenuItem Header="Patterntable Viewer" Clicked="OpenPatterntableWindow"/>
+                        <NativeMenuItem Header="Nametable Viewer" Clicked="OpenNametableWindow" />
+                        <NativeMenuItem Header="Patterntable Viewer" Clicked="OpenPatterntableWindow" />
                     </NativeMenu>
                 </NativeMenuItem.Menu>
             </NativeMenuItem>
         </NativeMenu>
     </NativeMenu.Menu>
-        
-    
-    <controls:EmulatorRenderer  Width="256" Height="240"/>
+
+
+    <controls:EmulatorRenderer Width="256" Height="240" />
 
 </Window>

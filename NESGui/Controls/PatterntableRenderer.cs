@@ -1,13 +1,40 @@
 using Avalonia.LogicalTree;
+using NESCore;
 
-namespace NESGui.Controls
+namespace NESGui.Controls;
+
+public unsafe class PatterntableRenderer : RenderToTargetBitmap
 {
-    public unsafe class PatterntableRenderer : RenderToTargetBitmap
+    public enum PatternTableEnum
     {
-        protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
+        Left,
+        Right
+    }
+
+    public PatternTableEnum Table { get; set; }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+
+        switch (Table)
         {
-            base.OnAttachedToLogicalTree(e);
-            backBufferPointer = (void*) NESSingleton.Instance.Emulator.Bus.Ppu.Buffer.backBufferPtr;
+            case PatternTableEnum.Left:
+                backBufferPointer = (void*) Bus.Ppu.PatterntableDebugView.LeftBuffer
+                    .backBufferPtr;
+                break;
+            case PatternTableEnum.Right:
+                backBufferPointer = (void*) Bus.Ppu.PatterntableDebugView.RightBuffer
+                    .backBufferPtr;
+                break;
         }
+
+        Bus.Ppu.PatterntableDebugView.Renderer.StartRenderer();
+    }
+
+    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromLogicalTree(e);
+        Bus.Ppu.PatterntableDebugView.Renderer.StopRenderer();
     }
 }

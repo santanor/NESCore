@@ -336,3 +336,5 @@ ASALocalRun/
 NESCore/rom/
 NESTest/TestData
 Roms
+.DS_Store
+.vscode/

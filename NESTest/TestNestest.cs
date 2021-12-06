@@ -1,43 +1,36 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using NESCore;
 using NUnit.Framework;
 
-namespace Tests
+namespace Tests;
+
+/// <summary>
+///     Only tests the validity of the instructions, so far it doesn't test how
+///     "cycle accurate" the emulator is
+/// </summary>
+public class TestNestest
 {
-    /// <summary>
-    /// Only tests the validity of the instructions, so far it doesn't test how
-    /// "cycle accurate" the emulator is
-    /// </summary>
-    public class TestNestest
+    private const int instructionsToRun = 8990;
+    private Cartridge c;
+    private NES nes;
+
+    [SetUp]
+    public void Setup()
     {
-        private Cartridge c;
-        private NES nes;
-        private const int instructionsToRun = 8990;
+        c = Cartridge.FromFile("./TestData/nestest/nestest.nes");
+        Assert.IsNotNull(c);
 
-        [SetUp]
-        public void Setup()
-        {
-            c = Cartridge.FromFile("./TestData/nestest/nestest.nes");
-            Assert.IsNotNull(c);
-
-            nes = new NES();
-            nes.Bus.Cartridge = c;
-            nes.Bus.Cpu.PC = 0xC000;
-        }
+        nes = new NES();
+        Bus.Cartridge = c;
+        Bus.Cpu.PC = 0xC000;
+    }
 
 
-        [Test]
-        public void Nestest()
-        {
-            for(var i = 0; i <= instructionsToRun; i++)
-            {
-                nes.Step();
-            }
-            
-            Assert.Zero(nes.Bus.Byte(0x02));
-            Assert.Zero(nes.Bus.Byte(0x03));
-        }
+    [Test]
+    public void Nestest()
+    {
+        for (var i = 0; i <= instructionsToRun; i++) nes.Step();
+
+        Assert.Zero(Bus.Byte(0x02));
+        Assert.Zero(Bus.Byte(0x03));
     }
 }

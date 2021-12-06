@@ -1,44 +1,41 @@
-using System;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media.Imaging;
 
-namespace NESGui.Views
+namespace NESGui.Views;
+
+public class Emulator : Window
 {
-    public class Emulator : Window
+    public Emulator()
     {
-        public Emulator()
-        {
-            InitializeComponent();
+        InitializeComponent();
 #if DEBUG
-            this.AttachDevTools();
+        this.AttachDevTools();
 #endif
-        }
+    }
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-            
-            //Force the load
-            var n = NESSingleton.Instance;
-        }
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
 
-        private void OnCloseClicked(object? sender, EventArgs e)
-        {
-            NESSingleton.Instance.Emulator.Stop();
-            Close();
-        }
+        //Force the load
+        var n = NESSingleton.Instance;
+    }
 
-        private void OpenNametableWindow(object? sender, EventArgs e)
-        {
-            
-        }
+    private void OnCloseClicked(object? sender, EventArgs e)
+    {
+        NESSingleton.Instance.Emulator.Stop();
+        Close();
+    }
 
-        private void OpenPatterntableWindow(object? sender, EventArgs e)
-        {
-            var patterntableViewer = new PatterntableViewer();
-            patterntableViewer.Show();
-        }
+    private void OpenNametableWindow(object? sender, EventArgs e)
+    {
+        var nametableViewer = new NametableViewer();
+        nametableViewer.Show();
+    }
+
+    private void OpenPatterntableWindow(object? sender, EventArgs e)
+    {
+        var patterntableViewer = new PatterntableViewer();
+        patterntableViewer.Show();
     }
 }

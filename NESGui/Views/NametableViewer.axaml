@@ -4,18 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:NESGui.Controls"
-        mc:Ignorable="d" d:DesignWidth="256" d:DesignHeight="128"
-        Width="256"
-        Height="128"
-        x:Class="NESGui.Views.PatterntableViewer"
-        Title="Patterntable Viewer">
+        mc:Ignorable="d" d:DesignWidth="512" d:DesignHeight="480"
+        Width="512"
+        Height="480"
+        x:Class="NESGui.Views.NametableViewer"
+        Title="Nametable Viewer">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <DockPanel HorizontalAlignment="Center">
-        <controls:PatterntableRenderer Table="Left" Width="128" Height="128" />
-        <controls:PatterntableRenderer Table="Right" Width="128" Height="128" />
-    </DockPanel>
+    <controls:NametableRenderer Width="512" Height="480" />
+
 </Window>

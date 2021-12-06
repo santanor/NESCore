@@ -1,28 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>preview</LangVersion>
+        <LangVersion>10</LangVersion>
         <Nullable>disable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\net6.0\NESCore.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\net6.0\NESCore.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net6.0\NESCore.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net6.0\NESCore.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CoreCompat.libgdiplus" Version="6.0.4-ci-84" />
-      <PackageReference Include="runtime.osx.10.10-x64.CoreCompat.System.Drawing" Version="5.8.64" />
-      <PackageReference Include="Serilog" Version="2.9.0-dev-01119" />
-      <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.0-dev-10240" />
-      <PackageReference Include="Serilog.Sinks.Console" Version="3.1.2-dev-00806" />
-      <PackageReference Include="Serilog.Sinks.File" Version="4.1.0-dev-00847" />
-      <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
+        <PackageReference Include="CoreCompat.libgdiplus" Version="6.0.4-ci-84"/>
+        <PackageReference Include="runtime.osx.10.10-x64.CoreCompat.System.Drawing" Version="5.8.64"/>
+        <PackageReference Include="Serilog" Version="2.9.0-dev-01119"/>
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.0-dev-10240"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.2-dev-00806"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="4.1.0-dev-00847"/>
+        <PackageReference Include="System.Drawing.Common" Version="4.5.0"/>
     </ItemGroup>
 
 </Project>

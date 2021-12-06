@@ -2,19 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>preview</LangVersion>
+        <LangVersion>default</LangVersion>
 
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="nunit" Version="3.11.0" />
-        <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+        <PackageReference Include="nunit" Version="3.11.0"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="3.12.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NESCore\NESCore.csproj" />
+        <ProjectReference Include="..\NESCore\NESCore.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

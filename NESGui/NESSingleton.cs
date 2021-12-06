@@ -1,26 +1,31 @@
 using System.Threading.Tasks;
+using NESCore;
 
-namespace NESGui
+namespace NESGui;
+
+public class NESSingleton
 {
-    public class NESSingleton
+    public NES Emulator;
+
+    private Task emulatorTask;
+
+    // Explicit static constructor to tell C# compiler
+    // not to mark type as beforefieldinit
+    static NESSingleton()
     {
-        private static readonly NESSingleton instance = new();
-
-        public NESCore.NES Emulator;
-
-        private Task emulatorTask;
-
-        // Explicit static constructor to tell C# compiler
-        // not to mark type as beforefieldinit
-        static NESSingleton() { }
-
-        private NESSingleton()
-        {
-            Emulator = new NESCore.NES();
-            Emulator.LoadCartridge("../../../../Roms/DK.nes");
-            emulatorTask = Task.Run(() => Emulator.Run());
-        }
-
-        public static NESSingleton Instance => instance;
     }
+
+    private NESSingleton()
+    {
+        Emulator = new NES();
+        Emulator.LoadCartridge("../../../../Roms/DK.nes");
+        
+    }
+
+    public void Run()
+    {
+        emulatorTask = Task.Run(() => Emulator.Run());
+    }
+
+    public static NESSingleton Instance { get; } = new();
 }

@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace NESGui.Views;
 
-public class PatterntableViewer : Window
+public class NametableViewer : Window
 {
-    public PatterntableViewer()
+    public NametableViewer()
     {
         InitializeComponent();
     }
