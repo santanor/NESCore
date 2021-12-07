@@ -80,12 +80,15 @@ public unsafe class PatterntableDebugView
         switch (pixelValue)
         {
             case 0:
-                return (255 << 24) + (255 << 16) + (0 << 8) + 0;
+                return (255 << 24) + (0 << 16) + (0 << 8) + 0;
             case 1:
-                return (255 << 24) + (0 << 16) + (255 << 8) + 0;
+                return (255 << 24) + (255 << 16) + (0 << 8) + 0;
             case 2:
+                return (255 << 24) + (0 << 16) + (255 << 8) + 0;
+            case 3:
                 return (255 << 24) + (0 << 16) + (0 << 8) + 255;
             default:
+                throw new NotImplementedException();
                 return (255 << 24) + (0 << 16) + (0 << 8) + 0;
         }
     }

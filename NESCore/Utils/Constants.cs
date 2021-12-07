@@ -11,7 +11,7 @@ public static class Constants
     public const int TILE_HEIGHT = 8;
     public const int PATTERNTABLE_WIDTH = 128;
     public const int PATTERNTABLE_HEIGHT = 128;
-    public const int TILES_PER_PATTERNTABLE = 16;
+    public const int TILES_PER_PATTERNTABLE = 256;
     public const ushort PATTERNTABLE_LEFT_ADDR = 0X0000;
     public const ushort PATTERNTABLE_RIGHT_ADDR = 0x1000;
 
