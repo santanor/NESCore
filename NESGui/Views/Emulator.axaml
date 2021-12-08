@@ -37,6 +37,8 @@
     </NativeMenu.Menu>
 
 
-    <controls:EmulatorRenderer Width="256" Height="240" />
+    <Viewbox Stretch="Uniform">
+        <controls:EmulatorRenderer Width="256" Height="240" />
+    </Viewbox>
 
 </Window>

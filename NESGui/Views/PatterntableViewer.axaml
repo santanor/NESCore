@@ -14,8 +14,11 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <DockPanel HorizontalAlignment="Center">
-        <controls:PatterntableRenderer Table="Left" Width="128" Height="128" />
-        <controls:PatterntableRenderer Table="Right" Width="128" Height="128" />
-    </DockPanel>
+    
+    <Viewbox Stretch="Uniform">
+        <DockPanel HorizontalAlignment="Center">
+            <controls:PatterntableRenderer Table="Left" Width="128" Height="128" />
+            <controls:PatterntableRenderer Table="Right" Width="128" Height="128" />
+        </DockPanel>
+    </Viewbox>
 </Window>
