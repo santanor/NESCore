@@ -9,6 +9,7 @@ public static class Constants
     public const int PATTERNTABLE_BUFFER_SIZE = 16384;
     public const int TILE_WIDTH = 8;
     public const int TILE_HEIGHT = 8;
+    public const int TILE_BYTE_SIZE = 0x16;
     public const int PATTERNTABLE_WIDTH = 128;
     public const int PATTERNTABLE_HEIGHT = 128;
     public const int TILES_PER_PATTERNTABLE = 256;

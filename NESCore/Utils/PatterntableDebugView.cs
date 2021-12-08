@@ -48,21 +48,22 @@ public unsafe class PatterntableDebugView
     /// <param name="targetTexture">Pointer to render texture</param>
     private void RenderPatterntable(ushort startAddr, ref PPUPatterntableBufferData targetTexture)
     {
-        var tiles = ppu.EncodeAsTiles(startAddr, TILES_PER_PATTERNTABLE);
-        
-        var pixelCounter = 0; //To keep track of the pixel on the screen
+        Tile tile;
 
         //To know which tile to paint, we simply mod the current pixel by the size of a tile
         for (var i = 0; i < TILES_PER_PATTERNTABLE; i++)
         {
-            var tileCounter = 0; //To keep track of the pixel in the tile
+            tile = ppu.GetTile(startAddr);
+            startAddr += TILE_BYTE_SIZE;
             for (var j = 0; j < TILE_WIDTH; j++)
             {
                 for (var k = 0; k < TILE_HEIGHT; k++)
                 {
-                    targetTexture.backBuffer[pixelCounter] = GetPixelColour(tiles[i].Pattern[tileCounter]);
-                    tileCounter++;
-                    pixelCounter++;
+                    var columnIndex = ((i & 0x0F) * TILE_HEIGHT) + k;
+                    var rowIndex = ((i >> 4) * TILE_WIDTH) + j;
+
+                    var pixelIndex = PATTERNTABLE_HEIGHT * rowIndex + columnIndex;
+                    targetTexture.backBuffer[pixelIndex] = GetPixelColour(tile.Pattern[j,k]);
                 }
             }
         }
@@ -81,12 +82,12 @@ public unsafe class PatterntableDebugView
         {
             case 0:
                 return (255 << 24) + (0 << 16) + (0 << 8) + 0;
-            case 1:
+            case 1: case 2: case 3:
                 return (255 << 24) + (255 << 16) + (0 << 8) + 0;
-            case 2:
+            /*case 2:
                 return (255 << 24) + (0 << 16) + (255 << 8) + 0;
             case 3:
-                return (255 << 24) + (0 << 16) + (0 << 8) + 255;
+                return (255 << 24) + (0 << 16) + (0 << 8) + 255;*/
             default:
                 throw new NotImplementedException();
                 return (255 << 24) + (0 << 16) + (0 << 8) + 0;

@@ -76,34 +76,50 @@ public unsafe class PPU
     }
 
     /// <summary>
+    /// Encodes the next 16 bytes as a patterntable tile, starting at the given address
+    /// </summary>
+    /// <param name="addr"></param>
+    /// <returns></returns>
+    public Tile GetTile(ushort addr)
+    {
+        var tile = new Tile();
+        
+        for (var i = 0; i < TILE_WIDTH; i++)
+        {
+            var lowByteAddr = addr + i;
+            var highByteAddr = lowByteAddr + TILE_WIDTH;
+            for (var j = 0; j < TILE_HEIGHT; j++)
+            {
+                
+                //Get the bit j from the current iteration and 8 positions ahead. Then add those two bits so that
+                //you get one of the following: 00, 01, 10, 11.
+                var least_sig_bit = Bit.TestVal(Bus.VByte(lowByteAddr), j);
+                var most_sig_bit = (byte) ((Bit.TestVal(Bus.VByte(highByteAddr), j)) << 1);
+                    
+                //use the abs to flip the tile in the Y component. Otherwise it comes out wrong.
+                //The +1 is because otherwise the tiles wraparound itself. Feel free to change it and break it :D
+                var yComponent = Math.Abs(j - TILE_HEIGHT + 1);
+                tile.Pattern[i,yComponent] = (byte) (most_sig_bit + least_sig_bit);
+            }
+        }
+
+        return tile;
+    }
+
+    /// <summary>
     /// </summary>
     /// <returns></returns>
-    public Tile[] EncodeAsTiles(ushort startAddr, int numTiles)
+    public Tile[] EncodeAsTiles(ushort addr, int numTiles)
     {
         var tiles = new Tile[numTiles];
         
         // First iterate the number of tiles
         for (var i = 0; i < numTiles; i++)
         {
-            tiles[i] = new Tile();
-            var tileIndex = 0;
-            for (var j = 0; j < TILE_WIDTH; j++)
-            {
-                for (var k = 0; k < TILE_HEIGHT; k++)
-                {
-                    //Get the bit j from the current iteration and 8 positions ahead. Then add those two bits so that
-                    //you get one of the following: 00, 01, 10, 11.
-                    var least_sig_bit = Bit.TestVal(Bus.VByte(startAddr+j + i), k);
-                    var most_sig_bit = (byte) ((Bit.TestVal(Bus.VByte(startAddr+j + i + TILE_WIDTH), k)) << 1);
-                    
-                    //use the abs to flip the tile in the Y component. Otherwise it comes out wrong.
-                    //The +1 is because otherwise the tiles wraparound itself. Feel free to change it and brake it :D
-                    var yComponent = Math.Abs(k - TILE_HEIGHT + 1);
-                    tiles[i].Pattern[tileIndex] = (byte) (most_sig_bit + least_sig_bit);
-                    tileIndex++;
-                }
-            }
+            tiles[i] = GetTile(addr);
+            addr += TILE_BYTE_SIZE;
         }
+        
         return tiles;
     }
 }
