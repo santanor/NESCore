@@ -84,10 +84,10 @@ public unsafe class PatterntableDebugView
                 return (255 << 24) + (0 << 16) + (0 << 8) + 0;
             case 1: case 2: case 3:
                 return (255 << 24) + (255 << 16) + (0 << 8) + 0;
-            /*case 2:
+            case 2:
                 return (255 << 24) + (0 << 16) + (255 << 8) + 0;
             case 3:
-                return (255 << 24) + (0 << 16) + (0 << 8) + 255;*/
+                return (255 << 24) + (0 << 16) + (0 << 8) + 255;
             default:
                 throw new NotImplementedException();
                 return (255 << 24) + (0 << 16) + (0 << 8) + 0;
