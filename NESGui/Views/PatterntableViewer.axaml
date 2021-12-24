@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:NESGui.Controls"
         mc:Ignorable="d" d:DesignWidth="256" d:DesignHeight="128"
-        Width="256"
-        Height="128"
+        Width="512"
+        Height="256"
         x:Class="NESGui.Views.PatterntableViewer"
         Title="Patterntable Viewer">
 

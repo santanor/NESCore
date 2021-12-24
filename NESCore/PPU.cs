@@ -122,4 +122,14 @@ public unsafe class PPU
         
         return tiles;
     }
+
+    /// <summary>
+    /// Returns the current patterntable address. In order to do that this method will look at bit 3 of PPUTCTRL (0x2000)
+    /// </summary>
+    /// <returns></returns>
+    public ushort GetCurrentPatterntableAddr()
+    {
+        var ppuctrl = Bus.Byte(PPUCTRL);
+        return Bit.Test(ppuctrl, 4) ? PATTERNTABLE_RIGHT_ADDR : PATTERNTABLE_LEFT_ADDR;
+    }
 }

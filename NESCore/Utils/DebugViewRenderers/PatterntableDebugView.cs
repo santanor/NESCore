@@ -78,19 +78,8 @@ public unsafe class PatterntableDebugView
     /// <returns></returns>
     int GetPixelColour(int pixelValue)
     {
-        switch (pixelValue)
-        {
-            case 0:
-                return (255 << 24) + (0 << 16) + (0 << 8) + 0;
-            case 1: case 2: case 3:
-                return (255 << 24) + (255 << 16) + (0 << 8) + 0;
-            case 2:
-                return (255 << 24) + (0 << 16) + (255 << 8) + 0;
-            case 3:
-                return (255 << 24) + (0 << 16) + (0 << 8) + 255;
-            default:
-                throw new NotImplementedException();
-                return (255 << 24) + (0 << 16) + (0 << 8) + 0;
-        }
+        var addr = UNIVERSAL_BACKGROUND + pixelValue;
+        var colourIndex = Bus.VByte(addr);
+        return Palette.Colours[colourIndex];
     }
 }

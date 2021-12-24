@@ -8,7 +8,7 @@ public unsafe class NametableRenderer : RenderToTargetBitmap
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnAttachedToLogicalTree(e);
-        backBufferPointer = (void*) Bus.Ppu.NametableDebugView.Buffer.backBufferPtr;
+        backBufferPointer = (void*) Bus.Ppu.NametableDebugView.Nametable.backBufferPtr;
         Bus.Ppu.NametableDebugView.Renderer.StartRenderer();
     }
 

@@ -338,3 +338,5 @@ NESTest/TestData
 Roms
 .DS_Store
 .vscode/
+*.DotSettings
+PPU programmer reference - Nesdev wiki.pdf

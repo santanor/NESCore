@@ -35,20 +35,20 @@ public static class Bus
     /// <returns></returns>
     public static byte VByte(ushort address)
     {
-        if (address <= 0x2FFF)
+        if (address <= 0x1FFF)
         {
             return Cartridge.VByte(address);
         }
-        if (address <= 0x3FFF) //Mirrors of $2000-$2EFF
+        if (address <= 0x3EFF) // Nametables and mirrors of nametables
         {
-            return Vram.Byte(address & 0x2EFF);
+            return Cartridge.Byte(address);
         }
-        if (address <= 0x3F1F)
+        if (address <= 0x3FFF) // Palette RAM and mirrors 
         {
-            return Vram.Byte(address);
+            return (byte) (address - 0x3F00); // So that indexes are 0-based
         }
         
-        //Mirrors of $3F00-$3F1F
+        // Mirrors of $3F00-$3F1F
         return Vram.Byte(address & 0x3F1F);
     }
 
