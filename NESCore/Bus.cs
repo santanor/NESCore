@@ -16,6 +16,11 @@ public static class Bus
     /// <returns></returns>
     public static byte Byte(ushort address)
     {
+        // This goes to the PPU registers
+        if (address >= PPUCTRL && address <= 0x3FFF)
+        {
+            Ppu.ReadRegister(address & 0x2007);// This doesn't do the writing to memory
+        }
         //RAM Range
         if (address <= 0x1FFF)
             return Ram.Byte(address & 0x07FF);
@@ -28,6 +33,52 @@ public static class Bus
         return 0x00;
     }
 
+    /// <summary>
+    ///     Push a byte on top of the stack
+    /// </summary>
+    /// <param name="value"></param>
+    public static void PushByte(byte b)
+    {
+        var bankPointer = Cpu.SP + 0x100; // The stack is between 0x100 and 0x1FF
+        WriteByte(bankPointer, b);
+        Cpu.SP -= 1;
+    }
+    
+    /// <summary>
+    ///     Push a word on top of the stack, internally the word is flipped to reflect
+    ///     the correct endian-ess
+    /// </summary>
+    /// <param name="value"></param>
+    public static void PushWord(ushort value)
+    {
+        var bankPointer = (ushort) (Cpu.SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
+        WriteWord(bankPointer, value);
+        Cpu.SP -= 2;
+    }
+
+    
+    /// <summary>
+    ///     Pulls the top-most byte from the stack
+    /// </summary>
+    /// <returns></returns>
+    public static byte PopByte()
+    {
+        var value = Bus.Byte((ushort) (Cpu.SP + 1 + 0x100));
+        Cpu.SP += 1;
+        return value;
+    }
+
+    /// <summary>
+    ///     Pops the 2 top-most bytes from the stack and returns them as a word
+    /// </summary>
+    /// <returns></returns>
+    public static ushort PopWord()
+    {
+        var value = Bus.Word((ushort) (Cpu.SP + 1 + 0x100));
+        Cpu.SP += 2;
+        return value;
+    }
+    
     /// <summary>
     ///  Reads a byte from the specified VRAM memory location
     /// </summary>
@@ -96,7 +147,14 @@ public static class Bus
     /// <param name="value"></param>
     public static void WriteByte(ushort addr, byte value)
     {
-        if (addr <= 0x1FFF) Ram.WriteByte(addr & 0x07FF, value);
+        if (addr >= PPUCTRL && addr <= 0x3FFF)
+        {
+            Ppu.WriteRegister(addr & 0x2007, value);// This doesn't do the writing to memory
+        }
+        else if (addr <= 0x1FFF)
+        {
+            Ram.WriteByte(addr & 0x07FF, value);
+        }
     }
 
     public static void WriteByte(int addr, byte value)
@@ -111,7 +169,7 @@ public static class Bus
     /// <param name="value"></param>
     public static void VWriteByte(ushort address, byte value)
     {
-        if (address <= 0x2FFF)
+        if (address <= 0x2FFF & Cartridge != null)
         {
             Cartridge.WriteCHRByte(address, value);
         }

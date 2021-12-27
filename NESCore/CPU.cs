@@ -418,6 +418,16 @@ public class CPU
         Bit.Set(ref P, Flags.IRQ);
     }
 
+    public void nmi()
+    {
+        Bus.PushWord(PC);
+        Bit.Clear(ref P, Flags.Break);
+        Bus.PushByte(P);
+        var nmi_vector = Bus.Word(0xFFFA);
+        Bit.Set(ref P, Flags.IRQ);
+        PC = nmi_vector;
+    }
+
     /// <summary>
     ///     Executes the ORA instruction (OR with Acumulator)
     /// </summary>
@@ -648,7 +658,7 @@ public class CPU
         var addr = Absolute(Bus.Word(PC + 1));
         LogInstruction(2, $"JSR ${addr:X2}");
 
-        PushWord(cachedPc); // Stores the address of the next opcode minus one
+        Bus.PushWord(cachedPc); // Stores the address of the next opcode minus one
         PC = addr;
     }
 
@@ -803,15 +813,15 @@ public class CPU
     private void Rti()
     {
         LogInstruction(0, "RTI");
-        P = PopByte();
+        P = Bus.PopByte();
         Bit.Set(ref P, Flags.Unused); //It has to be one. Always
-        PC = PopWord(); //Unlike RTS. RTI pulls the correct PC address. No need to increment
+        PC = Bus.PopWord(); //Unlike RTS. RTI pulls the correct PC address. No need to increment
     }
 
     private void Rts()
     {
         LogInstruction(0, "RTS");
-        PC = PopWord();
+        PC = Bus.PopWord();
     }
 
     /// <summary>
@@ -845,13 +855,13 @@ public class CPU
     private void Pha()
     {
         LogInstruction(0, "PHA");
-        PushByte(A);
+        Bus.PushByte(A);
     }
 
     private void Pla()
     {
         LogInstruction(0, "PLA");
-        A = PopByte();
+        A = Bus.PopByte();
         Bit.Val(ref P, Flags.Zero, A == 0);
         Bit.Val(ref P, Flags.Negative, Bit.Test(A, Flags.Negative));
     }
@@ -859,13 +869,13 @@ public class CPU
     private void Php()
     {
         LogInstruction(0, "PHP");
-        PushByte((byte) (P | 0x10));
+        Bus.PushByte((byte) (P | 0x10));
     }
 
     private void Plp()
     {
         LogInstruction(0, "PLP");
-        P = PopByte();
+        P = Bus.PopByte();
 
         //Bit 5 of P is unused, so clear it. It should always be 1.
         Bit.Set(ref P, 5);
@@ -1022,52 +1032,6 @@ public class CPU
         value++;
         Bus.WriteByte(addr, value);
         AdcInternal((byte) ~value);
-    }
-
-
-    /// <summary>
-    ///     Push a byte on top of the stack
-    /// </summary>
-    /// <param name="value"></param>
-    public void PushByte(byte value)
-    {
-        var bankPointer = (ushort) (SP + 0x100);
-        Bus.WriteByte(bankPointer, value);
-        SP -= 1;
-    }
-
-    /// <summary>
-    ///     Push a word on top of the stack, internally the word is flipped to reflect
-    ///     the correct endian-ess
-    /// </summary>
-    /// <param name="value"></param>
-    public void PushWord(ushort value)
-    {
-        var bankPointer = (ushort) (SP + 0xFF); // 100 - 1 but in hex -> 99 is 0xFF;
-        Bus.WriteWord(bankPointer, value);
-        SP -= 2;
-    }
-
-    /// <summary>
-    ///     Pulls the top-most byte from the stack
-    /// </summary>
-    /// <returns></returns>
-    public byte PopByte()
-    {
-        var value = Bus.Byte((ushort) (SP + 1 + 0x100));
-        SP += 1;
-        return value;
-    }
-
-    /// <summary>
-    ///     Pops the 2 top-most bytes from the stack and returns them as a word
-    /// </summary>
-    /// <returns></returns>
-    public ushort PopWord()
-    {
-        var value = Bus.Word((ushort) (SP + 1 + 0x100));
-        SP += 2;
-        return value;
     }
 
     /// <summary>

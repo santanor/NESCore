@@ -30,6 +30,7 @@ public class NES
         Bus.Ram = new RAM();
         Bus.Vram = new VRAM();
         Bus.Cpu.PowerUp();
+        Bus.Ppu.Init();
         ConfigureLogger();
 
         // A Wildcard to indicate "Go as fast as you can"
@@ -68,7 +69,7 @@ public class NES
     {
         MatchSpeed();
         var cpuCycles = Bus.Cpu.Instruction();
-        Bus.Ppu.RunCycles(cpuCycles * 3);
+        Bus.Ppu.RunCycles(cpuCycles * 3); // 3 PPU cycles per CPU cycle
     }
 
     private void MatchSpeed()

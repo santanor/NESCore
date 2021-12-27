@@ -38,25 +38,25 @@ public class TestMemory
     [Test]
     public void TestStack()
     {
-        Bus.Cpu.PushByte(0x23);
-        Assert.AreEqual(Bus.Cpu.PopByte(), 0x23);
-        Assert.AreEqual(Bus.Cpu.PopByte(), 0x00);
+        Bus.PushByte(0x23);
+        Assert.AreEqual(Bus.PopByte(), 0x23);
+        Assert.AreEqual(Bus.PopByte(), 0x00);
 
         //Checking that the stack writes to the correct address in the memory map
-        Bus.Cpu.PushByte(0x23);
+        Bus.PushByte(0x23);
         Assert.AreEqual(Bus.Byte(0x01FD), 0x23);
-        Bus.Cpu.PopByte(); // clean it up
+        Bus.PopByte(); // clean it up
 
 
-        Bus.Cpu.PushWord(0x2369);
-        Assert.AreEqual(Bus.Cpu.PopWord(), 0x2369);
+        Bus.PushWord(0x2369);
+        Assert.AreEqual(Bus.PopWord(), 0x2369);
 
-        Bus.Cpu.PushWord(0x2369);
-        Bus.Cpu.PushByte(0x42);
-        Assert.AreEqual(Bus.Cpu.PopWord(), 0x6942);
-        Assert.AreEqual(Bus.Cpu.PopByte(), 0x23);
+        Bus.PushWord(0x2369);
+        Bus.PushByte(0x42);
+        Assert.AreEqual(Bus.PopWord(), 0x6942);
+        Assert.AreEqual(Bus.PopByte(), 0x23);
 
-        Assert.AreEqual(Bus.Cpu.PopWord(), 0x0000);
+        Assert.AreEqual(Bus.PopWord(), 0x0000);
     }
 
     [Test]
