@@ -50,7 +50,7 @@ public class NES
         const string logFileName = "Logs/logfile.log";
         if (File.Exists(logFileName)) File.Delete(logFileName);
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
+            //.WriteTo.Console(outputTemplate: "{Message:lj}{NewLine}")
             .WriteTo.File(logFileName, outputTemplate: "{Message:lj}{NewLine}")
             .CreateLogger();
     }
@@ -62,6 +62,8 @@ public class NES
 
         Running = true;
 
+        //Set the first PC
+        Bus.Cpu.PC = Bus.Word(0xFFFC);
         while (Running) Step();
     }
 

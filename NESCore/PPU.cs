@@ -41,6 +41,11 @@ public unsafe class PPU
     private ushort currentVramAddr;
 
     /// <summary>
+    /// Internal PPU Buffer that contains the latest read data from 0x2007
+    /// </summary>
+    private byte currentVramBuffer;
+
+    /// <summary>
     /// PPU Registers, each is 1 byte and can be read/written from the Bus or internal PPU
     /// </summary>
     private byte Ctrl, Mask, Status;
@@ -59,7 +64,7 @@ public unsafe class PPU
 
     public void Init()
     {
-        Bus.WriteByte(PPUCTRL, 0);
+        Bus.WriteByte(PPUCTRL, 0b10000000);
         Bus.WriteByte(PPUMASK, 0);
         Bus.WriteByte(PPUSTATUS, 0xA0);
         Bus.WriteByte(OAMADDR, 0);
@@ -149,8 +154,8 @@ public unsafe class PPU
 
     private void FinishVBlank()
     {
-        vBlank = true;
-        nmiOccurred = true;
+        vBlank = false;
+        nmiOccurred = false;
     }
 
     private void SetPixel(int row, int col, byte r, byte g, byte b)
@@ -264,7 +269,7 @@ public unsafe class PPU
         switch (register)
         {
             case PPUCTRL:
-                break;
+                return ReadPPUCtrl();
             case PPUMASK:
                 break;
             case PPUSTATUS:
@@ -297,6 +302,11 @@ public unsafe class PPU
     {
         nmiOutput = Bit.Test(val, 7);
         Ctrl = val;
+    }
+
+    private byte ReadPPUCtrl()
+    {
+        return Ctrl;
     }
 
     /// <summary>
@@ -348,11 +358,12 @@ public unsafe class PPU
     /// <returns></returns>
     private byte ReadPPUData()
     {
-        var val = Bus.VByte(currentVramAddr);
+        var aux = currentVramBuffer;
+        currentVramBuffer = Bus.VByte(currentVramAddr);
         var ctrl = Bus.Byte(PPUCTRL);
         currentVramAddr += (ushort)(Bit.Test(ctrl, 2) ? 31 : 1);
 
-        return val;
+        return aux;
     }
 
     /// <summary>

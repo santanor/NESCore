@@ -36,7 +36,7 @@ public class Cartridge
     /// <returns></returns>
     public byte VByte(ushort addr)
     {
-        addr = mapper.Map(addr);
+        //addr = mapper.Map(addr);
         return Rom.chrROM[addr];
     }
 
@@ -60,8 +60,8 @@ public class Cartridge
         addr = mapper.Map(addr);
         
         var result = new byte[2];
-        result[0] = Byte(addr);
-        result[1] = Byte((ushort) (addr + 1));
+        result[0] = Rom.prgROM[addr];
+        result[1] = Rom.prgROM[addr+1];
 
         return result.ToWord();
     }

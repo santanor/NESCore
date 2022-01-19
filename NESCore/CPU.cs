@@ -1308,7 +1308,6 @@ public class CPU
 
     private void LogInstruction(int numParams, string mnemonic, bool invalid = false)
     {
-        return;
         var sb = new StringBuilder();
         sb.Append($"{PC:X4}  {currentOpcode:X2} ");
 

@@ -19,7 +19,7 @@ public static class Bus
         // This goes to the PPU registers
         if (address >= PPUCTRL && address <= 0x3FFF)
         {
-            Ppu.ReadRegister(address & 0x2007);// This doesn't do the writing to memory
+            return Ppu.ReadRegister(address & 0x2007);// This doesn't do the writing to memory
         }
         //RAM Range
         if (address <= 0x1FFF)
