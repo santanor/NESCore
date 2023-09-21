@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
@@ -14,7 +14,7 @@
         <PackageReference Include="Avalonia.Desktop" Version="0.10.0"/>
         <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0"/>
         <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0"/>
-        <PackageReference Include="SkiaSharp" Version="2.88.0-preview.155"/>
+        <PackageReference Include="SkiaSharp" Version="2.88.6"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.0-preview.155"/>
     </ItemGroup>
     <ItemGroup>
